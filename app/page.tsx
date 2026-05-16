@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
 import ReactMarkdown from 'react-markdown';
+import MermaidDiagram from "@/components/MermaidDiagram";
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
@@ -236,7 +237,25 @@ export default function Home() {
             // After streaming: render polished markdown + KaTeX
             <SolutionErrorBoundary fallbackText={solution}>
               <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 text-sm leading-relaxed">
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    code({node: _node, inline, className, children, ...props}: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                      const match = /language-(\w+)/.exec(className || '');
+                      const isMermaid = match && match[1] === 'mermaid';
+
+                      if (!inline && isMermaid) {
+                        return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+                      }
+                      return (
+                        <code className={className ? className : "bg-gray-800 rounded px-1"} {...props}>
+                          {children}
+                        </code>
+                      );
+                    }
+                  }}
+                >
                   {preprocessMarkdown(solution)}
                 </ReactMarkdown>
               </div>
