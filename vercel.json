@@ -1,5 +1,6 @@
 {
   "regions": ["bom1"],
+  "buildCommand": "npx next build --webpack",
   "headers": [
     {
       "source": "/api/(.*)",
