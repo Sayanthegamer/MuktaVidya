@@ -65,8 +65,13 @@ Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.${lang
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
       contents: [
-        { inlineData: { mimeType, data: base64Data } },
-        systemPrompt
+        {
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType, data: base64Data } },
+            { text: systemPrompt }
+          ]
+        }
       ],
     });
 
