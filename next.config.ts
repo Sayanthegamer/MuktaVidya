@@ -8,6 +8,7 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@google/genai'],
+  turbopack: {},
 };
 
 export default withPWA(nextConfig);
