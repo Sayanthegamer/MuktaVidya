@@ -14,7 +14,13 @@ const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
 export async function POST(request: Request) {
   const origin = request.headers.get('origin');
-  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+  
+  const isAllowed = 
+    !origin || 
+    ALLOWED_ORIGINS.includes(origin) || 
+    origin.endsWith('.vercel.app');
+
+  if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
   }
 
