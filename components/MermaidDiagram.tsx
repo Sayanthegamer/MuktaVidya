@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, useId } from 'react';
+import React, { useEffect, useState, useId, useRef } from 'react';
 import mermaid from 'mermaid';
+import DOMPurify from 'dompurify';
 
 interface MermaidDiagramProps {
   chart: string;
@@ -11,29 +12,44 @@ interface MermaidDiagramProps {
 mermaid.initialize({
   theme: 'dark',
   startOnLoad: false,
+  securityLevel: 'strict',
 });
 
 export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const id = useId().replace(/:/g, ''); // Generate a valid DOM id
+  const latestRenderIdRef = useRef<number>(0);
 
   useEffect(() => {
     let isMounted = true;
 
     const renderChart = async () => {
       try {
+        // Strip any embedded %%{init}%% directives from the raw diagram input
+        const sanitizedChart = chart.replace(/%%\{init.*?\}%%/g, '');
+
+        // Increment and capture the render ID to prevent stale renders
+        latestRenderIdRef.current += 1;
+        const localRenderId = latestRenderIdRef.current;
+
         // We use mermaid.render to get the SVG string instead of rendering it into the DOM directly.
         // It requires a unique ID for each render call.
-        const { svg } = await mermaid.render(`mermaid-${id}`, chart);
+        const { svg } = await mermaid.render(`mermaid-${id}`, sanitizedChart);
 
-        if (isMounted) {
-          setSvgContent(svg);
+        // Sanitize SVG content before rendering
+        const sanitizedSvg = DOMPurify.sanitize(svg, { SAFE_FOR_TEMPLATES: true });
+
+        if (isMounted && localRenderId === latestRenderIdRef.current) {
+          setSvgContent(sanitizedSvg);
           setIsError(false);
         }
       } catch (_) {
         // Catch parsing errors (e.g., when the syntax is incomplete during streaming)
-        if (isMounted) {
+        latestRenderIdRef.current += 1;
+        const localRenderId = latestRenderIdRef.current;
+
+        if (isMounted && localRenderId === latestRenderIdRef.current) {
           setIsError(true);
         }
       }
