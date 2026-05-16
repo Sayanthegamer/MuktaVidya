@@ -23,8 +23,9 @@ export default function Home() {
 
   useEffect(() => {
     const t = getInitialTheme();
-    setTheme(t);
     applyTheme(t);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTheme(t);
   }, []);
 
   const sendFeedback = async (type: 'up' | 'down') => {
@@ -222,7 +223,7 @@ export default function Home() {
       {/* Solution: Raw text while streaming, KaTeX after complete */}
       {solution && !loading && (
         <div className="w-full max-w-md p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden" aria-live="polite">
-          <h3 className="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             AI Solution: {isStreaming && <span className="text-blue-400 text-sm font-normal ml-2">● streaming...</span>}
           </h3>
 
