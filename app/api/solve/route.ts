@@ -63,7 +63,7 @@ For MCQs, state which option is correct and why others are wrong.
 Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.${langInstruction}`;
 
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [
         { inlineData: { mimeType, data: base64Data } },
         systemPrompt
