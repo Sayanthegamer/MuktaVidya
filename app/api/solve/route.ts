@@ -2,8 +2,10 @@ import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
 
-// Stay on Node.js runtime (default) — no Edge env-var issues
-const ai = new GoogleGenAI({ apiKey: getGeminiApiKey() });
+// Lazy initialization to avoid build-time env-var issues
+function getAI() {
+  return new GoogleGenAI({ apiKey: getGeminiApiKey() });
+}
 
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
@@ -62,6 +64,7 @@ Structure your response as: ### Subject, ### Given, ### Approach, ### Solution, 
 For MCQs, state which option is correct and why others are wrong.
 Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.${langInstruction}`;
 
+    const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
       contents: [
