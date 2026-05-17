@@ -31,8 +31,14 @@ export default function Home() {
     setTheme(t);
     try {
       const hist = JSON.parse(localStorage.getItem('muktavidya_history') || '[]');
-      setHistory(hist);
-    } catch {}
+      if (Array.isArray(hist)) {
+        setHistory(hist);
+      } else {
+        setHistory([]);
+      }
+    } catch {
+      setHistory([]);
+    }
   }, []);
 
   const sendFeedback = async (type: 'up' | 'down') => {
@@ -126,7 +132,9 @@ export default function Home() {
               language,
               preview: fullText.slice(0, 120),
             };
-            const updatedHistory = [newItem, ...currentHistory].slice(0, 10);
+            const updatedHistory = Array.isArray(currentHistory)
+              ? [newItem, ...currentHistory].slice(0, 10)
+              : [newItem];
             localStorage.setItem('muktavidya_history', JSON.stringify(updatedHistory));
             setHistory(updatedHistory);
           } catch {} // Silently fail if localStorage is full
@@ -369,12 +377,13 @@ export default function Home() {
             onClick={() => setIsHistoryOpen(false)}
           />
           {/* Drawer Content */}
-          <div className="relative bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl shadow-2xl overflow-hidden flex flex-col">
+          <div className="relative bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl shadow-2xl overflow-hidden flex flex-col" role="dialog" aria-modal="true" aria-labelledby="session-history-title">
             <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Session History</h2>
+              <h2 id="session-history-title" className="text-xl font-bold text-gray-900 dark:text-white">Session History</h2>
               <button
                 onClick={() => setIsHistoryOpen(false)}
                 className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                aria-label="Close session history"
               >
                 ✕
               </button>
@@ -390,6 +399,8 @@ export default function Home() {
                       setImagePreview(item.imageBase64);
                       setSolution(item.solution);
                       setLanguage(item.language);
+                      setLoading(false);
+                      setIsStreaming(false);
                       setIsHistoryOpen(false);
                     }}
                     className="w-full text-left flex gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
