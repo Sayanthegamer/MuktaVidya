@@ -17,7 +17,7 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     {
-      urlPattern: /^\/api\/.*/,
+      matcher: /^\/api\/.*/,
       handler: new NetworkOnly(),
     },
     ...defaultCache,
