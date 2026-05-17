@@ -20,6 +20,8 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<Theme>('dark');
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+  const [history, setHistory] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -27,6 +29,10 @@ export default function Home() {
     applyTheme(t);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(t);
+    try {
+      const hist = JSON.parse(localStorage.getItem('muktavidya_history') || '[]');
+      setHistory(hist);
+    } catch {}
   }, []);
 
   const sendFeedback = async (type: 'up' | 'down') => {
@@ -39,6 +45,9 @@ export default function Home() {
   };
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (typeof window !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(50);
+    }
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -107,16 +116,19 @@ export default function Home() {
             localStorage.setItem('muktavidya_usage', JSON.stringify(usage));
           } catch {}
 
-          // Save to localStorage history (keep last 15 solutions)
+          // Save to localStorage history (keep last 10 solutions)
           try {
-            const history = JSON.parse(localStorage.getItem('muktavidya_history') || '[]');
-            history.unshift({
+            const currentHistory = JSON.parse(localStorage.getItem('muktavidya_history') || '[]');
+            const newItem = {
+              imageBase64: base64String,
               solution: fullText,
               timestamp: Date.now(),
               language,
               preview: fullText.slice(0, 120),
-            });
-            localStorage.setItem('muktavidya_history', JSON.stringify(history.slice(0, 15)));
+            };
+            const updatedHistory = [newItem, ...currentHistory].slice(0, 10);
+            localStorage.setItem('muktavidya_history', JSON.stringify(updatedHistory));
+            setHistory(updatedHistory);
           } catch {} // Silently fail if localStorage is full
 
         } catch (err) {
@@ -177,6 +189,13 @@ export default function Home() {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-sm transition-all hover:scale-110 active:scale-95 shadow-sm"
+            aria-label="View History"
+          >
+            📜
+          </button>
         </div>
       </div>
 
@@ -204,8 +223,10 @@ export default function Home() {
 
       {/* Image Preview */}
       {imagePreview && (
-        <div className="w-full max-w-md mb-6 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg">
+        <div className="w-full max-w-md mb-6 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg relative">
+           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imagePreview} alt="Captured question" className="w-full h-auto" />
+          {loading && <div className="scanner-line"></div>}
         </div>
       )}
 
@@ -241,7 +262,27 @@ export default function Home() {
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({node: _node, inline, className, children, ...props}: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                    div: ({node: _node, className, children, ...props}: any) => { // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                      if (className && className.includes('math-display')) {
+                        return (
+                          <div className="overflow-x-auto pb-2 scrollbar-thin">
+                            <div className={className} {...props}>{children}</div>
+                          </div>
+                        );
+                      }
+                      return <div className={className} {...props}>{children}</div>;
+                    },
+                    span: ({node: _node, className, children, ...props}: any) => { // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                      if (className && className.includes('math-display')) {
+                        return (
+                          <span className="overflow-x-auto pb-2 scrollbar-thin block">
+                            <span className={className} {...props}>{children}</span>
+                          </span>
+                        );
+                      }
+                      return <span className={className} {...props}>{children}</span>;
+                    },
+                    code({node: _node, inline, className, children, ...props}: any) { // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
                       const match = /language-(\w+)/.exec(className || '');
                       const isMermaid = match && match[1] === 'mermaid';
 
@@ -316,6 +357,71 @@ export default function Home() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* History Drawer */}
+      {isHistoryOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 transition-opacity"
+            onClick={() => setIsHistoryOpen(false)}
+          />
+          {/* Drawer Content */}
+          <div className="relative bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Session History</h2>
+              <button
+                onClick={() => setIsHistoryOpen(false)}
+                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 space-y-4">
+              {history.length === 0 ? (
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8">No history yet.</p>
+              ) : (
+                history.map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setImagePreview(item.imageBase64);
+                      setSolution(item.solution);
+                      setLanguage(item.language);
+                      setIsHistoryOpen(false);
+                    }}
+                    className="w-full text-left flex gap-4 p-3 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    {item.imageBase64 ? (
+                      <div className="w-16 h-16 shrink-0 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
+                         {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.imageBase64} alt="Thumbnail" className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 shrink-0 bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center text-2xl">
+                        📄
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          {item.language}
+                        </span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          {new Date(item.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-800 dark:text-gray-300 line-clamp-2">
+                        {item.preview}
+                      </p>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
     </main>
