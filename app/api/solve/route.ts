@@ -66,7 +66,7 @@ Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.${lang
 
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-3-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         {
           role: 'user',
