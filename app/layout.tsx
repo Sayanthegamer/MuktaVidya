@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#3b82f6",
+  themeColor: "#0a0a0b", // Updated to match dark theme surface-0
 };
 
 export default function RootLayout({
@@ -31,9 +31,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
