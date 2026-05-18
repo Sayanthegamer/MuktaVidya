@@ -5,6 +5,7 @@ import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
 import HistorySidebar, { HistoryItem } from "./HistorySidebar";
 import ErrorBanner from "./ErrorBanner";
+import { get, set } from "idb-keyval";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 
 export default function MainWorkspace() {
@@ -28,18 +29,14 @@ export default function MainWorkspace() {
     if (savedLang) setLanguage(savedLang);
 
     // Load History
-    try {
-      const savedHistory = localStorage.getItem("muktavidya_history");
-      if (savedHistory) {
-        const parsed = JSON.parse(savedHistory);
-        if (Array.isArray(parsed)) {
-          const validHistory = parsed.filter(item => item && item.solution && item.timestamp);
-          setHistory(validHistory);
-        }
+    get("muktavidya_history").then(parsed => {
+      if (Array.isArray(parsed)) {
+        const validHistory = parsed.filter(item => item && item.solution && item.timestamp);
+        setHistory(validHistory);
       }
-    } catch (e) {
-      console.error("Failed to parse history", e);
-    }
+    }).catch(e => {
+      console.error("Failed to load history from IndexedDB", e);
+    });
 
     // Cleanup: abort any in-flight requests on unmount
     return () => {
@@ -80,7 +77,7 @@ export default function MainWorkspace() {
 
     setHistory(prev => {
       const newHistory = [newItem, ...prev].slice(0, 50); // Keep last 50
-      localStorage.setItem("muktavidya_history", JSON.stringify(newHistory));
+      set("muktavidya_history", newHistory).catch(e => console.error("Failed to save history to IndexedDB", e));
       return newHistory;
     });
   }, []);

@@ -20,10 +20,12 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
 
   // Reset feedback and copied state when solution changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setFeedback(null);
     setCopied(false);
   }, [solution]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleCopy = async () => {
     try {
@@ -82,7 +84,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
               <span className="text-xs font-mono text-[var(--text-muted)] border border-[var(--border-subtle)] rounded px-2 py-0.5">
                 {subject}
               </span>
-              {idx < arr.length - 1 && <span className="text-[var(--text-muted)]">·</span>}
+              {idx < arr.length - 1 && <span className="text-[var(--text-muted)]">|</span>}
             </div>
           ))}
         </div>
