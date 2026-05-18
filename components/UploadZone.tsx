@@ -112,7 +112,6 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         <input
           type="file"
           accept="image/*"
-          capture="environment"
           className="hidden"
           onChange={onFileChange}
           ref={fileInputRef}
