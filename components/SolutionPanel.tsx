@@ -1,6 +1,6 @@
 "use client";
 import { FileText, CopySimple, Check, ShareNetwork, ThumbsUp, ThumbsDown } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -18,6 +18,12 @@ interface SolutionPanelProps {
 export default function SolutionPanel({ isStreaming, isLoading, solution }: SolutionPanelProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+
+  // Reset feedback and copied state when solution changes
+  useEffect(() => {
+    setFeedback(null);
+    setCopied(false);
+  }, [solution]);
 
   const handleCopy = async () => {
     try {

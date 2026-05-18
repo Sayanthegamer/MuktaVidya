@@ -58,6 +58,13 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     }
   };
 
+  const handleUploadZoneKeyDown = (e: React.KeyboardEvent<HTMLLabelElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInputRef.current?.click();
+    }
+  };
+
   if (imagePreview) {
     return (
       <div className={`relative w-full h-full min-h-[400px] md:min-h-full rounded-lg overflow-hidden ${isProcessing ? "scanner-active" : ""}`}>
@@ -90,6 +97,10 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
+        onKeyDown={handleUploadZoneKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label="Upload or capture question image"
         className={`
           upload-zone w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed cursor-pointer
           ${isDragging

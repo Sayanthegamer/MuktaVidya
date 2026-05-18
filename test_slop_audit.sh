@@ -1,5 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # 1. Zero emojis
-! grep -RinE '[😀-🙏]' components/ app/
+! rg -n '\p{Emoji}' components/ app/
 # 2. Zero gradient text
 ! grep -RinE 'bg-clip-text' components/ app/
 # 3. Zero purple/violet/indigo

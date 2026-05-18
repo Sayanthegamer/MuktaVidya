@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AppHeader from "./AppHeader";
 import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
@@ -17,6 +17,8 @@ export default function MainWorkspace() {
   const [solution, setSolution] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<{ title: string; description: string } | null>(null);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load initial state
   useEffect(() => {
@@ -38,6 +40,13 @@ export default function MainWorkspace() {
     } catch (e) {
       console.error("Failed to parse history", e);
     }
+
+    // Cleanup: abort any in-flight requests on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, []);
 
   // Save language changes
@@ -72,6 +81,15 @@ export default function MainWorkspace() {
   }, []);
 
   const handleCapture = async (base64Data: string) => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setImagePreview(base64Data);
     setSolution("");
     setError(null);
@@ -83,7 +101,10 @@ export default function MainWorkspace() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: base64Data, language }),
+        signal: abortController.signal,
       });
+
+      if (abortController.signal.aborted) return;
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -113,24 +134,50 @@ export default function MainWorkspace() {
 
       setIsProcessing(false); // Done analyzing image, now streaming text
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        streamedText += chunk;
-        setSolution(streamedText);
+          if (abortController.signal.aborted) {
+            await reader.cancel();
+            return;
+          }
+
+          const chunk = decoder.decode(value, { stream: true });
+          streamedText += chunk;
+          setSolution(streamedText);
+        }
+
+        // Flush any remaining bytes from the decoder
+        const finalChunk = decoder.decode();
+        if (finalChunk) {
+          streamedText += finalChunk;
+        }
+
+        if (abortController.signal.aborted) return;
+
+        // Finish streaming
+        const finalSolution = preprocessMarkdown(streamedText);
+        setSolution(finalSolution);
+        setIsStreaming(false);
+
+        if (abortController.signal.aborted) return;
+
+        // Save to history
+        saveToHistory(finalSolution, base64Data, language);
+      } finally {
+        reader.releaseLock();
       }
 
-      // Finish streaming
-      const finalSolution = preprocessMarkdown(streamedText);
-      setSolution(finalSolution);
-      setIsStreaming(false);
-
-      // Save to history
-      saveToHistory(finalSolution, base64Data, language);
-
     } catch (err: unknown) {
+      // Don't show error if the request was aborted
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+
+      if (abortController.signal.aborted) return;
+
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred while analyzing the image.";
       console.error("Solve error", err);
       setError({
