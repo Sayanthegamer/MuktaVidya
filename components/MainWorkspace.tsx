@@ -56,6 +56,11 @@ export default function MainWorkspace() {
   };
 
   const handleSelectHistory = (item: HistoryItem) => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     setImagePreview(item.imageBase64);
     setSolution(item.solution);
     setIsProcessing(false);
@@ -191,6 +196,11 @@ export default function MainWorkspace() {
   };
 
   const handleRescan = () => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     setImagePreview(null);
     setSolution("");
     setError(null);

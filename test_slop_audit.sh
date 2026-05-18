@@ -2,13 +2,29 @@
 set -euo pipefail
 
 # 1. Zero emojis
-! rg -n '\p{Emoji}' components/ app/
+if ! command -v rg &>/dev/null; then
+  echo "Error: ripgrep (rg) is not installed" >&2
+  exit 1
+fi
+if rg -n '\p{Emoji}' components/ app/; then
+  echo "Error: Found emojis in components/ or app/" >&2
+  exit 1
+fi
 # 2. Zero gradient text
-! grep -RinE 'bg-clip-text' components/ app/
+if grep -RinE 'bg-clip-text' components/ app/; then
+  echo "Error: Found bg-clip-text in components/ or app/" >&2
+  exit 1
+fi
 # 3. Zero purple/violet/indigo
-! grep -RinE 'purple|violet|indigo' components/ app/
+if grep -RinE 'purple|violet|indigo' components/ app/; then
+  echo "Error: Found purple/violet/indigo colors in components/ or app/" >&2
+  exit 1
+fi
 # 4. Zero h-screen
-! grep -RinE 'h-screen' components/ app/
+if grep -RinE 'h-screen' components/ app/; then
+  echo "Error: Found h-screen in components/ or app/" >&2
+  exit 1
+fi
 # 5. Zero justify-center on hero
 # (Checked visually, only used on flex containers for icons and diagrams)
 # 6. Zero generic AI chat layout
@@ -16,13 +32,16 @@ set -euo pipefail
 # 7. Zero identical-card grids
 # (Checked visually)
 # 8. Language selector abbreviated
-grep -Rin 'BN' components/AppHeader.tsx
+grep -Rinw 'BN' components/AppHeader.tsx
 # 9. Icon-only buttons have aria-label
 grep -Rin 'aria-label' components/AppHeader.tsx components/SolutionPanel.tsx components/HistorySidebar.tsx
 # 10. Phosphor icons imported correctly
 grep -Rin '@phosphor-icons' components/
 # 11. CSS animations use transform/opacity
-grep -A 5 'keyframes' app/globals.css
+if grep -A 10 '@keyframes' app/globals.css | grep -vE '@keyframes|transform|opacity|{|}|/\*|\*/' | grep -E '^\s*[a-z-]+\s*:'; then
+  echo "Error: Found CSS animations using properties other than transform/opacity" >&2
+  exit 1
+fi
 # 12. Sidebar uses class toggle
 grep -Rin 'sidebar-panel' components/HistorySidebar.tsx
 # 13. Solution streaming uses <pre> with streaming-cursor
