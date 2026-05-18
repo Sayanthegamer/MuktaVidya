@@ -1,73 +1,191 @@
+/* app/globals.css */
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ─── DESIGN TOKENS ──────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --scanner-color: #3b82f6;
-  --scanner-color-rgb: 59, 130, 246;
-  --scrollbar-thumb: #9ca3af;
-  --scrollbar-thumb-hover: #6b7280;
+  /* Surface hierarchy (Zinc-tinted, never pure black/white) */
+  --surface-0:   oklch(0.08 0.005 250);   /* Page background */
+  --surface-1:   oklch(0.11 0.005 250);   /* Card / panel bg */
+  --surface-2:   oklch(0.15 0.006 250);   /* Elevated surface */
+  --surface-3:   oklch(0.19 0.006 250);   /* Input / code bg */
+
+  /* Borders */
+  --border-subtle:   oklch(0.22 0.005 250 / 0.6);
+  --border-default:  oklch(0.28 0.006 250);
+  --border-strong:   oklch(0.36 0.007 250);
+
+  /* Text hierarchy */
+  --text-primary:   oklch(0.94 0.004 250); /* Headlines */
+  --text-secondary: oklch(0.70 0.006 250); /* Body copy */
+  --text-muted:     oklch(0.48 0.005 250); /* Labels, captions */
+  --text-disabled:  oklch(0.32 0.004 250);
+
+  /* Single accent — Electric Blue */
+  --accent:         oklch(0.60 0.20 250);
+  --accent-hover:   oklch(0.65 0.22 250);
+  --accent-muted:   oklch(0.60 0.20 250 / 0.12);
+  --accent-border:  oklch(0.60 0.20 250 / 0.30);
+
+  /* Semantic */
+  --error:         oklch(0.55 0.20 27);
+  --error-muted:   oklch(0.55 0.20 27 / 0.12);
+  --success:       oklch(0.62 0.15 155);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg:             var(--surface-0);
+  --color-surface-1:      var(--surface-1);
+  --color-surface-2:      var(--surface-2);
+  --color-surface-3:      var(--surface-3);
+  --color-border:         var(--border-default);
+  --color-border-subtle:  var(--border-subtle);
+  --color-text:           var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-accent:         var(--accent);
+  --color-accent-hover:   var(--accent-hover);
+  --color-error:          var(--error);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --scanner-color: #3b82f6;
-    --scanner-color-rgb: 59, 130, 246;
-    --scrollbar-thumb: #4b5563;
-    --scrollbar-thumb-hover: #6b7280;
-  }
+/* Force dark mode globally — no system preference switch */
+html {
+  color-scheme: dark;
+  background: var(--surface-0);
+  color: var(--text-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@keyframes scan {
-  0% {
-    top: 0;
-  }
-  100% {
-    top: 100%;
-  }
+/* ─── SCAN ANIMATION (refined) ──────────────────────────── */
+@keyframes scan-line {
+  0%   { transform: translateY(0); opacity: 0.9; }
+  95%  { opacity: 0.9; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
 
-.scanner-line {
+.scanner-active::after {
+  content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--scanner-color);
-  box-shadow: 0 0 10px 2px var(--scanner-color), 0 0 20px 4px rgba(var(--scanner-color-rgb), 0.5);
-  animation: scan 2s linear infinite;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 12px 2px var(--accent);
+  animation: scan-line 1.8s var(--ease-out-expo) infinite;
+  pointer-events: none;
   z-index: 10;
 }
 
-/* Custom scrollbar for math overflow */
-.scrollbar-thin::-webkit-scrollbar {
-  height: 6px;
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+/* ─── TYPOGRAPHY RESET ──────────────────────────────────── */
+h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
+
+/* ─── PROSE OVERRIDES (for markdown solution) ───────────── */
+.prose {
+  --tw-prose-body: var(--text-secondary);
+  --tw-prose-headings: var(--text-primary);
+  --tw-prose-code: var(--text-primary);
+  --tw-prose-pre-bg: var(--surface-3);
+  --tw-prose-hr: var(--border-subtle);
+  --tw-prose-bullets: var(--text-muted);
+  --tw-prose-counters: var(--text-muted);
+  max-width: 72ch;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+.prose :where(code):not(:where(pre code)) {
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+  color: var(--text-primary);
+}
+.prose :where(pre) {
+  background: var(--surface-3) !important;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+.prose :where(h3) { font-size: 1.05rem; font-weight: 600; margin-top: 1.75rem; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+/* History sidebar slide-in */
+.sidebar-panel {
+  transform: translateX(100%);
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-panel.is-open {
+  transform: translateX(0);
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-  border-radius: 10px;
+/* Upload zone hover */
+.upload-zone {
+  transition: border-color var(--duration-base) var(--ease-out-expo),
+              background-color var(--duration-base) var(--ease-out-expo);
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-thumb-hover);
+/* Button press tactile feedback */
+.btn-press:active {
+  transform: scale(0.97);
+  transition: transform 80ms ease-out;
+}
+
+/* Streaming cursor blink */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.streaming-cursor::after {
+  content: '▊';
+  animation: blink-cursor 0.9s step-end infinite;
+  color: var(--accent);
+  margin-left: 1px;
+}
+
+/* Fade-up for solution content appearing */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 280ms var(--ease-out-expo) both;
 }
