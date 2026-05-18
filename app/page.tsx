@@ -164,7 +164,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white p-6 flex flex-col items-center transition-colors duration-300">
       {/* Header Narrative */}
-      <div className="w-full max-w-md text-center mt-10 mb-8">
+      <div className="w-full max-w-3xl px-4 md:px-8 text-center mt-10 mb-8">
         <h1 className="text-4xl font-extrabold text-blue-500 mb-2">MuktaVidya AI</h1>
         <p className="text-gray-400 text-sm">
           Snap a competitive exam question. Get instant conceptual breakdown.
@@ -208,7 +208,7 @@ export default function Home() {
       </div>
 
       {/* The Camera Trigger Button */}
-      <div className="w-full max-w-md mb-8">
+      <div className="w-full max-w-3xl px-4 md:px-8 mb-8">
         <label
           className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl cursor-pointer transition-all shadow-lg shadow-blue-500/30"
           role="button"
@@ -231,7 +231,7 @@ export default function Home() {
 
       {/* Image Preview */}
       {imagePreview && (
-        <div className="w-full max-w-md mb-6 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg relative">
+        <div className="w-full max-w-3xl px-4 md:px-8 mb-6 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-lg relative">
            {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imagePreview} alt="Captured question" className="w-full h-auto" />
           {loading && <div className="scanner-line"></div>}
@@ -240,7 +240,7 @@ export default function Home() {
 
       {/* Loading Skeleton */}
       {loading && (
-        <div className="w-full max-w-md p-6 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800" role="status">
+        <div className="w-full max-w-3xl px-4 md:px-8 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800" role="status">
           <p className="text-blue-400 font-semibold text-lg mb-3">Analyzing Question...</p>
           <div className="space-y-3 animate-pulse">
             <div className="h-4 bg-gray-700 rounded w-3/4" />
@@ -252,20 +252,20 @@ export default function Home() {
 
       {/* Solution: Raw text while streaming, KaTeX after complete */}
       {solution && !loading && (
-        <div className="w-full max-w-md p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden" aria-live="polite">
+        <div className="w-full max-w-3xl px-4 md:px-8 p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden" aria-live="polite">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
             AI Solution: {isStreaming && <span className="text-blue-400 text-sm font-normal ml-2">● streaming...</span>}
           </h3>
 
           {isStreaming ? (
             // During streaming: show raw text (no flickering, no broken LaTeX)
-            <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 text-sm font-sans leading-relaxed">
+            <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 text-base font-sans leading-loose">
               {solution}
             </pre>
           ) : (
             // After streaming: render polished markdown + KaTeX
             <SolutionErrorBoundary fallbackText={solution}>
-              <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 text-sm leading-relaxed">
+              <div className="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-300 text-base leading-loose">
                 <ReactMarkdown
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
@@ -273,7 +273,7 @@ export default function Home() {
                     div: ({node: _node, className, children, ...props}: any) => { // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
                       if (className && className.includes('math-display')) {
                         return (
-                          <div className="overflow-x-auto pb-2 scrollbar-thin">
+                          <div className="overflow-x-auto pb-2 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                             <div className={className} {...props}>{children}</div>
                           </div>
                         );
@@ -283,7 +283,7 @@ export default function Home() {
                     span: ({node: _node, className, children, ...props}: any) => { // eslint-disable-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
                       if (className && className.includes('math-display')) {
                         return (
-                          <span className="overflow-x-auto pb-2 scrollbar-thin block">
+                          <span className="overflow-x-auto pb-2 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block">
                             <span className={className} {...props}>{children}</span>
                           </span>
                         );
