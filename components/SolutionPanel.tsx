@@ -113,28 +113,29 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
+                    code({ className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || '');
                       const lang = match ? match[1] : '';
 
-                      if (!inline && lang === 'mermaid') {
+                      if (lang === 'mermaid') {
                         return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
                       }
 
-                      return !inline ? (
+                      // If there is no language match, it's an inline code block
+                      return !match ? (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      ) : (
                         <div className="overflow-x-auto">
                           <code className={className} {...props}>
                             {children}
                           </code>
                         </div>
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
                       );
                     },
                     table({ children, ...props }: React.ComponentPropsWithoutRef<"table">) {
-                      return (
+
                         <div className="table-wrapper">
                           <table {...props}>
                             {children}
