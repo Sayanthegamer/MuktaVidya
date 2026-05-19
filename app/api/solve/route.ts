@@ -9,7 +9,7 @@ function getAI() {
 
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
-  'open-solver.vercel.app',
+  'https://open-solver.vercel.app',
 ].filter(Boolean);
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
