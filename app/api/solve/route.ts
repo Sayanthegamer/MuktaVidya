@@ -19,10 +19,10 @@ export async function POST(request: Request) {
   
   const isDevelopment = process.env.NODE_ENV === 'development';
 
-  const isAllowed = 
+  const isAllowed =
     (isDevelopment && !origin) ||
     (origin && ALLOWED_ORIGINS.includes(origin)) ||
-    (origin && origin.endsWith('.vercel.app'));
+    (origin && process.env.VERCEL_PROJECT_NAME && origin.endsWith(`.${process.env.VERCEL_PROJECT_NAME}.vercel.app`));
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
