@@ -22,7 +22,16 @@ export async function POST(request: Request) {
   const isAllowed =
     (isDevelopment && !origin) ||
     (origin && ALLOWED_ORIGINS.includes(origin)) ||
-    (origin && process.env.VERCEL_PROJECT_NAME && origin.endsWith(`.${process.env.VERCEL_PROJECT_NAME}.vercel.app`));
+    (origin && process.env.VERCEL_PROJECT_NAME && (() => {
+      try {
+        const url = new URL(origin);
+        return url.protocol === 'https:' &&
+               url.hostname.endsWith('.vercel.app') &&
+               url.hostname.includes(`-${process.env.VERCEL_PROJECT_NAME}-`);
+      } catch {
+        return false;
+      }
+    })());
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
