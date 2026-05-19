@@ -132,6 +132,15 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
                           {children}
                         </code>
                       );
+                    },
+                    table({ children, ...props }: React.ComponentPropsWithoutRef<"table">) {
+                      return (
+                        <div className="table-wrapper">
+                          <table {...props}>
+                            {children}
+                          </table>
+                        </div>
+                      );
                     }
                   }}
                 >
