@@ -6,7 +6,7 @@ if ! command -v rg &>/dev/null; then
   echo "Error: ripgrep (rg) is not installed" >&2
   exit 1
 fi
-if rg -n '\p{Emoji}' components/ app/; then
+if rg -n '\p{Emoji_Presentation}' components/ app/; then
   echo "Error: Found emojis in components/ or app/" >&2
   exit 1
 fi
@@ -38,7 +38,7 @@ grep -Rin 'aria-label' components/AppHeader.tsx components/SolutionPanel.tsx com
 # 10. Phosphor icons imported correctly
 grep -Rin '@phosphor-icons' components/
 # 11. CSS animations use transform/opacity
-if grep -A 10 '@keyframes' app/globals.css | grep -vE '@keyframes|transform|opacity|{|}|/\*|\*/' | grep -E '^\s*[a-z-]+\s*:'; then
+if awk '/@keyframes/ { depth=0; printing=1 } printing { print } printing && /{/ { depth++ } printing && /}/ { depth--; if (depth == 0) printing=0 }' app/globals.css | grep -vE '@keyframes|{|}|/\*|\*/|from|to|[0-9]+%' | grep -vE '^\s*(transform|opacity)\s*:' | grep -E '^\s*[a-z-]+\s*:'; then
   echo "Error: Found CSS animations using properties other than transform/opacity" >&2
   exit 1
 fi

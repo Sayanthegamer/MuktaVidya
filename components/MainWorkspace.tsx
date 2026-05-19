@@ -5,12 +5,14 @@ import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
 import HistorySidebar, { HistoryItem } from "./HistorySidebar";
 import ErrorBanner from "./ErrorBanner";
+import { get, set } from "idb-keyval";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 
 export default function MainWorkspace() {
   const [language, setLanguage] = useState("EN");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,26 +30,36 @@ export default function MainWorkspace() {
     if (savedLang) setLanguage(savedLang);
 
     // Load History
-    try {
-      const savedHistory = localStorage.getItem("muktavidya_history");
-      if (savedHistory) {
-        const parsed = JSON.parse(savedHistory);
-        if (Array.isArray(parsed)) {
-          const validHistory = parsed.filter(item => item && item.solution && item.timestamp);
-          setHistory(validHistory);
-        }
+    let isCancelled = false;
+    get("muktavidya_history").then(parsed => {
+      if (isCancelled) return;
+      if (Array.isArray(parsed)) {
+        const validHistory = parsed.filter(item => item && item.solution && item.timestamp);
+        setHistory(validHistory);
       }
-    } catch (e) {
-      console.error("Failed to parse history", e);
-    }
+      setIsHydrated(true);
+    }).catch(e => {
+      if (isCancelled) return;
+      console.error("Failed to load history from IndexedDB", e);
+      setIsHydrated(true);
+    });
 
     // Cleanup: abort any in-flight requests on unmount
     return () => {
+      isCancelled = true;
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
   }, []);
+
+  // Persist history to IndexedDB when it changes (after hydration)
+  useEffect(() => {
+    if (!isHydrated) return;
+    set("muktavidya_history", history).catch(e =>
+      console.error("Failed to save history to IndexedDB", e)
+    );
+  }, [history, isHydrated]);
 
   // Save language changes
   const handleLanguageChange = (lang: string) => {
@@ -78,11 +90,7 @@ export default function MainWorkspace() {
       preview: finalSolution.replace(/[#*`_]/g, '').substring(0, 100).trim(),
     };
 
-    setHistory(prev => {
-      const newHistory = [newItem, ...prev].slice(0, 50); // Keep last 50
-      localStorage.setItem("muktavidya_history", JSON.stringify(newHistory));
-      return newHistory;
-    });
+    setHistory(prev => [newItem, ...prev].slice(0, 50)); // Keep last 50
   }, []);
 
   const handleCapture = async (base64Data: string) => {
