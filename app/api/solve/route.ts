@@ -65,8 +65,9 @@ export async function POST(request: Request) {
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
     // Build language-aware structured prompt
-    const langInstruction = language && language !== 'en'
-      ? `\nRespond entirely in ${language === 'bn' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
+    const upperLang = language ? language.toUpperCase() : 'EN';
+    const langInstruction = upperLang !== 'EN'
+      ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
       : '';
 
     const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
