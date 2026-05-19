@@ -139,11 +139,11 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
                         <div className="table-wrapper">
                           <table {...props}>
                             {children}
-
+                          </table>
                         </div>
                       );
                     }
-                  }}
+
                 >
                   {solution}
                 </ReactMarkdown>
