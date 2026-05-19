@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
     // Build language-aware structured prompt
-    const upperLang = language ? language.toUpperCase() : 'EN';
+    const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
     const langInstruction = upperLang !== 'EN'
       ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
       : '';
