@@ -1,0 +1,14 @@
+
+> open-solver@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 511ms
+
+ POST /api/solve 500 in 374ms (next.js: 344ms, application-code: 30ms)
+ POST /api/solve 500 in 14ms (next.js: 6ms, application-code: 7ms)
+ POST /api/solve 500 in 9ms (next.js: 3ms, application-code: 6ms)
+ POST /api/solve 403 in 8ms (next.js: 3ms, application-code: 5ms)
+[?25h

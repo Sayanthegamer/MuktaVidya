@@ -17,6 +17,11 @@ const MAX_BODY_BYTES = 5 * 1024 * 1024;
 export async function POST(request: Request) {
   const origin = request.headers.get('origin');
   
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  // Mobile apps/PWA/Capacitor often send requests without an Origin header.
+  // When testing on production, the user received a 403 on their deployed instance, meaning origin is empty or mismatched.
+  // Allow empty origin in production because sometimes fetch requests from PWA contexts might not attach it.
   const isAllowed = 
     !origin || 
     ALLOWED_ORIGINS.includes(origin) || 
