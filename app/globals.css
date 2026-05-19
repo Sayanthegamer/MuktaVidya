@@ -135,7 +135,7 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   color: var(--text-secondary);
   font-style: italic;
 }
-.prose table { width: 100%; text-align: left; border-collapse: collapse; }
+.prose table { width: 100%; text-align: left; border-collapse: collapse; margin-top: 2em; margin-bottom: 2em; }
 .prose thead th { color: var(--text-primary); border-bottom: 2px solid var(--border-strong); padding: 0.5em; }
 .prose tbody td { border-bottom: 1px solid var(--border-subtle); padding: 0.5em; }
 
@@ -188,12 +188,13 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   scrollbar-color: var(--border-strong) transparent;
 }
 
-/* 2. Make markdown tables scrollable on mobile via wrapper */
-.prose .table-wrapper {
+/* 2. Make markdown tables scrollable on mobile */
+.prose table {
+  display: block;
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin-top: 2em;
-  margin-bottom: 2em;
+  white-space: nowrap;
 }
 
 /* 3. Scale down math elements specifically on mobile */

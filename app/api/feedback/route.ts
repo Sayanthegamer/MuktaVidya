@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     console.log(`[Feedback] Type: ${type}, Solution Length: ${solutionLength}`);
     // In a real app, you would log this to Supabase or another DB.
     return new Response(JSON.stringify({ success: true }));
-  } catch (err) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
   }
 }

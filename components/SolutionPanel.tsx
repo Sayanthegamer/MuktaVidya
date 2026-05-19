@@ -113,37 +113,27 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[rehypeKatex]}
                   components={{
-                    code({ className, children, ...props }) {
+                    code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
                       const match = /language-(\w+)/.exec(className || '');
                       const lang = match ? match[1] : '';
 
-                      if (lang === 'mermaid') {
+                      if (!inline && lang === 'mermaid') {
                         return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
                       }
 
-                      // If there is no language match, it's an inline code block
-                      return !match ? (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      ) : (
+                      return !inline ? (
                         <div className="overflow-x-auto">
                           <code className={className} {...props}>
                             {children}
                           </code>
                         </div>
-                      );
-                    },
-                    table({ children, ...props }: React.ComponentPropsWithoutRef<"table">) {
-                      return (
-                        <div className="table-wrapper">
-                          <table {...props}>
-                            {children}
-                          </table>
-                        </div>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
                       );
                     }
-
+                  }}
                 >
                   {solution}
                 </ReactMarkdown>
