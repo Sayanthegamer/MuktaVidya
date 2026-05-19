@@ -156,16 +156,55 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   overflow-x: auto;
   margin-top: 1.5em;
   margin-bottom: 1.5em;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 .prose pre code { color: var(--text-primary); font-size: 0.875em; }
 
-/* KaTeX Overrides */
+/* ─── KaTeX Overrides & Mobile Formatting ───────────── */
 .prose .katex,
 .prose .katex-display {
   color: var(--text-primary);
 }
 .prose .katex-error {
   color: var(--error) !important;
+}
+
+/* 1. Force horizontal scrolling for block equations */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  padding-bottom: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+
+  /* Enable smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+
+  /* Hide standard scrollbar but keep functionality */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* 2. Make markdown tables scrollable on mobile */
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+}
+
+/* 3. Scale down math elements specifically on mobile */
+@media (max-width: 640px) {
+  .prose .katex {
+    font-size: 0.9em;
+  }
+  .prose .katex-display {
+    padding-left: 0.5rem;
+  }
 }
 
 /* Skeleton shimmer */
