@@ -1,6 +1,5 @@
 /* app/globals.css */
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
 /* ─── DESIGN TOKENS ──────────────────────────────────── */
 :root {
@@ -104,19 +103,43 @@ body {
 /* ─── TYPOGRAPHY RESET ──────────────────────────────────── */
 h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
 
-/* ─── PROSE OVERRIDES (for markdown solution) ───────────── */
+/* ─── CUSTOM MARKDOWN SCOPE (.prose) ───────────── */
 .prose {
-  --tw-prose-body: var(--text-secondary);
-  --tw-prose-headings: var(--text-primary);
-  --tw-prose-code: var(--text-primary);
-  --tw-prose-pre-bg: var(--surface-3);
-  --tw-prose-hr: var(--border-subtle);
-  --tw-prose-bullets: var(--text-muted);
-  --tw-prose-counters: var(--text-muted);
   max-width: 72ch;
   font-size: 0.9375rem;
   line-height: 1.75;
+  color: var(--text-secondary);
 }
+
+/* Base Elements */
+.prose p { margin-bottom: 1.25em; margin-top: 1.25em; }
+.prose strong, .prose b { color: var(--text-primary); font-weight: 600; }
+.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.prose ul { list-style-type: disc; padding-left: 1.625em; margin-top: 1.25em; margin-bottom: 1.25em; }
+.prose ol { list-style-type: decimal; padding-left: 1.625em; margin-top: 1.25em; margin-bottom: 1.25em; }
+.prose li::marker { color: var(--text-muted); }
+
+/* Headings */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+.prose h3 { font-size: 1.05rem; margin-top: 1.75rem; }
+
+/* Quotes & Tables */
+.prose blockquote {
+  border-left: 4px solid var(--border-strong);
+  padding-left: 1em;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+.prose table { width: 100%; text-align: left; border-collapse: collapse; margin-top: 2em; margin-bottom: 2em; }
+.prose thead th { color: var(--text-primary); border-bottom: 2px solid var(--border-strong); padding: 0.5em; }
+.prose tbody td { border-bottom: 1px solid var(--border-subtle); padding: 0.5em; }
+
+/* Inline Code & Code Blocks */
 .prose :where(code):not(:where(pre code)) {
   background: var(--surface-3);
   border: 1px solid var(--border-subtle);
@@ -125,12 +148,25 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   font-size: 0.85em;
   color: var(--text-primary);
 }
-.prose :where(pre) {
-  background: var(--surface-3) !important;
+.prose pre {
+  background: var(--surface-3);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
 }
-.prose :where(h3) { font-size: 1.05rem; font-weight: 600; margin-top: 1.75rem; }
+.prose pre code { color: var(--text-primary); font-size: 0.875em; }
+
+/* KaTeX Overrides */
+.prose .katex,
+.prose .katex-display {
+  color: var(--text-primary);
+}
+.prose .katex-error {
+  color: var(--error) !important;
+}
 
 /* Skeleton shimmer */
 @keyframes shimmer {
