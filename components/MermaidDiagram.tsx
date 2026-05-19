@@ -44,7 +44,7 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
           setSvgContent(sanitizedSvg);
           setIsError(false);
         }
-      } catch (_) {
+      } catch {
         // Catch parsing errors (e.g., when the syntax is incomplete during streaming)
         latestRenderIdRef.current += 1;
         const localRenderId = latestRenderIdRef.current;
