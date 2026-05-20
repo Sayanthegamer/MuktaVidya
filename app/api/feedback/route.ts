@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       try {
         const url = new URL(origin);
         return url.protocol === 'https:' &&
-               url.hostname.endsWith('.vercel.app') &&
+               (url.hostname === 'vercel.app' || url.hostname.endsWith('.vercel.app')) &&
                url.hostname.includes(`-${process.env.VERCEL_PROJECT_NAME}-`);
       } catch {
         return false;
