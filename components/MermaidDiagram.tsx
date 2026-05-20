@@ -38,7 +38,12 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
         const { svg } = await mermaid.render(`mermaid-${id}`, sanitizedChart);
 
         // Sanitize SVG content before rendering
-        const sanitizedSvg = DOMPurify.sanitize(svg, { SAFE_FOR_TEMPLATES: true });
+        // New Code
+        const sanitizedSvg = DOMPurify.sanitize(svg, { 
+          SAFE_FOR_TEMPLATES: true,
+          ADD_TAGS: ['foreignObject', 'style'],
+          ADD_ATTR: ['xmlns:xhtml'] 
+        });
 
         if (isMounted && localRenderId === latestRenderIdRef.current) {
           setSvgContent(sanitizedSvg);
