@@ -16,8 +16,19 @@ export function useUploadZone(onImageSelect: (base64: string) => void) {
       };
       const compressedFile = await imageCompression(file, options);
       const reader = new FileReader();
+      reader.onerror = () => {
+        console.error("FileReader error", reader.error);
+      };
       reader.onloadend = () => {
-        onImageSelect(reader.result as string);
+        if (reader.error) {
+          console.error("Error reading file", reader.error);
+          return;
+        }
+        if (reader.result && typeof reader.result === 'string') {
+          onImageSelect(reader.result);
+        } else {
+          console.error("FileReader result is null or not a string");
+        }
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {

@@ -21,7 +21,8 @@ export function useMainWorkspace() {
   useEffect(() => {
     const savedLang = localStorage.getItem("muktavidya_language");
     if (savedLang) {
-      setTimeout(() => setLanguage(savedLang), 0);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLanguage(savedLang);
     }
   }, []);
 

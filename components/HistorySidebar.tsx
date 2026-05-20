@@ -83,7 +83,7 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
                   className="flex gap-3 p-3 hover:bg-[var(--surface-2)] transition-colors border-b border-[var(--border-subtle)] last:border-0 text-left items-start"
                 >
                   {/* Thumbnail */}
-                  <div className="shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
+                  <div className="relative shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
                     {item.imageBase64 ? (
                       <Image src={item.imageBase64} alt="" fill className="w-full h-full object-cover" unoptimized />
                     ) : (

@@ -40,12 +40,17 @@ export function useSolutionPanel(solution: string) {
     if (feedback) return; // Locked
     setFeedback(type);
     try {
-      await fetch('/api/feedback', {
+      const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, content: solution.substring(0, 100) }),
       });
+      if (!response.ok) {
+        setFeedback(null);
+        console.error("Feedback failed, response not ok");
+      }
     } catch (e) {
+      setFeedback(null);
       console.error("Feedback failed", e);
     }
   };
