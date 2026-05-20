@@ -33,18 +33,15 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={onClose}
+        aria-hidden={!isOpen}
+      />
 
       {/* Sidebar Panel */}
-      {isOpen && (
       <div
-        className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-1)] border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel is-open`}
+        className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-1)] border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel ${isOpen ? "is-open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="history-title"
@@ -113,7 +110,6 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
           )}
         </div>
       </div>
-      )}
     </>
   );
 }

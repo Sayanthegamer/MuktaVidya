@@ -25,64 +25,77 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
     handleFeedback
   } = useSolutionPanel(solution);
 
-  // 1. Empty State
-  if (!isLoading && !isStreaming && !solution) {
-    return <EmptyState />;
-  }
+  const isEmpty = !isLoading && !isStreaming && !solution;
+  const showSkeleton = isLoading && !solution;
+  const showContent = isStreaming || !!solution;
 
-  // 2. Loading / Streaming State
-  if (isLoading && !solution) {
-    return <SkeletonLoader />;
-  }
-
-  // 3. Render Solution (Streaming or Complete)
   return (
     <div className="w-full max-w-3xl mx-auto px-6 py-8 md:px-8 flex flex-col min-h-full">
-      <div className="flex-1">
-        {isStreaming ? (
-          <pre className="whitespace-pre-wrap font-mono text-sm text-[var(--text-secondary)] leading-relaxed streaming-cursor">
-            {solution}
-          </pre>
-        ) : (
-          <div className="fade-up">
-            <SolutionErrorBoundary>
-              <div className="prose w-full">
-                <ReactMarkdown
-                  remarkPlugins={[remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
-                  components={{
-                    code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
-                      const match = /language-(\w+)/.exec(className || '');
-                      const lang = match ? match[1] : '';
+      <div className="flex-1 grid grid-cols-1 grid-rows-1 relative">
 
-                      if (!inline && lang === 'mermaid') {
-                        return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
-                      }
+        {/* 1. Empty State */}
+        <div
+          className={`col-start-1 row-start-1 transition-opacity duration-300 ease-out ${isEmpty ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
+          <EmptyState />
+        </div>
 
-                      return !inline ? (
-                        <div className="overflow-x-auto">
+        {/* 2. Loading / Skeleton State */}
+        <div
+          className={`col-start-1 row-start-1 transition-opacity duration-300 ease-out ${showSkeleton ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
+          <SkeletonLoader />
+        </div>
+
+        {/* 3. Render Solution (Streaming or Complete) */}
+        <div
+          className={`col-start-1 row-start-1 transition-opacity duration-300 ease-out ${showContent ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
+          {isStreaming ? (
+            <pre className="whitespace-pre-wrap font-mono text-sm text-[var(--text-secondary)] leading-relaxed streaming-cursor">
+              {solution}
+            </pre>
+          ) : (
+            <div className="fade-up">
+              <SolutionErrorBoundary>
+                <div className="prose w-full">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      code({ inline, className, children, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
+                        const match = /language-(w+)/.exec(className || '');
+                        const lang = match ? match[1] : '';
+
+                        if (!inline && lang === 'mermaid') {
+                          return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+                        }
+
+                        return !inline ? (
+                          <div className="overflow-x-auto">
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          </div>
+                        ) : (
                           <code className={className} {...props}>
                             {children}
                           </code>
-                        </div>
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    }
-                  }}
-                >
-                  {solution}
-                </ReactMarkdown>
-              </div>
-            </SolutionErrorBoundary>
-          </div>
-        )}
+                        );
+                      }
+                    }}
+                  >
+                    {solution}
+                  </ReactMarkdown>
+                </div>
+              </SolutionErrorBoundary>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Action Bar (Only when complete) */}
-      {!isStreaming && solution && (
+      <div className={`transition-opacity duration-300 ease-out ${(!isStreaming && solution) ? "opacity-100 mt-8" : "opacity-0 pointer-events-none"}`}>
         <ActionBar
           copied={copied}
           feedback={feedback}
@@ -90,7 +103,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
           onShare={handleShare}
           onFeedback={handleFeedback}
         />
-      )}
+      </div>
     </div>
   );
 }

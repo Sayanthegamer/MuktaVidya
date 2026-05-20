@@ -35,12 +35,11 @@ export default function MainWorkspace() {
       <main className="flex-1 relative grid grid-cols-1 md:grid-cols-[40fr_60fr] overflow-hidden">
         {/* Ambient Glow Mesh */}
         <div
-          className="absolute inset-0 pointer-events-none -z-10"
+          className="ambient-mesh absolute inset-0 pointer-events-none -z-10"
           style={{
             background: 'radial-gradient(circle at 50% -20%, var(--accent-muted) 0%, transparent 60%), radial-gradient(circle at -10% 50%, var(--surface-2) 0%, transparent 50%)',
             filter: 'blur(40px)',
             opacity: 0.8,
-            transform: 'translateZ(0)',
             willChange: 'transform'
           }}
           aria-hidden="true"
