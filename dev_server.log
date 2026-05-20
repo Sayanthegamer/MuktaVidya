@@ -1,0 +1,95 @@
+
+> open-solver@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 600ms
+
+○ Compiling / ...
+ GET / 200 in 12.0s (next.js: 11.3s, application-code: 726ms)
+ GET / 200 in 109ms (next.js: 7ms, application-code: 101ms)
+ GET / 200 in 83ms (next.js: 9ms, application-code: 75ms)
+ GET / 200 in 82ms (next.js: 6ms, application-code: 76ms)
+ GET / 200 in 83ms (next.js: 6ms, application-code: 78ms)
+ GET / 200 in 71ms (next.js: 5ms, application-code: 65ms)
+ GET / 200 in 85ms (next.js: 6ms, application-code: 79ms)
+ GET / 200 in 88ms (next.js: 7ms, application-code: 82ms)
+ GET / 200 in 92ms (next.js: 8ms, application-code: 84ms)
+ GET / 200 in 81ms (next.js: 5ms, application-code: 75ms)
+[browser] Uncaught Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <LoadingBoundary name="/" loading={null}>
+      <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+        <HTTPAccessFallbackErrorBoundary pathname="/" notFound={{...}} forbidden={undefined} unauthorized={undefined} ...>
+          <RedirectBoundary>
+            <RedirectErrorBoundary router={{...}}>
+              <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+                <SegmentViewNode type="page" pagePath="page.tsx">
+                  <SegmentTrieNode>
+                  <Home>
+                    <div className="min-h-[100...">
+                      <MainWorkspace>
+                        <AppHeader>
+                        <main className="flex-1 rel...">
+                          <div>
+                          <section className="md:sticky ...">
+                            <UploadZone onImageSelect={function handleCapture} isProcessing={false} imagePreview={null} ...>
+                              <div className="w-full h-f...">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  capture="environment"
+                                  className="hidden"
+                                  onChange={function onFileChange}
+                                  ref={{current:null}}
+                                  aria-hidden="true"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={function onGalleryChange}
+                                  ref={{current:null}}
+                                  aria-hidden="true"
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                ...
+                          <section className="overflow-y...">
+                            <SolutionPanel isLoading={false} isStreaming={false} solution="">
+                              <EmptyState>
++                               <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+-                               {"\n        "}
+                        ...
+                ...
+              ...
+
+    at <unknown> (https://react.dev/link/hydration-mismatch)
+    at div (<anonymous>)
+    at EmptyState (components/SolutionPanel/EmptyState.tsx:7:5)
+    at SolutionPanel (components/SolutionPanel.tsx:30:12)
+    at MainWorkspace (components/MainWorkspace.tsx:59:11)
+    at Home (app/page.tsx:8:7)
+   5 | export default function EmptyState() {
+   6 |   return (
+>  7 |     <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+     |     ^
+   8 |       <FileText size={48} weight="light" className="text-[var(--text-muted)] mb-6" />
+   9 |       <h2 className="text-base font-medium tracking-tight text-[var(--text-primary)] mb-2">
+  10 |         Scan a question to get started
+ GET / 200 in 78ms (next.js: 6ms, application-code: 72ms)
+ GET / 200 in 90ms (next.js: 5ms, application-code: 84ms)
+ GET / 200 in 74ms (next.js: 4ms, application-code: 70ms)
