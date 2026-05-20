@@ -39,7 +39,7 @@ describe('isAllowedOrigin', () => {
     process.env.NODE_ENV = 'production';
     process.env.NEXT_PUBLIC_APP_URL = 'https://myapp.com';
     // Re-evaluate allowed origins for the test by pushing to it or we rely on the ones we hardcoded
-    if(!ALLOWED_ORIGINS.includes('https://muktavidya.vercel.app')) {
+    if(!ALLOWED_ORIGINS.some(o => o === 'https://muktavidya.vercel.app')) {
         ALLOWED_ORIGINS.push('https://muktavidya.vercel.app')
     }
 

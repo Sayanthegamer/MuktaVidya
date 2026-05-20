@@ -13,7 +13,7 @@ export function isAllowedOrigin(request: Request): boolean {
     return true;
   }
 
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && ALLOWED_ORIGINS.some(o => o === origin)) {
     return true;
   }
 
