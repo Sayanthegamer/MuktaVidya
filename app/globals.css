@@ -52,7 +52,7 @@
   --color-accent:         var(--accent);
   --color-accent-hover:   var(--accent-hover);
   --color-error:          var(--error);
-  --error-border:         color-mix(in oklch, var(--error) 30%, transparent);
+  --color-error-border:   color-mix(in oklch, var(--error) 30%, transparent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
