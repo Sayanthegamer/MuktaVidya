@@ -30,34 +30,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     onFileChange(e);
   };
 
-  if (imagePreview) {
-    return (
-      <div className={`relative w-full h-full min-h-[400px] md:min-h-full rounded-lg overflow-hidden ${isProcessing ? "scanner-active" : ""}`}>
-        <Image src={imagePreview} alt="Question preview" fill className="w-full h-full object-cover" unoptimized />
-
-        {isProcessing && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="text-xs text-white/70 font-mono tracking-widest bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
-              Analyzing...
-            </span>
-          </div>
-        )}
-
-        {!isProcessing && (
-          <button
-            onClick={onRescan}
-            className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-1)]/90 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--accent)] hover:bg-[var(--surface-2)] transition-colors btn-press shadow-sm"
-          >
-            <ArrowCounterClockwise size={14} weight="bold" />
-            <span className="text-xs font-medium">Rescan</span>
-          </button>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-full min-h-[400px] md:min-h-full p-6">
+    <div className="w-full h-full min-h-[400px] md:min-h-full p-6 grid grid-cols-1 grid-rows-1">
       {/* Hidden input: camera capture */}
       <input
         type="file"
@@ -79,6 +53,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         aria-hidden="true"
       />
 
+      {/* State 1: Upload Zone */}
       <label
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -88,9 +63,12 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         role="presentation"
         className={`
           upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
+          col-start-1 row-start-1
+          transition-opacity duration-300 ease-out
+          ${imagePreview ? "opacity-0 pointer-events-none" : "opacity-100"}
           ${isDragging
-            ? "is-dragging bg-[var(--accent-muted)] border-[var(--accent)]"
-            : "border-[var(--border-subtle)]"
+            ? "is-dragging bg-transparent border-[var(--accent)]"
+            : "border-[var(--border-subtle)] bg-transparent"
           }
         `}
       >
@@ -137,6 +115,40 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
           </>
         )}
       </label>
+
+      {/* State 2: Image Preview */}
+      <div
+        className={`
+          relative w-full h-full rounded-lg overflow-hidden
+          col-start-1 row-start-1
+          transition-opacity duration-300 ease-out
+          ${!imagePreview ? "opacity-0 pointer-events-none" : "opacity-100"}
+          ${isProcessing ? "scanner-active" : ""}
+        `}
+      >
+        {imagePreview && (
+          <Image src={imagePreview} alt="Question preview" fill className="w-full h-full object-cover" unoptimized />
+        )}
+
+        {isProcessing && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="text-xs text-white/70 font-mono tracking-widest bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">
+              Analyzing...
+            </span>
+          </div>
+        )}
+
+        {!isProcessing && imagePreview && (
+          <button
+            onClick={onRescan}
+            className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-1)]/90 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--accent)] hover:bg-[var(--surface-2)] transition-colors btn-press shadow-sm z-10"
+          >
+            <ArrowCounterClockwise size={14} weight="bold" />
+            <span className="text-xs font-medium">Rescan</span>
+          </button>
+        )}
+      </div>
+
     </div>
   );
 }
