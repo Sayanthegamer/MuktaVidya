@@ -19,13 +19,22 @@ export function useMainWorkspace() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  const cancelInFlightRequest = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
   // Load initial state
   useEffect(() => {
-    const savedLang = localStorage.getItem("muktavidya_language");
-    if (savedLang) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLanguage(savedLang);
-    }
+    const initLanguage = async () => {
+      const savedLang = localStorage.getItem("muktavidya_language");
+      if (savedLang) {
+        setLanguage(savedLang);
+      }
+    };
+    initLanguage();
   }, []);
 
   useEffect(() => {
@@ -53,11 +62,9 @@ export function useMainWorkspace() {
     // Cleanup: abort any in-flight requests on unmount
     return () => {
       isCancelled = true;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      cancelInFlightRequest();
     };
-  }, []);
+  }, [cancelInFlightRequest]);
 
   // Persist history to IndexedDB when it changes (after hydration)
   useEffect(() => {
@@ -74,10 +81,7 @@ export function useMainWorkspace() {
   };
 
   const handleSelectHistory = (item: HistoryItem) => {
-    // Cancel any in-flight request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    cancelInFlightRequest();
 
     setImagePreview(item.imageBase64);
     setSolution(item.solution);
@@ -100,10 +104,7 @@ export function useMainWorkspace() {
   }, []);
 
   const handleCapture = async (base64Data: string) => {
-    // Cancel any in-flight request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    cancelInFlightRequest();
 
     // Create new AbortController for this request
     const abortController = new AbortController();
@@ -210,10 +211,7 @@ export function useMainWorkspace() {
   };
 
   const handleRescan = () => {
-    // Cancel any in-flight request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    cancelInFlightRequest();
 
     setImagePreview(null);
     setSolution("");

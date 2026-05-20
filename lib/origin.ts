@@ -30,7 +30,7 @@ export function isAllowedOrigin(request: Request): boolean {
         const url = new URL(origin);
         if (
           url.protocol === 'https:' &&
-          url.hostname.endsWith('.vercel.app') &&
+          (url.hostname === 'vercel.app' || url.hostname.endsWith('.vercel.app')) &&
           url.hostname.includes(`-${process.env.VERCEL_PROJECT_NAME}-`)
         ) {
           return true;
