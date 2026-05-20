@@ -8,9 +8,32 @@ import mermaid from 'mermaid';
 // securityLevel: 'strict' forces Mermaid to run its OWN internal DOMPurify.
 // We removed htmlLabels: false so it defaults to true (which looks much better).
 mermaid.initialize({
-  theme: 'dark',
+  theme: 'base',
   startOnLoad: false,
-  securityLevel: 'strict', 
+  securityLevel: 'strict',
+  themeVariables: {
+    darkMode: true,
+    background: '#0d0e11',      /* Deep background matching your app */
+    primaryColor: '#1f2024',    /* Rich dark gray node panels */
+    primaryTextColor: '#f4f4f5',/* Crisp off-white text */
+    lineColor: '#52525b',       /* visible gray connector lines */
+    textColor: '#f4f4f5',       /* Label text color */
+    nodeBorder: '#3f3f46',      /* Clean borders */
+  },
+  // Inject explicit CSS directly into the SVG to override the light gray behavior
+  themeCss: `
+    .nodeLabel, .label, .label div, .label span {
+      color: #f4f4f5 !important;
+    }
+    .edgeLabel rect {
+      fill: #0d0e11 !important;
+    }
+    .edgeLabel span, .edgeLabel tspan {
+      color: #f4f4f5 !important;
+      fill: #f4f4f5 !important;
+    }
+  `,
+  flowchart: { htmlLabels: true },
   sequence: { showSequenceNumbers: false },
 });
 
