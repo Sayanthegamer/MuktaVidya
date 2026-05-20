@@ -42,29 +42,6 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
         const { svg } = await mermaid.render(`mermaid-${id}-${localRenderId}`, sanitizedChart);
 
-        // ─── DOMPurify config for Mermaid SVG output ──────────────────────────
-        //
-        // Root causes of the "blank boxes" bug:
-        //
-        // 1. SAFE_FOR_TEMPLATES: true  →  escapes { } in Mermaid's embedded
-        //    <style> block, destroying all theme CSS.  Removed entirely.
-        //
-        // 2. Missing USE_PROFILES: { svg: true }  →  DOMPurify was processing
-        //    the SVG string in HTML mode, stripping SVG presentation attributes
-        //    (fill, text-anchor, dominant-baseline, etc.).  Adding the SVG
-        //    profile restores the full SVG attribute whitelist.
-        //
-        // 3. <style> tag not in ADD_TAGS  →  Mermaid embeds its theme CSS
-        //    inside the SVG as a <style> element.  Without it, dark-theme
-        //    colours are gone and node-label text becomes invisible (black on
-        //    dark bg).  Added to ADD_TAGS.
-        //
-        // 4. <foreignObject> content was stripped  →  htmlLabels: true wraps
-        //    node text in <foreignObject><div>…</div></foreignObject>.
-        //    DOMPurify allows the tag but strips its HTML children unless you
-        //    also pass html: true in USE_PROFILES.  Fixed via USE_PROFILES.
-        //
-        // Sanitize SVG content before rendering
         const sanitizedSvg = DOMPurify.sanitize(svg, { 
           USE_PROFILES: { svg: true }, // Strict SVG only, no HTML mixing
           ADD_TAGS: ['style'], 
