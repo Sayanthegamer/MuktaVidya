@@ -14,7 +14,9 @@ const ALLOWED_ORIGINS = [
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
-export async function POST(request: Request) {
+import { NextRequest } from 'next/server';
+
+export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
   
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -36,7 +38,19 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
   }
 
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+  // Secure IP extraction
+  // Request/NextRequest in Next 16 doesn't have .ip directly.
+  // We use headers. x-real-ip is set by many proxies, and Vercel sets x-vercel-forwarded-for.
+  // Then we fallback to x-forwarded-for.
+  let ip = request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-real-ip');
+  if (!ip) {
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    if (forwardedFor) {
+      ip = forwardedFor.split(',')[0].trim();
+    } else {
+      ip = '127.0.0.1';
+    }
+  }
   
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
