@@ -28,6 +28,7 @@
 
   /* Semantic */
   --error:         oklch(0.55 0.20 27);
+  --error-border:  color-mix(in oklch, var(--error) 30%, transparent);
   --error-muted:   oklch(0.55 0.20 27 / 0.12);
   --success:       oklch(0.62 0.15 155);
 
@@ -51,6 +52,7 @@
   --color-accent:         var(--accent);
   --color-accent-hover:   var(--accent-hover);
   --color-error:          var(--error);
+  --error-border:         color-mix(in oklch, var(--error) 30%, transparent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -289,45 +291,6 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   background: transparent !important;
 }
 
-.upload-zone {
-  transition: border-color var(--duration-base) var(--ease-out-expo),
-              background-color var(--duration-base) var(--ease-out-expo);
-}
-
-/* Button press tactile feedback */
-.btn-press:active {
-  transform: scale(0.97);
-  transition: transform 80ms ease-out;
-}
-
-/* Streaming cursor blink */
-@keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-.streaming-cursor::after {
-  content: '▊';
-  animation: blink-cursor 0.5s step-end infinite;
-  color: var(--accent);
-  margin-left: 1px;
-}
-
-/* Fade-up for solution content appearing */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fade-up {
-  animation: fade-up 280ms var(--ease-out-expo) both;
-}
-
-/* ─── MERMAID DIAGRAM RESIZING ──────────────────────────────────────── */
-.mermaid-diagram svg {
-  max-width: 100%;
-  height: auto;
-  background: transparent !important;
-}
-
 /* ─── UPLOAD ZONE BREATHING GLOW ──────────────────────────── */
 @keyframes breathing-glow {
   0% { transform: scale(1); opacity: 0.25; }
@@ -337,7 +300,6 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
 
 .upload-zone {
   position: relative;
-  z-index: 1; /* Establish stacking context for the pseudo-element */
 }
 
 .upload-zone::before {
