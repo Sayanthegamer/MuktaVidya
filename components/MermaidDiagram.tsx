@@ -12,7 +12,9 @@ interface MermaidDiagramProps {
 mermaid.initialize({
   theme: 'dark',
   startOnLoad: false,
-  securityLevel: 'strict',
+  securityLevel: 'loose', // Let Mermaid keep the text
+  flowchart: { htmlLabels: false }, // Force standard SVG text
+  sequence: { showSequenceNumbers: false },
 });
 
 export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
@@ -38,11 +40,10 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
         const { svg } = await mermaid.render(`mermaid-${id}`, sanitizedChart);
 
         // Sanitize SVG content before rendering
-        // New Code
         const sanitizedSvg = DOMPurify.sanitize(svg, { 
           SAFE_FOR_TEMPLATES: true,
-          ADD_TAGS: ['foreignObject', 'style'],
-          ADD_ATTR: ['xmlns:xhtml'] 
+          ADD_TAGS: ['foreignObject', 'style', 'div', 'span', 'p'],
+          ADD_ATTR: ['xmlns:xhtml', 'style', 'class'] 
         });
 
         if (isMounted && localRenderId === latestRenderIdRef.current) {
