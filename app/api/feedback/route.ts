@@ -9,7 +9,14 @@ export async function POST(request: Request) {
     return new Response('Forbidden', { status: 403 });
   }
 
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+  // Next.js >= 15 removed `request.ip`. Safely parse `x-forwarded-for` to get the real client IP.
+  let ip = '127.0.0.1';
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    // x-forwarded-for can be a comma-separated list of IPs.
+    // The left-most IP is the original client IP.
+    ip = forwardedFor.split(',')[0].trim() || '127.0.0.1';
+  }
 
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
