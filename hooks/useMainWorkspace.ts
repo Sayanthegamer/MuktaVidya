@@ -3,6 +3,8 @@ import { get, set } from "idb-keyval";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 import { HistoryItem } from "../components/HistorySidebar";
 
+const MARKDOWN_STRIP_REGEX = /[#*`_]/g;
+
 export function useMainWorkspace() {
   const [language, setLanguage] = useState("EN");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -91,7 +93,7 @@ export function useMainWorkspace() {
       solution: finalSolution,
       timestamp: new Date().toISOString(),
       language: lang,
-      preview: finalSolution.replace(/[#*`_]/g, '').substring(0, 100).trim(),
+      preview: finalSolution.replace(MARKDOWN_STRIP_REGEX, '').substring(0, 100).trim(),
     };
 
     setHistory(prev => [newItem, ...prev].slice(0, 50)); // Keep last 50
