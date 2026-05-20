@@ -2,30 +2,22 @@
 
 import React, { useEffect, useState, useId, useRef } from 'react';
 import mermaid from 'mermaid';
-import DOMPurify from 'dompurify';
+// 1. We completely removed the DOMPurify import.
 
-interface MermaidDiagramProps {
-  chart: string;
-}
-
-// Initialize mermaid once outside the component.
-// Key change: htmlLabels: true (default) so Mermaid uses <foreignObject> + HTML
-// for node labels — much more reliable than SVG <text> in a Next.js/React context.
-// securityLevel: 'strict' lets Mermaid sanitize the chart source itself;
-// we still DOMPurify the output SVG separately.
+// 2. Initialize mermaid. 
+// securityLevel: 'strict' forces Mermaid to run its OWN internal DOMPurify.
+// We removed htmlLabels: false so it defaults to true (which looks much better).
 mermaid.initialize({
   theme: 'dark',
   startOnLoad: false,
-  securityLevel: 'strict',
-  flowchart: { htmlLabels: false }, // <-- CRITICAL: Force pure SVG text
+  securityLevel: 'strict', 
   sequence: { showSequenceNumbers: false },
 });
 
-export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
+export default function MermaidDiagram({ chart }: { chart: string }) {
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [isError,    setIsError]    = useState(false);
-  // useId gives a stable, unique id per component instance
-  const id               = useId().replace(/:/g, '');
+  const [isError, setIsError] = useState(false);
+  const id = useId().replace(/:/g, '');
   const latestRenderIdRef = useRef<number>(0);
 
   useEffect(() => {
@@ -33,23 +25,18 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
     const renderChart = async () => {
       try {
-        // Strip any embedded %%{init}%% directives that could override our config
         const sanitizedChart = chart.replace(/%%\{[\s\S]*?\}%%/g, '').trim();
         if (!sanitizedChart) return;
 
         latestRenderIdRef.current += 1;
         const localRenderId = latestRenderIdRef.current;
 
+        // 3. mermaid.render returns an ALREADY SANITIZED safe SVG string.
         const { svg } = await mermaid.render(`mermaid-${id}-${localRenderId}`, sanitizedChart);
 
-        const sanitizedSvg = DOMPurify.sanitize(svg, { 
-          USE_PROFILES: { svg: true }, // Strict SVG only, no HTML mixing
-          ADD_TAGS: ['style'], 
-          ADD_ATTR: ['dominant-baseline', 'text-anchor', 'alignment-baseline', 'class', 'style'] 
-        });
-
         if (isMounted && localRenderId === latestRenderIdRef.current) {
-          setSvgContent(sanitizedSvg);
+          // 4. Inject it directly. No more double-sanitizing!
+          setSvgContent(svg); 
           setIsError(false);
         }
       } catch (err) {
@@ -67,7 +54,6 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
     return () => { isMounted = false; };
   }, [chart, id]);
 
-  // Graceful fallback while streaming / on parse error
   if (isError || !svgContent) {
     return (
       <div className="my-4">
