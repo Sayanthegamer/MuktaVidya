@@ -49,7 +49,48 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { imageBase64, language } = await request.json();
+    // Prevent payload size validation bypass via Content-Length spoofing
+    if (!request.body) {
+      return new Response(JSON.stringify({ error: 'No body provided' }), { status: 400 });
+    }
+
+    const reader = request.body.getReader();
+    let receivedLength = 0;
+    const chunks = [];
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      if (value) {
+        receivedLength += value.length;
+        if (receivedLength > MAX_BODY_BYTES) {
+          // Cancel the stream to stop receiving data immediately
+          reader.cancel();
+          return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
+        }
+        chunks.push(value);
+      }
+    }
+
+    // Concatenate all chunks
+    const totalBuffer = new Uint8Array(receivedLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+      totalBuffer.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    const bodyString = new TextDecoder().decode(totalBuffer);
+
+    let bodyData;
+    try {
+      bodyData = JSON.parse(bodyString);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+    }
+
+    const { imageBase64, language } = bodyData;
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
     }
