@@ -17,8 +17,8 @@ mermaid.initialize({
   theme: 'dark',
   startOnLoad: false,
   securityLevel: 'strict',
-  flowchart: { htmlLabels: true },  // ← reverted; SVG-text mode had the fill issue
-  sequence:  { showSequenceNumbers: false },
+  flowchart: { htmlLabels: false }, // <-- CRITICAL: Force pure SVG text
+  sequence: { showSequenceNumbers: false },
 });
 
 export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
@@ -64,46 +64,11 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
         //    DOMPurify allows the tag but strips its HTML children unless you
         //    also pass html: true in USE_PROFILES.  Fixed via USE_PROFILES.
         //
-        const sanitizedSvg = DOMPurify.sanitize(svg, {
-          // Allow both SVG and inline HTML (needed for <foreignObject> content)
-          USE_PROFILES: { svg: true, svgFilters: true, html: true },
-
-          // Extra tags Mermaid uses that aren't in the base SVG profile
-          ADD_TAGS: [
-            'foreignObject',   // node label wrappers (htmlLabels: true)
-            'style',           // Mermaid's embedded theme CSS
-            'div', 'span',     // inside foreignObject
-            'p', 'br',
-          ],
-
-          // Extra attributes not covered by the SVG profile
-          ADD_ATTR: [
-            // Namespace / structural
-            'xmlns:xlink', 'xmlns:xhtml', 'xml:space',
-            'requiredFeatures', 'requiredExtensions',
-            // Layout
-            'x', 'y', 'dx', 'dy', 'x1', 'y1', 'x2', 'y2',
-            'cx', 'cy', 'r', 'rx', 'ry',
-            'width', 'height', 'viewBox', 'preserveAspectRatio',
-            'transform', 'patternTransform',
-            // Presentation (critical — without these SVG text is black/invisible)
-            'fill', 'fill-opacity', 'fill-rule',
-            'stroke', 'stroke-width', 'stroke-dasharray',
-            'stroke-linecap', 'stroke-linejoin', 'stroke-opacity',
-            'opacity',
-            // Text
-            'text-anchor', 'dominant-baseline', 'alignment-baseline',
-            'font-size', 'font-family', 'font-weight', 'font-style',
-            // Markers / links
-            'marker-end', 'marker-start', 'marker-mid',
-            'xlink:href', 'href',
-            // General
-            'style', 'class', 'id', 'name',
-            'd', 'points', 'clip-path', 'clip-rule',
-            'mask', 'filter',
-          ],
-
-          FORCE_BODY: false,  // don't wrap in <body>, keep the raw <svg>
+        // Sanitize SVG content before rendering
+        const sanitizedSvg = DOMPurify.sanitize(svg, { 
+          USE_PROFILES: { svg: true }, // Strict SVG only, no HTML mixing
+          ADD_TAGS: ['style'], 
+          ADD_ATTR: ['dominant-baseline', 'text-anchor', 'alignment-baseline', 'class', 'style'] 
         });
 
         if (isMounted && localRenderId === latestRenderIdRef.current) {
