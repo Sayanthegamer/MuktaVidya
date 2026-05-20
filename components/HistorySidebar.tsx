@@ -2,15 +2,7 @@
 import { X, ClockCounterClockwise, FileText } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useEffect } from "react";
-
-export interface HistoryItem {
-  id?: string;
-  imageBase64: string;
-  solution: string;
-  timestamp: string;
-  language: string;
-  preview?: string;
-}
+import { HistoryItem } from "../types/history";
 
 interface HistorySidebarProps {
   isOpen: boolean;

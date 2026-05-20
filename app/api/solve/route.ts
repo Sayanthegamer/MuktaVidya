@@ -1,31 +1,19 @@
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
+import { isAllowedOrigin } from '@/lib/origin';
+import { NextRequest } from 'next/server';
 
 // Lazy initialization to avoid build-time env-var issues
 function getAI() {
   return new GoogleGenAI({ apiKey: getGeminiApiKey() });
 }
 
-const ALLOWED_ORIGINS = [
-  process.env.NEXT_PUBLIC_APP_URL,
-  'https://muktavidya.vercel.app',
-].filter(Boolean);
-
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
-export async function POST(request: Request) {
-  const origin = request.headers.get('origin');
-  
-  const isDevelopment = process.env.NODE_ENV === 'development';
+export async function POST(request: NextRequest) {
 
-  const isAllowed =
-    (isDevelopment && (!origin || origin.startsWith('http://localhost:'))) ||
-    (origin && ALLOWED_ORIGINS.includes(origin)) ||
-    (origin && (
-      (process.env.VERCEL_URL && origin === `https://${process.env.VERCEL_URL}`) ||
-      (process.env.VERCEL_BRANCH_URL && origin === `https://${process.env.VERCEL_BRANCH_URL}`)
-    ));
+  const isAllowed = isAllowedOrigin(request);
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
@@ -36,7 +24,19 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
   }
 
-  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+  // Secure IP extraction
+  // Request/NextRequest in Next 16 doesn't have .ip directly.
+  // We use headers. x-real-ip is set by many proxies, and Vercel sets x-vercel-forwarded-for.
+  // Then we fallback to x-forwarded-for.
+  let ip = request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-real-ip');
+  if (!ip) {
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    if (forwardedFor) {
+      ip = forwardedFor.split(',')[0].trim();
+    } else {
+      ip = '127.0.0.1';
+    }
+  }
   
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
@@ -49,7 +49,48 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { imageBase64, language } = await request.json();
+    // Prevent payload size validation bypass via Content-Length spoofing
+    if (!request.body) {
+      return new Response(JSON.stringify({ error: 'No body provided' }), { status: 400 });
+    }
+
+    const reader = request.body.getReader();
+    let receivedLength = 0;
+    const chunks = [];
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      if (value) {
+        receivedLength += value.length;
+        if (receivedLength > MAX_BODY_BYTES) {
+          // Cancel the stream to stop receiving data immediately
+          reader.cancel();
+          return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
+        }
+        chunks.push(value);
+      }
+    }
+
+    // Concatenate all chunks
+    const totalBuffer = new Uint8Array(receivedLength);
+    let offset = 0;
+    for (const chunk of chunks) {
+      totalBuffer.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    const bodyString = new TextDecoder().decode(totalBuffer);
+
+    let bodyData;
+    try {
+      bodyData = JSON.parse(bodyString);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+    }
+
+    const { imageBase64, language } = bodyData;
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
     }

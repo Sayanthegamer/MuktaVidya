@@ -70,4 +70,49 @@ describe('POST /api/feedback', () => {
     const response = await POST(request as any);
     expect(response.status).toBe(200);
   });
+
+  describe('CORS Validation in Production', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalProjectName = process.env.VERCEL_PROJECT_NAME;
+
+    beforeEach(() => {
+      process.env.NODE_ENV = 'production';
+      process.env.VERCEL_PROJECT_NAME = 'muktavidya';
+    });
+
+    afterAll(() => {
+      process.env.NODE_ENV = originalNodeEnv;
+      process.env.VERCEL_PROJECT_NAME = originalProjectName;
+    });
+
+    it('should block requests with malicious vercel domain bypass', async () => {
+      const request = new Request('http://localhost/api/feedback', {
+        method: 'POST',
+        body: JSON.stringify({ type: 'thumbs-up' }),
+        headers: {
+          origin: 'https://attacker-muktavidya-vercel.app'
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(403);
+      const text = await response.text();
+      expect(text).toBe('Forbidden');
+    });
+
+    it('should allow requests from valid vercel preview subdomains', async () => {
+      const request = new Request('http://localhost/api/feedback', {
+        method: 'POST',
+        body: JSON.stringify({ type: 'thumbs-up' }),
+        headers: {
+          origin: 'https://preview-muktavidya-xyz.vercel.app'
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toEqual({ success: true });
+    });
+  });
 });
