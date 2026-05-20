@@ -28,11 +28,13 @@ export function useMainWorkspace() {
 
   // Load initial state
   useEffect(() => {
-    const savedLang = localStorage.getItem("muktavidya_language");
-    if (savedLang) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLanguage(savedLang);
-    }
+    const initLanguage = async () => {
+      const savedLang = localStorage.getItem("muktavidya_language");
+      if (savedLang) {
+        setLanguage(savedLang);
+      }
+    };
+    initLanguage();
   }, []);
 
   useEffect(() => {
