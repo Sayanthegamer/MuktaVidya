@@ -1,7 +1,7 @@
 "use client";
 import { CameraPlus, ArrowCounterClockwise } from "@phosphor-icons/react";
-import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import imageCompression from "browser-image-compression";
+import Image from "next/image";
+import { useUploadZone } from "../hooks/useUploadZone";
 
 interface UploadZoneProps {
   onImageSelect: (base64: string) => void;
@@ -11,64 +11,20 @@ interface UploadZoneProps {
 }
 
 export default function UploadZone({ onImageSelect, isProcessing, imagePreview, onRescan }: UploadZoneProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) return;
-
-    try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onImageSelect(reader.result as string);
-      };
-      reader.readAsDataURL(compressedFile);
-    } catch (error) {
-      console.error("Error compressing image", error);
-    }
-  };
-
-  const onDragOver = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const handleUploadZoneKeyDown = (e: React.KeyboardEvent<HTMLLabelElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      fileInputRef.current?.click();
-    }
-  };
+  const {
+    isDragging,
+    fileInputRef,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onFileChange,
+    handleUploadZoneKeyDown
+  } = useUploadZone(onImageSelect);
 
   if (imagePreview) {
     return (
       <div className={`relative w-full h-full min-h-[400px] md:min-h-full rounded-lg overflow-hidden ${isProcessing ? "scanner-active" : ""}`}>
-        <img src={imagePreview} alt="Question preview" className="w-full h-full object-cover" />
+        <Image src={imagePreview} alt="Question preview" fill className="w-full h-full object-cover" unoptimized />
 
         {isProcessing && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
