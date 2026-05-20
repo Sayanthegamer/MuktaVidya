@@ -265,11 +265,7 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   animation: fade-up 280ms var(--ease-out-expo) both;
 }
 
-/* ─── MERMAID DIAGRAM OVERRIDES ─────────────────────────────────────────────
-   Paste this block into globals.css anywhere after the .prose section.
-   These rules are safety-nets: Mermaid's own dark-theme CSS sets most of
-   these, but if DOMPurify strips the embedded <style> they won't exist.
-   ─────────────────────────────────────────────────────────────────────────── */
+/* ─── MERMAID DIAGRAM OVERRIDES (FIXED) ────────────────────────────────── */
 
 /* Container */
 .mermaid-diagram svg {
@@ -278,46 +274,34 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   background: transparent;
 }
 
-/* All SVG text elements — SVG uses `fill` (not `color`) for text colour.
-   Without an explicit fill, text defaults to fill:black, invisible on dark bg. */
+/* Force all SVG text to be visible */
 .mermaid-diagram svg text,
 .mermaid-diagram svg tspan {
-  fill: var(--text-primary);
+  fill: var(--foreground, #ffffff) !important;
 }
 
-/* Node label <div> inside <foreignObject> (htmlLabels: true path) */
+/* Node labels */
 .mermaid-diagram .nodeLabel,
 .mermaid-diagram .label div,
 .mermaid-diagram .label span {
-  color: var(--text-primary) !important;
+  color: var(--foreground, #ffffff) !important;
   background: transparent;
 }
 
-/* Edge / arrow labels */
+/* Edge / arrow labels - requires a solid background to block lines behind it */
 .mermaid-diagram .edgeLabel,
 .mermaid-diagram .edgeLabel p {
-  color: var(--text-primary) !important;
-  background: var(--surface-2);
+  color: var(--foreground, #ffffff) !important;
+  background: var(--background, #0a0a0a) !important;
   padding: 2px 4px;
   border-radius: 3px;
 }
 
-/* Node fills — keep Mermaid's colours but ensure contrast */
+/* Ensure node borders are visible against the dark theme */
 .mermaid-diagram .node rect,
 .mermaid-diagram .node circle,
 .mermaid-diagram .node ellipse,
 .mermaid-diagram .node polygon,
 .mermaid-diagram .node path {
-  stroke: var(--border-default);
+  stroke: #525252 !important; 
 }
-
-/* Sequence diagram participant boxes */
-.mermaid-diagram .actor {
-  fill: var(--surface-2);
-  stroke: var(--border-default);
-}
-.mermaid-diagram .actor > tspan,
-.mermaid-diagram text.actor {
-  fill: var(--text-primary);
-}
-
