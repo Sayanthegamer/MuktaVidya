@@ -312,3 +312,12 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   opacity: 0.25;
   animation: breathing-glow 6s ease-in-out infinite;
 }
+
+/* Reduced motion: disable animation, use static opacity */
+@media (prefers-reduced-motion: reduce) {
+  .upload-zone.is-dragging::before {
+    animation: none;
+    opacity: 0.15;
+    transition: none;
+  }
+}
