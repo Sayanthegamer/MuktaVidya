@@ -265,43 +265,9 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   animation: fade-up 280ms var(--ease-out-expo) both;
 }
 
-/* ─── MERMAID DIAGRAM OVERRIDES (FIXED) ────────────────────────────────── */
-
-/* Container */
+/* ─── MERMAID DIAGRAM LAYOUT ────────────────────────────────── */
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
   background: transparent;
-}
-
-/* Force all SVG text to be visible */
-.mermaid-diagram svg text,
-.mermaid-diagram svg tspan {
-  fill: var(--foreground, #ffffff) !important;
-}
-
-/* Node labels */
-.mermaid-diagram .nodeLabel,
-.mermaid-diagram .label div,
-.mermaid-diagram .label span {
-  color: var(--foreground, #ffffff) !important;
-  background: transparent;
-}
-
-/* Edge / arrow labels - requires a solid background to block lines behind it */
-.mermaid-diagram .edgeLabel,
-.mermaid-diagram .edgeLabel p {
-  color: var(--foreground, #ffffff) !important;
-  background: var(--background, #0a0a0a) !important;
-  padding: 2px 4px;
-  border-radius: 3px;
-}
-
-/* Ensure node borders are visible against the dark theme */
-.mermaid-diagram .node rect,
-.mermaid-diagram .node circle,
-.mermaid-diagram .node ellipse,
-.mermaid-diagram .node polygon,
-.mermaid-diagram .node path {
-  stroke: #525252 !important; 
 }
