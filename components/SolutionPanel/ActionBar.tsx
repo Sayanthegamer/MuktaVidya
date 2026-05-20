@@ -1,0 +1,68 @@
+import { CopySimple, Check, ShareNetwork, ThumbsUp, ThumbsDown } from "@phosphor-icons/react";
+
+interface ActionBarProps {
+  copied: boolean;
+  feedback: 'up' | 'down' | null;
+  onCopy: () => void;
+  onShare: () => void;
+  onFeedback: (type: 'up' | 'down') => void;
+}
+
+export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedback }: ActionBarProps) {
+  return (
+    <div className="mt-12 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between fade-up">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          aria-label="Copy solution"
+        >
+          {copied ? <Check size={15} weight="bold" className="text-[var(--success)]" /> : <CopySimple size={15} />}
+          <span className="text-xs font-medium">{copied ? "Copied" : "Copy"}</span>
+        </button>
+        <button
+          onClick={onShare}
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          aria-label="Share solution"
+        >
+          <ShareNetwork size={15} />
+          <span className="text-xs font-medium">Share</span>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-[var(--text-muted)]">Was this helpful?</span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onFeedback('up')}
+            disabled={feedback !== null}
+            className={`p-1.5 rounded transition-colors ${
+              feedback === 'up'
+                ? "text-[var(--accent)]"
+                : feedback === 'down'
+                  ? "text-[var(--text-disabled)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            }`}
+            aria-label="Helpful"
+          >
+            <ThumbsUp size={16} weight={feedback === 'up' ? "fill" : "regular"} />
+          </button>
+          <button
+            onClick={() => onFeedback('down')}
+            disabled={feedback !== null}
+            className={`p-1.5 rounded transition-colors ${
+              feedback === 'down'
+                ? "text-[var(--error)]"
+                : feedback === 'up'
+                  ? "text-[var(--text-disabled)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            }`}
+            aria-label="Not helpful"
+          >
+            <ThumbsDown size={16} weight={feedback === 'down' ? "fill" : "regular"} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

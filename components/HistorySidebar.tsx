@@ -1,5 +1,6 @@
 "use client";
 import { X, ClockCounterClockwise, FileText } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useEffect } from "react";
 
 export interface HistoryItem {
@@ -84,7 +85,7 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
                   {/* Thumbnail */}
                   <div className="shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
                     {item.imageBase64 ? (
-                      <img src={item.imageBase64} alt="" className="w-full h-full object-cover" />
+                      <Image src={item.imageBase64} alt="" fill className="w-full h-full object-cover" unoptimized />
                     ) : (
                       <FileText size={24} className="text-[var(--text-muted)]" />
                     )}

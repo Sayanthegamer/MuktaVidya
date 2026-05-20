@@ -1,6 +1,4 @@
 "use client";
-import { FileText, CopySimple, Check, ShareNetwork, ThumbsUp, ThumbsDown } from "@phosphor-icons/react";
-import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -8,6 +6,9 @@ import 'katex/dist/katex.min.css';
 import SkeletonLoader from "./SkeletonLoader";
 import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
 import MermaidDiagram from "./MermaidDiagram";
+import { useSolutionPanel } from "../hooks/useSolutionPanel";
+import ActionBar from "./SolutionPanel/ActionBar";
+import EmptyState from "./SolutionPanel/EmptyState";
 
 interface SolutionPanelProps {
   isStreaming: boolean;
@@ -16,80 +17,17 @@ interface SolutionPanelProps {
 }
 
 export default function SolutionPanel({ isStreaming, isLoading, solution }: SolutionPanelProps) {
-  const [copied, setCopied] = useState(false);
-  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
-
-  // Reset feedback and copied state when solution changes
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    setFeedback(null);
-    setCopied(false);
-  }, [solution]);
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(solution);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy', err);
-    }
-  };
-
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'MuktaVidya AI Solution',
-          text: solution,
-        });
-      } else {
-        handleCopy();
-      }
-    } catch (err) {
-      console.error('Failed to share', err);
-    }
-  };
-
-  const handleFeedback = async (type: 'up' | 'down') => {
-    if (feedback) return; // Locked
-    setFeedback(type);
-    try {
-      await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, content: solution.substring(0, 100) }),
-      });
-    } catch (e) {
-      console.error("Feedback failed", e);
-    }
-  };
+  const {
+    copied,
+    feedback,
+    handleCopy,
+    handleShare,
+    handleFeedback
+  } = useSolutionPanel(solution);
 
   // 1. Empty State
   if (!isLoading && !isStreaming && !solution) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-        <FileText size={48} weight="light" className="text-[var(--text-muted)] mb-6" />
-        <h2 className="text-base font-medium tracking-tight text-[var(--text-primary)] mb-2">
-          Scan a question to get started
-        </h2>
-        <p className="text-sm text-[var(--text-muted)] max-w-[36ch] leading-relaxed mb-8">
-          Point your camera at any WBJEE, JEE, or NEET question.
-        </p>
-
-        <div className="flex items-center justify-center gap-2 flex-wrap">
-          {["Physics", "Chemistry", "Mathematics", "Biology"].map((subject, idx, arr) => (
-            <div key={subject} className="flex items-center gap-2">
-              <span className="text-xs font-mono text-[var(--text-muted)] border border-[var(--border-subtle)] rounded px-2 py-0.5">
-                {subject}
-              </span>
-              {idx < arr.length - 1 && <span className="text-[var(--text-muted)]">|</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <EmptyState />;
   }
 
   // 2. Loading / Streaming State
@@ -145,60 +83,13 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
 
       {/* Action Bar (Only when complete) */}
       {!isStreaming && solution && (
-        <div className="mt-12 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between fade-up">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
-              aria-label="Copy solution"
-            >
-              {copied ? <Check size={15} weight="bold" className="text-[var(--success)]" /> : <CopySimple size={15} />}
-              <span className="text-xs font-medium">{copied ? "Copied" : "Copy"}</span>
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
-              aria-label="Share solution"
-            >
-              <ShareNetwork size={15} />
-              <span className="text-xs font-medium">Share</span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-[var(--text-muted)]">Was this helpful?</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleFeedback('up')}
-                disabled={feedback !== null}
-                className={`p-1.5 rounded transition-colors ${
-                  feedback === 'up'
-                    ? "text-[var(--accent)]"
-                    : feedback === 'down'
-                      ? "text-[var(--text-disabled)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
-                }`}
-                aria-label="Helpful"
-              >
-                <ThumbsUp size={16} weight={feedback === 'up' ? "fill" : "regular"} />
-              </button>
-              <button
-                onClick={() => handleFeedback('down')}
-                disabled={feedback !== null}
-                className={`p-1.5 rounded transition-colors ${
-                  feedback === 'down'
-                    ? "text-[var(--error)]"
-                    : feedback === 'up'
-                      ? "text-[var(--text-disabled)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
-                }`}
-                aria-label="Not helpful"
-              >
-                <ThumbsDown size={16} weight={feedback === 'down' ? "fill" : "regular"} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <ActionBar
+          copied={copied}
+          feedback={feedback}
+          onCopy={handleCopy}
+          onShare={handleShare}
+          onFeedback={handleFeedback}
+        />
       )}
     </div>
   );
