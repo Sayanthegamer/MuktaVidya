@@ -8,19 +8,24 @@ interface MermaidDiagramProps {
   chart: string;
 }
 
-// Initialize mermaid once outside the component
+// Initialize mermaid once outside the component.
+// Key change: htmlLabels: true (default) so Mermaid uses <foreignObject> + HTML
+// for node labels — much more reliable than SVG <text> in a Next.js/React context.
+// securityLevel: 'strict' lets Mermaid sanitize the chart source itself;
+// we still DOMPurify the output SVG separately.
 mermaid.initialize({
   theme: 'dark',
   startOnLoad: false,
-  securityLevel: 'loose', // Let Mermaid keep the text
-  flowchart: { htmlLabels: false }, // Force standard SVG text
-  sequence: { showSequenceNumbers: false },
+  securityLevel: 'strict',
+  flowchart: { htmlLabels: true },  // ← reverted; SVG-text mode had the fill issue
+  sequence:  { showSequenceNumbers: false },
 });
 
 export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [isError, setIsError] = useState(false);
-  const id = useId().replace(/:/g, ''); // Generate a valid DOM id
+  const [isError,    setIsError]    = useState(false);
+  // useId gives a stable, unique id per component instance
+  const id               = useId().replace(/:/g, '');
   const latestRenderIdRef = useRef<number>(0);
 
   useEffect(() => {
@@ -28,66 +33,115 @@ export default function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
     const renderChart = async () => {
       try {
-        // Strip any embedded %%{init}%% directives from the raw diagram input
-        const sanitizedChart = chart.replace(/%%\{init.*?\}%%/g, '');
+        // Strip any embedded %%{init}%% directives that could override our config
+        const sanitizedChart = chart.replace(/%%\{[\s\S]*?\}%%/g, '').trim();
+        if (!sanitizedChart) return;
 
-        // Increment and capture the render ID to prevent stale renders
         latestRenderIdRef.current += 1;
         const localRenderId = latestRenderIdRef.current;
 
-        // We use mermaid.render to get the SVG string instead of rendering it into the DOM directly.
-        // It requires a unique ID for each render call.
-        const { svg } = await mermaid.render(`mermaid-${id}`, sanitizedChart);
+        const { svg } = await mermaid.render(`mermaid-${id}-${localRenderId}`, sanitizedChart);
 
-        // Sanitize SVG content before rendering
-        const sanitizedSvg = DOMPurify.sanitize(svg, { 
-          SAFE_FOR_TEMPLATES: true,
-          ADD_TAGS: ['foreignObject', 'style', 'div', 'span', 'p'],
-          ADD_ATTR: ['xmlns:xhtml', 'style', 'class'] 
+        // ─── DOMPurify config for Mermaid SVG output ──────────────────────────
+        //
+        // Root causes of the "blank boxes" bug:
+        //
+        // 1. SAFE_FOR_TEMPLATES: true  →  escapes { } in Mermaid's embedded
+        //    <style> block, destroying all theme CSS.  Removed entirely.
+        //
+        // 2. Missing USE_PROFILES: { svg: true }  →  DOMPurify was processing
+        //    the SVG string in HTML mode, stripping SVG presentation attributes
+        //    (fill, text-anchor, dominant-baseline, etc.).  Adding the SVG
+        //    profile restores the full SVG attribute whitelist.
+        //
+        // 3. <style> tag not in ADD_TAGS  →  Mermaid embeds its theme CSS
+        //    inside the SVG as a <style> element.  Without it, dark-theme
+        //    colours are gone and node-label text becomes invisible (black on
+        //    dark bg).  Added to ADD_TAGS.
+        //
+        // 4. <foreignObject> content was stripped  →  htmlLabels: true wraps
+        //    node text in <foreignObject><div>…</div></foreignObject>.
+        //    DOMPurify allows the tag but strips its HTML children unless you
+        //    also pass html: true in USE_PROFILES.  Fixed via USE_PROFILES.
+        //
+        const sanitizedSvg = DOMPurify.sanitize(svg, {
+          // Allow both SVG and inline HTML (needed for <foreignObject> content)
+          USE_PROFILES: { svg: true, svgFilters: true, html: true },
+
+          // Extra tags Mermaid uses that aren't in the base SVG profile
+          ADD_TAGS: [
+            'foreignObject',   // node label wrappers (htmlLabels: true)
+            'style',           // Mermaid's embedded theme CSS
+            'div', 'span',     // inside foreignObject
+            'p', 'br',
+          ],
+
+          // Extra attributes not covered by the SVG profile
+          ADD_ATTR: [
+            // Namespace / structural
+            'xmlns:xlink', 'xmlns:xhtml', 'xml:space',
+            'requiredFeatures', 'requiredExtensions',
+            // Layout
+            'x', 'y', 'dx', 'dy', 'x1', 'y1', 'x2', 'y2',
+            'cx', 'cy', 'r', 'rx', 'ry',
+            'width', 'height', 'viewBox', 'preserveAspectRatio',
+            'transform', 'patternTransform',
+            // Presentation (critical — without these SVG text is black/invisible)
+            'fill', 'fill-opacity', 'fill-rule',
+            'stroke', 'stroke-width', 'stroke-dasharray',
+            'stroke-linecap', 'stroke-linejoin', 'stroke-opacity',
+            'opacity',
+            // Text
+            'text-anchor', 'dominant-baseline', 'alignment-baseline',
+            'font-size', 'font-family', 'font-weight', 'font-style',
+            // Markers / links
+            'marker-end', 'marker-start', 'marker-mid',
+            'xlink:href', 'href',
+            // General
+            'style', 'class', 'id', 'name',
+            'd', 'points', 'clip-path', 'clip-rule',
+            'mask', 'filter',
+          ],
+
+          FORCE_BODY: false,  // don't wrap in <body>, keep the raw <svg>
         });
 
         if (isMounted && localRenderId === latestRenderIdRef.current) {
           setSvgContent(sanitizedSvg);
           setIsError(false);
         }
-      } catch {
-        // Catch parsing errors (e.g., when the syntax is incomplete during streaming)
+      } catch (err) {
+        console.error('[MermaidDiagram] render error', err);
         latestRenderIdRef.current += 1;
         const localRenderId = latestRenderIdRef.current;
-
         if (isMounted && localRenderId === latestRenderIdRef.current) {
           setIsError(true);
         }
       }
     };
 
-    if (chart) {
-      renderChart();
-    }
+    if (chart) renderChart();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [chart, id]);
 
+  // Graceful fallback while streaming / on parse error
   if (isError || !svgContent) {
-    // Graceful fallback for incomplete/invalid mermaid syntax during streaming
     return (
       <div className="my-4">
-        <div className="text-xs text-blue-400 animate-pulse mb-1 font-mono">
-          Generating diagram...
+        <div className="text-xs text-[var(--accent)] animate-pulse mb-1 font-mono">
+          Generating diagram…
         </div>
-        <pre className="bg-gray-800 rounded p-2 overflow-x-auto text-sm text-gray-300 font-mono">
+        <pre className="bg-[var(--surface-3)] border border-[var(--border-subtle)] rounded-lg p-3 overflow-x-auto text-sm text-[var(--text-secondary)] font-mono">
           <code>{chart}</code>
         </pre>
       </div>
     );
   }
 
-  // Render the successfully generated SVG safely
   return (
     <div
-      className="mermaid-diagram my-4 flex justify-center w-full overflow-x-auto"
+      className="mermaid-diagram my-6 flex justify-center w-full overflow-x-auto rounded-lg"
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
   );
