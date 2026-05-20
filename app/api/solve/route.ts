@@ -74,7 +74,8 @@ export async function POST(request: Request) {
 Analyze the image. First identify the subject (Physics/Chemistry/Mathematics/Biology).
 Structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer.
 For MCQs, state which option is correct and why others are wrong.
-Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.${langInstruction}`;
+Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.
+CRITICAL: Whenever a visual aid would clarify the solution (e.g., a free-body diagram, basic circuit, chemical reaction pathway, or flowchart), you MUST generate a diagram using Mermaid.js syntax inside a \`\`\`mermaid code block.${langInstruction}`;
 
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
