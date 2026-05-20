@@ -265,9 +265,47 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   animation: fade-up 280ms var(--ease-out-expo) both;
 }
 
-/* ─── MERMAID DIAGRAM LAYOUT ────────────────────────────────── */
+/* ─── MERMAID DIAGRAM LAYOUT & THEME OVERRIDES ─────────────────────────── */
+
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
-  background: transparent;
+  background: transparent !important;
+}
+
+/* 1. Force the inner boxes/nodes to be dark using your theme tokens */
+.mermaid-diagram .node rect,
+.mermaid-diagram .node circle,
+.mermaid-diagram .node ellipse,
+.mermaid-diagram .node polygon,
+.mermaid-diagram .node path {
+  fill: var(--surface-2) !important;       /* Clean dark gray box background */
+  stroke: var(--border-strong) !important; /* Defined border */
+}
+
+/* 2. Keep the node text bright white */
+.mermaid-diagram .node text,
+.mermaid-diagram .nodeLabel,
+.mermaid-diagram .label div,
+.mermaid-diagram .label span {
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
+}
+
+/* 3. Fix edge lines and arrowhead colors */
+.mermaid-diagram .edgePath .path {
+  stroke: var(--text-muted) !important;
+}
+.mermaid-diagram .marker {
+  fill: var(--text-muted) !important;
+}
+
+/* 4. Fix arrow text labels to cleanly break the line */
+.mermaid-diagram .edgeLabel rect {
+  fill: var(--surface-0) !important; /* Matches main page background */
+}
+.mermaid-diagram .edgeLabel text,
+.mermaid-diagram .edgeLabel span {
+  color: var(--text-primary) !important;
+  fill: var(--text-primary) !important;
 }
