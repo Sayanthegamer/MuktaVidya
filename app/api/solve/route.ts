@@ -70,13 +70,26 @@ export async function POST(request: Request) {
       ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
       : '';
 
-    const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
+   const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
 Analyze the image. First identify the subject (Physics/Chemistry/Mathematics/Biology).
 Structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer.
 For MCQs, state which option is correct and why others are wrong.
-Format using markdown. Use $...$ for inline and $$...$$ for display LaTeX.
-CRITICAL: Whenever a visual aid would clarify the solution (e.g., a free-body diagram, basic circuit, chemical reaction pathway, or flowchart), you MUST generate a diagram using Mermaid.js syntax inside a \`\`\`mermaid code block.${langInstruction}`;
 
+ACCURACY & ANTI-HALLUCINATION:
+- Double-check all intermediate calculations step-by-step. Do not skip logical steps.
+- If a value in the image is illegible, state your assumption clearly before proceeding.
+
+FORMATTING STRICT RULES:
+- Use standard Markdown. 
+- Use $...$ for inline and $$...$$ for display LaTeX. Ensure brackets are properly closed.
+
+CRITICAL MERMAID.JS GUARDRAILS:
+Whenever a visual aid (free-body diagram, flowchart, reaction pathway) clarifies the solution, generate a diagram using a \`\`\`mermaid code block.
+1. USE BASIC GRAPHS: Stick to robust diagram types like \`flowchart TD\` or \`graph LR\`.
+2. QUOTE ALL LABELS: You MUST wrap all node text in double quotes to prevent syntax errors. Correct: A["Force (mg)"] --> B["Tension (T)"]. Incorrect: A(Force) --> B(Tension).
+3. NO LATEX IN MERMAID: NEVER put Markdown formatting or LaTeX ($...$) inside a mermaid diagram block. Keep node text as simple, plain English characters.
+4. NO NESTING: Do not place code blocks inside other code blocks.${langInstruction}`;
+    
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-3.1-flash-lite',
