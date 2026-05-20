@@ -9,12 +9,6 @@ interface AppHeaderProps {
   setLanguage: (lang: string) => void;
 }
 
-const LANGUAGES = [
-  { id: "EN", label: "EN" },
-  { id: "BN", label: "BN" },
-  { id: "HI", label: "HI" },
-];
-
 export default function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage }: AppHeaderProps) {
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
@@ -30,7 +24,11 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
 
       {/* Language Selector */}
       <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
-        {LANGUAGES.map((lang, index) => (
+        {[
+          { id: "EN", label: "EN" },
+          { id: "BN", label: "BN" },
+          { id: "HI", label: "HI" },
+        ].map((lang, index) => (
           <button
             key={lang.id}
             onClick={() => setLanguage(lang.id)}

@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint",
-    "test": "jest"
+    "lint": "eslint"
   },
   "dependencies": {
     "@google/genai": "^2.3.0",
@@ -29,8 +28,6 @@
     "serwist": "^9.5.11"
   },
   "devDependencies": {
-    "@swc/core": "^1.15.33",
-    "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -43,13 +40,5 @@
     "jest": "^30.4.2",
     "tailwindcss": "^4",
     "typescript": "^5"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "transform": {
-      "^.+\\.(t|j)sx?$": [
-        "@swc/jest"
-      ]
-    }
   }
 }
