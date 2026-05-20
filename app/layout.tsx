@@ -13,9 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://muktavidya.vercel.app"),
   title: "MuktaVidya AI",
-  description: "Snap a competitive exam question. Get instant conceptual breakdown.",
+  description: "Instant, AI-powered solutions to your toughest questions.",
   manifest: "/manifest.json",
+  openGraph: {
+    title: "MuktaVidya AI",
+    description: "Instant, AI-powered solutions to your toughest questions.",
+    url: "https://muktavidya.vercel.app",
+    siteName: "MuktaVidya AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MuktaVidya AI",
+    description: "Instant, AI-powered solutions to your toughest questions.",
+  },
 };
 
 export const viewport = {
