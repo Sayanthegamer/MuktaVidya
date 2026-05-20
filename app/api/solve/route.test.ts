@@ -27,6 +27,7 @@ import { ratelimit } from '@/lib/rateLimit';
 
 describe('POST /api/solve IP Extraction Security', () => {
   beforeEach(() => {
+    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
     jest.clearAllMocks();
     (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
     process.env.NODE_ENV = 'development';
@@ -98,6 +99,7 @@ describe('POST /api/solve IP Extraction Security', () => {
 describe('Solve API route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
     process.env.NODE_ENV = 'development';
   });
