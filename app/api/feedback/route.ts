@@ -1,3 +1,5 @@
+import { ratelimit } from '@/lib/rateLimit';
+
 const ALLOWED_ORIGINS = [
   process.env.NEXT_PUBLIC_APP_URL,
   'https://open-solver.vercel.app',
@@ -17,6 +19,15 @@ export async function POST(request: Request) {
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
+  }
+
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+
+  if (ratelimit) {
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
+      return new Response('Too Many Requests', { status: 429 });
+    }
   }
 
   try {
