@@ -1,5 +1,7 @@
 import { FileText } from "@phosphor-icons/react";
 
+const SUBJECTS = ["Physics", "Chemistry", "Mathematics", "Biology"];
+
 export default function EmptyState() {
   return (
     <div className="h-full flex flex-col items-center justify-center p-6 text-center">
@@ -12,7 +14,7 @@ export default function EmptyState() {
       </p>
 
       <div className="flex items-center justify-center gap-2 flex-wrap">
-        {["Physics", "Chemistry", "Mathematics", "Biology"].map((subject, idx, arr) => (
+        {SUBJECTS.map((subject, idx, arr) => (
           <div key={subject} className="flex items-center gap-2">
             <span className="text-xs font-mono text-[var(--text-muted)] border border-[var(--border-subtle)] rounded px-2 py-0.5">
               {subject}
