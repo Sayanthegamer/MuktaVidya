@@ -40,4 +40,19 @@ describe('POST /api/feedback', () => {
     const data = await response.json();
     expect(data).toEqual({ success: true });
   });
+
+  it('should handle incomplete (but parsable) data gracefully', async () => {
+    const request = new Request('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+    // Ensure no origin header so it passes dev mode check
+    request.headers.delete('origin');
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data).toEqual({ success: true });
+  });
 });
