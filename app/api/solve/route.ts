@@ -1,33 +1,19 @@
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
+import { isAllowedOrigin } from '@/lib/origin';
+import { NextRequest } from 'next/server';
 
 // Lazy initialization to avoid build-time env-var issues
 function getAI() {
   return new GoogleGenAI({ apiKey: getGeminiApiKey() });
 }
 
-const ALLOWED_ORIGINS = [
-  process.env.NEXT_PUBLIC_APP_URL,
-  'https://muktavidya.vercel.app',
-].filter(Boolean);
-
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
-import { NextRequest } from 'next/server';
-
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get('origin');
-  
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
-  const isAllowed =
-    (isDevelopment && (!origin || origin.startsWith('http://localhost:'))) ||
-    (origin && ALLOWED_ORIGINS.includes(origin)) ||
-    (origin && (
-      (process.env.VERCEL_URL && origin === `https://${process.env.VERCEL_URL}`) ||
-      (process.env.VERCEL_BRANCH_URL && origin === `https://${process.env.VERCEL_BRANCH_URL}`)
-    ));
+  const isAllowed = isAllowedOrigin(request);
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
