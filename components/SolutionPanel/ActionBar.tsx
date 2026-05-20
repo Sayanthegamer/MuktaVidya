@@ -10,7 +10,7 @@ interface ActionBarProps {
 
 export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedback }: ActionBarProps) {
   return (
-    <div className="mt-12 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between fade-up">
+    <div className="mt-12 flex items-center justify-between fade-up sticky bottom-4 z-10 px-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/70 backdrop-blur-md shadow-lg">
       <div className="flex items-center gap-4">
         <button
           onClick={onCopy}

@@ -32,9 +32,19 @@ export default function MainWorkspace() {
         setLanguage={handleLanguageChange}
       />
 
-      <main className="flex-1 grid grid-cols-1 md:grid-cols-[40fr_60fr] overflow-hidden">
+      <main className="flex-1 relative grid grid-cols-1 md:grid-cols-[40fr_60fr] overflow-hidden">
+        {/* Ambient Glow Mesh */}
+        <div
+          className="absolute inset-0 pointer-events-none -z-10"
+          style={{
+            background: 'radial-gradient(circle at 50% -20%, var(--accent-muted) 0%, transparent 60%), radial-gradient(circle at -10% 50%, var(--surface-2) 0%, transparent 50%)',
+            filter: 'blur(150px)',
+            opacity: 0.8
+          }}
+          aria-hidden="true"
+        />
         {/* Left Panel - Upload Zone */}
-        <section className="md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] overflow-y-auto border-r border-[var(--border-subtle)] bg-[var(--surface-0)] z-10">
+        <section className="md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] overflow-y-auto border-r border-[var(--border-subtle)] bg-transparent z-10">
           <UploadZone
             onImageSelect={handleCapture}
             isProcessing={isProcessing}
@@ -44,7 +54,7 @@ export default function MainWorkspace() {
         </section>
 
         {/* Right Panel - Solution */}
-        <section className="overflow-y-auto min-h-[60vh] md:min-h-0 bg-[var(--surface-0)] flex flex-col">
+        <section className="overflow-y-auto min-h-[60vh] md:min-h-0 bg-transparent flex flex-col z-10">
           {error && <ErrorBanner title={error.title} description={error.description} />}
           <SolutionPanel
             isLoading={isProcessing && solution.length === 0}

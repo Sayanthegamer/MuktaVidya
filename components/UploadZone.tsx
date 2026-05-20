@@ -87,9 +87,9 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         tabIndex={-1}
         role="presentation"
         className={`
-          upload-zone w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
+          upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
           ${isDragging
-            ? "bg-[var(--accent-muted)] border-[var(--accent)]"
+            ? "is-dragging bg-[var(--accent-muted)] border-[var(--accent)]"
             : "border-[var(--border-subtle)]"
           }
         `}
