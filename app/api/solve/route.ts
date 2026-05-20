@@ -79,7 +79,7 @@ CRITICAL: Whenever a visual aid would clarify the solution (e.g., a free-body di
 
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: [
         {
           role: 'user',
