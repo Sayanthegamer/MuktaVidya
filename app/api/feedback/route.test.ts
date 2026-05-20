@@ -1,6 +1,17 @@
 import { POST } from './route';
 
 describe('Feedback API POST handler', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...originalEnv, NODE_ENV: 'development' };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
   it('should return 200 and success for valid telemetry payload', async () => {
     const request = new Request('http://localhost/api/feedback', {
       method: 'POST',
