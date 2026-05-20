@@ -21,7 +21,7 @@ mermaid.initialize({
     nodeBorder: '#3f3f46',      /* Clean borders */
   },
   // Inject explicit CSS directly into the SVG to override the light gray behavior
-  themeCss: `
+  themeCSS: `
     .nodeLabel, .label, .label div, .label span {
       color: #f4f4f5 !important;
     }
