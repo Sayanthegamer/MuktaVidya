@@ -36,8 +36,12 @@ export function useMainWorkspace() {
     get("muktavidya_history").then(parsed => {
       if (isCancelled) return;
       if (Array.isArray(parsed)) {
-        const validHistory = parsed.filter(item => item && item.solution && item.timestamp);
-        setHistory(validHistory);
+        const validHistory = parsed.filter((item: HistoryItem) => item && item.solution && item.timestamp);
+        setHistory(currentHistory => {
+          const existingIds = new Set(currentHistory.map(item => item.id));
+          const newHydratedItems = validHistory.filter((item: HistoryItem) => !existingIds.has(item.id));
+          return [...currentHistory, ...newHydratedItems].slice(0, 50);
+        });
       }
       setIsHydrated(true);
     }).catch(e => {
