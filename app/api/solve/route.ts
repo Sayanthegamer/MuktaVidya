@@ -111,6 +111,7 @@ Structure your response as: ### Subject, ### Given, ### Approach, ### Solution, 
 For MCQs, state which option is correct and why others are wrong.
 
 ACCURACY & ANTI-HALLUCINATION:
+- When you produce equations, make sure the equations are not in one continuous line as they will be hard to distinguish or understand due to wrapping and etc
 - Double-check all intermediate calculations step-by-step. Do not skip logical steps.
 - If a value in the image is illegible, state your assumption clearly before proceeding.
 
