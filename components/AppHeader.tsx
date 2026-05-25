@@ -19,14 +19,14 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
       {/* Logo */}
-      <div className="flex items-center gap-1.5 select-none">
+      <h1 className="flex items-center gap-1.5 select-none">
         <span className="font-mono text-sm tracking-widest text-[var(--text-muted)] uppercase">
           MuktaVidya
         </span>
         <span className="font-sans font-medium text-[var(--accent)] text-sm">
           AI
         </span>
-      </div>
+      </h1>
 
       {/* Language Selector */}
       <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
