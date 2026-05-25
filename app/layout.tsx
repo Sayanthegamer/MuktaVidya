@@ -30,6 +30,9 @@ export const metadata: Metadata = {
     title: "MuktaVidya AI",
     description: "Instant, AI-powered solutions to your toughest questions.",
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export const viewport = {
