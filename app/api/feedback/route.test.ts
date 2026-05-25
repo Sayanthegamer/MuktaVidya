@@ -22,7 +22,7 @@ describe('POST /api/feedback', () => {
     // Ensure no origin header so it passes dev mode check
     request.headers.delete('origin');
 
-    const response = await POST(request as any);
+    const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
     expect(data).toEqual({ error: 'Invalid JSON' });
@@ -36,7 +36,7 @@ describe('POST /api/feedback', () => {
     // Ensure no origin header so it passes dev mode check
     request.headers.delete('origin');
 
-    const response = await POST(request as any);
+    const response = await POST(request);
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data).toEqual({ success: true });
@@ -50,7 +50,7 @@ describe('POST /api/feedback', () => {
     // Ensure no origin header so it passes dev mode check
     request.headers.delete('origin');
 
-    const response = await POST(request as any);
+    const response = await POST(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -67,7 +67,7 @@ describe('POST /api/feedback', () => {
     // Simulate an attacker spoofing the header with multiple IPs
     request.headers.set('x-forwarded-for', '10.0.0.1, 192.168.1.1, 8.8.8.8');
 
-    const response = await POST(request as any);
+    const response = await POST(request);
     expect(response.status).toBe(200);
   });
 
