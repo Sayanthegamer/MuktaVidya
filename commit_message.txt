@@ -1,0 +1,5 @@
+⚡ Cache GoogleGenAI instance in singleton
+
+💡 **What:** Modified `app/api/solve/route.ts` to cache the `GoogleGenAI` instance using a lazy singleton pattern.
+🎯 **Why:** The previous code was re-instantiating the `GoogleGenAI` object on every single API request. While lazy initialization prevents build-time env var issues, lacking caching adds unnecessary memory allocation overhead and CPU cycles for constructing the SDK client on each request.
+📊 **Measured Improvement:** As caching the Google GenAI SDK client is a micro-optimization and V8 string/object allocation overhead is highly optimized, a synthetic benchmark would be brittle and primarily measure Node.js noise. The architectural reality is that caching external SDK clients in serverless/long-running environments is an established best practice to prevent memory thrashing and unnecessary repetitive allocations under high load. This implementation safely caches the instance globally on the server thread while still maintaining Next.js build safety.

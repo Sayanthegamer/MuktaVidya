@@ -5,8 +5,12 @@ import { isAllowedOrigin } from '@/lib/origin';
 import { NextRequest } from 'next/server';
 
 // Lazy initialization to avoid build-time env-var issues
+let aiInstance: GoogleGenAI | null = null;
 function getAI() {
-  return new GoogleGenAI({ apiKey: getGeminiApiKey() });
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({ apiKey: getGeminiApiKey() });
+  }
+  return aiInstance;
 }
 
 const MAX_BODY_BYTES = 5 * 1024 * 1024;
