@@ -352,3 +352,8 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
     transform: translate3d(0,0,0) scale(1);
   }
 }
+
+/* Safe area padding for mobile devices with notches/home indicators */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
