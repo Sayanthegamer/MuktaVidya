@@ -15,9 +15,9 @@ describe('preprocessMarkdown', () => {
     expect(preprocessMarkdown(input)).toBe(expected);
   });
 
-  it('should convert block LaTeX delimiters `\\[` and `\\]` to `$$`', () => {
+  it('should convert block LaTeX delimiters `\\[` and `\\]` to `$$` and add missing blank lines', () => {
     const input = 'This is block:\n\\[x = \n2\\]';
-    const expected = 'This is block:\n$$x = \n2$$';
+    const expected = 'This is block:\n\n$$x = \n2$$';
     expect(preprocessMarkdown(input)).toBe(expected);
   });
 
@@ -33,7 +33,7 @@ describe('preprocessMarkdown', () => {
     expect(preprocessMarkdown(input)).toBe(expected);
   });
 
-  it('should safely handle multi-line complex mixed texts without collision', () => {
+  it('should safely handle multi-line complex mixed texts without collision and space out equations', () => {
     const input = `
 Here is a complex explanation.
 
@@ -56,14 +56,31 @@ First, standard markdown:
 $a^2 + b^2 = c^2$
 
 Next, some LaTeX that needs conversion:
+
 $$
+
 E = mc^2
+
 $$
 
 And inline: $F = ma$.
 
 Will it break? $$No$$.
     `;
+    expect(preprocessMarkdown(input)).toBe(expected);
+  });
+
+  it('should separate steps correctly when consecutive $$ lines are given', () => {
+    const input = `Since $x \to \pi/2$, let $h = x - \pi/2$.
+$$ \sin(2x) = -\sin(2h) $$
+$$ \cos(x) = -\sin(h) $$`;
+
+    const expected = `Since $x \to \pi/2$, let $h = x - \pi/2$.
+
+$$ \sin(2x) = -\sin(2h) $$
+
+$$ \cos(x) = -\sin(h) $$`;
+
     expect(preprocessMarkdown(input)).toBe(expected);
   });
 });
