@@ -2,7 +2,9 @@
 import { CameraPlus, Images, ArrowCounterClockwise } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
-import { useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent } from "react";
+import ReactCrop, { type Crop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 
 interface UploadZoneProps {
   onImageSelect: (base64: string) => void;
@@ -12,6 +14,53 @@ interface UploadZoneProps {
 }
 
 export default function UploadZone({ onImageSelect, isProcessing, imagePreview, onRescan }: UploadZoneProps) {
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  const handleCropComplete = async () => {
+    if (!imageRef.current || !crop || !crop.width || !crop.height) {
+      if (imageToCrop) onImageSelect(imageToCrop);
+      setImageToCrop(null);
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    const scaleX = imageRef.current.naturalWidth / imageRef.current.width;
+    const scaleY = imageRef.current.naturalHeight / imageRef.current.height;
+
+    canvas.width = crop.width * scaleX;
+    canvas.height = crop.height * scaleY;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(
+      imageRef.current,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width * scaleX,
+      crop.height * scaleY
+    );
+
+    const croppedBase64 = canvas.toDataURL("image/jpeg", 0.9);
+    onImageSelect(croppedBase64);
+    setImageToCrop(null);
+  };
+
+  const handleCancelCrop = () => {
+    setImageToCrop(null);
+    setCrop(undefined);
+  };
+
+  const handleImageLoaded = (base64: string) => {
+    setImageToCrop(base64);
+  };
+
   const {
     isDragging,
     fileInputRef,
@@ -20,7 +69,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     onDrop,
     onFileChange,
     handleUploadZoneKeyDown
-  } = useUploadZone(onImageSelect);
+  } = useUploadZone(handleImageLoaded);
 
   // Separate ref for the gallery input (no capture attribute)
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -65,7 +114,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
           upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
           col-start-1 row-start-1
           transition-opacity duration-300 ease-out
-          ${imagePreview ? "opacity-0 pointer-events-none" : "opacity-100"}
+          ${imagePreview || imageToCrop ? "opacity-0 pointer-events-none" : "opacity-100"}
           ${isDragging
             ? "is-dragging bg-transparent border-[var(--accent)]"
             : "border-[var(--border-subtle)] bg-transparent"
@@ -115,6 +164,38 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
           </>
         )}
       </label>
+
+
+      {/* State 3: Cropping UI */}
+      {imageToCrop && !imagePreview && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--surface-0)] p-4 col-start-1 row-start-1 h-full w-full">
+          <div className="flex-1 w-full flex items-center justify-center overflow-hidden min-h-0">
+             <ReactCrop crop={crop} onChange={c => setCrop(c)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  ref={imageRef}
+                  src={imageToCrop}
+                  alt="Crop preview"
+                  className="max-w-full max-h-[60vh] object-contain"
+                />
+             </ReactCrop>
+          </div>
+          <div className="flex items-center gap-4 mt-6 shrink-0">
+            <button
+              onClick={handleCancelCrop}
+              className="px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCropComplete}
+              className="px-4 py-2 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors"
+            >
+              Crop & Solve
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* State 2: Image Preview */}
       <div
