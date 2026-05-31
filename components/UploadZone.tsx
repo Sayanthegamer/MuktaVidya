@@ -168,28 +168,36 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
       {/* State 3: Cropping UI */}
       {imageToCrop && !imagePreview && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--surface-0)] p-4 col-start-1 row-start-1 h-full w-full">
-          <div className="flex-1 w-full flex items-center justify-center overflow-hidden min-h-0">
+        <div className="fixed inset-0 z-50 flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm">
+          {/* Header/Title area (optional, helps with spacing) */}
+          <div className="shrink-0 p-4 flex justify-center items-center border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
+            <span className="text-sm font-medium text-[var(--text-primary)]">Crop Image</span>
+          </div>
+
+          {/* Image container */}
+          <div className="flex-1 w-full flex items-center justify-center overflow-hidden p-4 min-h-0">
              <ReactCrop crop={crop} onChange={c => setCrop(c)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   ref={imageRef}
                   src={imageToCrop}
                   alt="Crop preview"
-                  className="max-w-full max-h-[60vh] object-contain"
+                  className="max-w-full max-h-[70vh] object-contain"
                 />
              </ReactCrop>
           </div>
-          <div className="flex items-center gap-4 mt-6 shrink-0">
+
+          {/* Footer with buttons - Fixed at bottom */}
+          <div className="shrink-0 flex items-center justify-center gap-4 p-4 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface-1)]">
             <button
               onClick={handleCancelCrop}
-              className="px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
+              className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleCropComplete}
-              className="px-4 py-2 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors"
+              className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors"
             >
               Crop & Solve
             </button>
