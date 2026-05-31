@@ -1,7 +1,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import imageCompression from "browser-image-compression";
 
-export function useUploadZone(onImageSelect: (base64: string) => void) {
+export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -25,7 +25,7 @@ export function useUploadZone(onImageSelect: (base64: string) => void) {
           return;
         }
         if (reader.result && typeof reader.result === 'string') {
-          onImageSelect(reader.result);
+          onImageLoaded(reader.result);
         } else {
           console.error("FileReader result is null or not a string");
         }
