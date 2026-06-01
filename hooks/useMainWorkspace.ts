@@ -9,14 +9,16 @@ export function useMainWorkspace() {
 
   const {
     imagePreview,
-    setImagePreview,
+    messages,
+    setInitialState,
     isProcessing,
     solution,
-    setSolution,
     isStreaming,
     error,
     handleCapture,
+    handleFollowUp,
     handleRescan,
+    abortCurrentRequest,
     resetState
   } = useImageSolver({
     onSolveComplete: saveToHistory,
@@ -25,8 +27,7 @@ export function useMainWorkspace() {
 
   const handleSelectHistory = (item: HistoryItem) => {
     resetState();
-    setImagePreview(item.imageBase64);
-    setSolution(item.solution);
+    setInitialState(item.imageBase64, item.solution);
   };
 
   return {
@@ -35,6 +36,7 @@ export function useMainWorkspace() {
     setIsHistoryOpen,
     history,
     imagePreview,
+    messages,
     isProcessing,
     solution,
     isStreaming,
@@ -42,6 +44,9 @@ export function useMainWorkspace() {
     handleLanguageChange,
     handleSelectHistory,
     handleCapture,
-    handleRescan
+    handleFollowUp,
+    handleRescan,
+    abortCurrentRequest,
+    resetState
   };
 }

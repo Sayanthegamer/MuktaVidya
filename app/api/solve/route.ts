@@ -13,7 +13,13 @@ function getAI() {
   return aiInstance;
 }
 
-const MAX_BODY_BYTES = 5 * 1024 * 1024;
+const MAX_BODY_BYTES = 10 * 1024 * 1024; // Increased to 10MB to support multiple images in history
+
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text?: string;
+  imageBase64?: string;
+}
 
 export async function POST(request: NextRequest) {
 
@@ -29,9 +35,6 @@ export async function POST(request: NextRequest) {
   }
 
   // Secure IP extraction
-  // Request/NextRequest in Next 16 doesn't have .ip directly.
-  // We use headers. x-real-ip is set by many proxies, and Vercel sets x-vercel-forwarded-for.
-  // Then we fallback to x-forwarded-for.
   let ip = request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-real-ip');
   if (!ip) {
     const forwardedFor = request.headers.get('x-forwarded-for');
@@ -53,7 +56,6 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Prevent payload size validation bypass via Content-Length spoofing
     if (!request.body) {
       return new Response(JSON.stringify({ error: 'No body provided' }), { status: 400 });
     }
@@ -69,7 +71,6 @@ export async function POST(request: NextRequest) {
       if (value) {
         receivedLength += value.length;
         if (receivedLength > MAX_BODY_BYTES) {
-          // Cancel the stream to stop receiving data immediately
           reader.cancel();
           return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
         }
@@ -77,7 +78,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Concatenate all chunks
     const totalBuffer = new Uint8Array(receivedLength);
     let offset = 0;
     for (const chunk of chunks) {
@@ -94,14 +94,24 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
     }
 
-    const { imageBase64, language } = bodyData;
-    if (!imageBase64) {
-      return new Response(JSON.stringify({ error: 'No image' }), { status: 400 });
+    const { messages, language } = bodyData as { messages?: ChatMessage[], language?: string };
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
     }
 
-    const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
+    // Validate that all messages have either text or imageBase64
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      const hasText = msg.text && msg.text.trim().length > 0;
+      const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
+      if (!hasText && !hasImage) {
+        return new Response(
+          JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
+          { status: 400 }
+        );
+      }
+    }
 
     // Build language-aware structured prompt
     const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
@@ -110,9 +120,8 @@ export async function POST(request: NextRequest) {
       : '';
 
    const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
-Analyze the image. First identify the subject (Physics/Chemistry/Mathematics/Biology).
-Structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer.
-For MCQs, state which option is correct and why others are wrong.
+Analyze the image or answer the user's question. For the first image, identify the subject (Physics/Chemistry/Mathematics/Biology) and structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer. For MCQs, state which option is correct and why others are wrong.
+For follow-up questions, act as a helpful tutor guiding the student through the problem.
 
 ACCURACY & ANTI-HALLUCINATION:
 - Double-check all intermediate calculations step-by-step. Do not skip logical steps.
@@ -139,18 +148,38 @@ If the problem requires plotting mathematical functions, vectors, scatter plots,
 \`\`\`
 ${langInstruction}`;
     
+    // Map our messages to Gemini API format
+    let systemPromptInjected = false;
+    const contents = messages.map((msg, index) => {
+      const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+
+      // Inject system prompt into the first user message
+      if (msg.role === 'user' && !systemPromptInjected) {
+        parts.push({ text: systemPrompt });
+        systemPromptInjected = true;
+      }
+
+      if (msg.text) {
+        parts.push({ text: msg.text });
+      }
+
+      if (msg.imageBase64) {
+        const mimeMatch = msg.imageBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const base64Data = msg.imageBase64.replace(/^data:image\/\w+;base64,/, "");
+        parts.push({ inlineData: { mimeType, data: base64Data } });
+      }
+
+      return {
+        role: msg.role === 'model' ? 'model' : 'user',
+        parts: parts
+      };
+    });
+
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-3.1-flash-lite',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            { inlineData: { mimeType, data: base64Data } },
-            { text: systemPrompt }
-          ]
-        }
-      ],
+      contents: contents,
     });
 
     const stream = new ReadableStream({

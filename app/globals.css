@@ -357,3 +357,22 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
+
+/* ─── ALIEN DOCK GLOW ──────────────────────────── */
+@keyframes alien-breathe {
+  0% { opacity: 0.15; transform: scale(0.98); }
+  50% { opacity: 0.4; transform: scale(1.02); }
+  100% { opacity: 0.15; transform: scale(0.98); }
+}
+
+.animate-alien-breathe {
+  animation: alien-breathe 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-alien-breathe {
+    animation: none;
+    opacity: 0.2;
+    transform: none;
+  }
+}

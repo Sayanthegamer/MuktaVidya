@@ -11,9 +11,9 @@ export function useSolutionPanel(solution: string) {
     setCopied(false);
   }
 
-  const handleCopy = async () => {
+  const handleCopy = async (customText?: string) => {
     try {
-      await navigator.clipboard.writeText(solution);
+      await navigator.clipboard.writeText(customText ?? solution);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -21,29 +21,29 @@ export function useSolutionPanel(solution: string) {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (customText?: string) => {
     try {
       if (navigator.share) {
         await navigator.share({
           title: 'MuktaVidya AI Solution',
-          text: solution,
+          text: customText ?? solution,
         });
       } else {
-        handleCopy();
+        await handleCopy(customText);
       }
     } catch (err) {
       console.error('Failed to share', err);
     }
   };
 
-  const handleFeedback = async (type: 'up' | 'down') => {
+  const handleFeedback = async (type: 'up' | 'down', customText?: string) => {
     if (feedback) return; // Locked
     setFeedback(type);
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, content: solution.substring(0, 100) }),
+        body: JSON.stringify({ type, content: (customText ?? solution).substring(0, 100) }),
       });
       if (!response.ok) {
         setFeedback(null);
