@@ -4,6 +4,7 @@ import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
 import HistorySidebar from "./HistorySidebar";
 import ErrorBanner from "./ErrorBanner";
+import FloatingDock from "./FloatingDock";
 import { useMainWorkspace } from "../hooks/useMainWorkspace";
 
 export default function MainWorkspace() {
@@ -13,6 +14,7 @@ export default function MainWorkspace() {
     setIsHistoryOpen,
     history,
     imagePreview,
+    messages,
     isProcessing,
     solution,
     isStreaming,
@@ -20,8 +22,12 @@ export default function MainWorkspace() {
     handleLanguageChange,
     handleSelectHistory,
     handleCapture,
-    handleRescan
+    handleFollowUp,
+    handleRescan,
+    abortCurrentRequest
   } = useMainWorkspace();
+
+  const hasStartedChat = messages.length > 0;
 
   return (
     <>
@@ -32,7 +38,7 @@ export default function MainWorkspace() {
         setLanguage={handleLanguageChange}
       />
 
-      <main className="flex-1 relative grid grid-cols-1 md:grid-cols-[40fr_60fr] overflow-hidden">
+      <main className={`flex-1 relative overflow-hidden transition-all duration-300 ease-out ${hasStartedChat ? 'flex flex-col' : 'grid grid-cols-1 md:grid-cols-[40fr_60fr]'}`}>
         {/* Ambient Glow Mesh */}
         <div
           className="ambient-mesh absolute -inset-[100px] pointer-events-none"
@@ -44,24 +50,46 @@ export default function MainWorkspace() {
           }}
           aria-hidden="true"
         />
-        {/* Left Panel - Upload Zone */}
-        <section className="md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] overflow-y-auto border-r border-[var(--border-subtle)] bg-transparent">
-          <UploadZone
-            onImageSelect={handleCapture}
-            isProcessing={isProcessing}
-            imagePreview={imagePreview}
-            onRescan={handleRescan}
-          />
-        </section>
 
-        {/* Right Panel - Solution */}
-        <section className="overflow-y-auto min-h-[60vh] md:min-h-0 bg-transparent flex flex-col">
-          {error && <ErrorBanner title={error.title} description={error.description} />}
+        {/*
+          If chat has started, hide the UploadZone entirely (display: none).
+          Otherwise, show it in the left column.
+        */}
+        {!hasStartedChat && (
+          <section className="md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] overflow-y-auto border-r border-[var(--border-subtle)] bg-transparent">
+            <UploadZone
+              onImageSelect={handleCapture}
+              isProcessing={isProcessing}
+              imagePreview={imagePreview}
+              onRescan={handleRescan}
+            />
+          </section>
+        )}
+
+        {/* Right Panel - Solution (or Full Width when chat started) */}
+        <section className={`overflow-y-auto bg-transparent flex flex-col relative ${hasStartedChat ? 'flex-1 h-full max-w-4xl mx-auto w-full' : 'min-h-[60vh] md:min-h-0'}`}>
+          {error && (
+            <div className={`w-full ${hasStartedChat ? 'px-4 mt-4' : ''}`}>
+              <ErrorBanner title={error.title} description={error.description} />
+            </div>
+          )}
+
           <SolutionPanel
-            isLoading={isProcessing && solution.length === 0}
+            isLoading={isProcessing && messages.length === 0}
             isStreaming={isStreaming}
             solution={solution}
+            messages={messages}
+            hasStartedChat={hasStartedChat}
+            onRescan={handleRescan}
           />
+
+          {hasStartedChat && (
+            <FloatingDock
+              onFollowUp={handleFollowUp}
+              isStreaming={isStreaming}
+              onStop={abortCurrentRequest}
+            />
+          )}
         </section>
       </main>
 

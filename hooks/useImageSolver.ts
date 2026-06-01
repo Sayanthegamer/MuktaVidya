@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
+import { ChatMessage } from "@/app/api/solve/route";
 
 interface UseImageSolverOptions {
   onSolveComplete?: (solution: string, imageBase64: string, language: string) => void;
@@ -7,9 +8,14 @@ interface UseImageSolverOptions {
 }
 
 export function useImageSolver({ onSolveComplete, language }: UseImageSolverOptions) {
+  // Legacy states for compatibility and UI components that expect them
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [solution, setSolution] = useState("");
+
+  // New chat history state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<{ title: string; description: string } | null>(null);
 
@@ -30,25 +36,24 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     }
   };
 
-  const handleCapture = async (base64Data: string) => {
-    // Cancel any in-flight request
+  const processRequest = async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
     abortCurrentRequest();
-
-    // Create new AbortController for this request
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    setImagePreview(base64Data);
-    setSolution("");
     setError(null);
     setIsProcessing(true);
     setIsStreaming(true);
+
+    // Add a placeholder message for the model's response
+    setMessages([...currentMessages, { role: 'model', text: '' }]);
+    if (isInitialCapture) setSolution("");
 
     try {
       const response = await fetch("/api/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64Data, language }),
+        body: JSON.stringify({ messages: currentMessages, language }),
         signal: abortController.signal,
       });
 
@@ -69,7 +74,9 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
         }
         setIsProcessing(false);
         setIsStreaming(false);
-        setImagePreview(null); // Reset image on failure to allow retry
+        if (isInitialCapture) setImagePreview(null);
+        // Remove the empty model message
+        setMessages(currentMessages);
         return;
       }
 
@@ -79,8 +86,7 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
       if (!reader) throw new Error("No reader stream");
 
       let streamedText = "";
-
-      setIsProcessing(false); // Done analyzing image, now streaming text
+      setIsProcessing(false);
 
       try {
         while (true) {
@@ -94,41 +100,57 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
 
           const chunk = decoder.decode(value, { stream: true });
           streamedText += chunk;
-          setSolution(streamedText);
+
+          if (isInitialCapture) setSolution(streamedText);
+
+          // Update the last model message in the messages array
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].text = streamedText;
+            return newMessages;
+          });
         }
 
-        // Flush any remaining bytes from the decoder
         const finalChunk = decoder.decode();
         if (finalChunk) {
           streamedText += finalChunk;
+          if (isInitialCapture) setSolution(streamedText);
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].text = streamedText;
+            return newMessages;
+          });
         }
 
         if (abortController.signal.aborted) return;
 
-        // Finish streaming
         const finalSolution = preprocessMarkdown(streamedText);
-        setSolution(finalSolution);
+
+        if (isInitialCapture) setSolution(finalSolution);
+
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1].text = finalSolution;
+          return newMessages;
+        });
+
         setIsStreaming(false);
 
         if (abortController.signal.aborted) return;
 
         // Trigger callback to save to history if provided
-        if (onSolveComplete) {
-          onSolveComplete(finalSolution, base64Data, language);
+        if (isInitialCapture && onSolveComplete && currentMessages[0].imageBase64) {
+          onSolveComplete(finalSolution, currentMessages[0].imageBase64, language);
         }
       } finally {
         reader.releaseLock();
       }
 
     } catch (err: unknown) {
-      // Don't show error if the request was aborted
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
-      }
-
+      if (err instanceof Error && err.name === 'AbortError') return;
       if (abortController.signal.aborted) return;
 
-      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred while analyzing the image.";
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred while analyzing the request.";
       console.error("Solve error", err);
       setError({
         title: "Analysis failed",
@@ -136,14 +158,40 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
       });
       setIsProcessing(false);
       setIsStreaming(false);
-      setImagePreview(null);
+      // Remove the empty model message
+      setMessages(currentMessages);
+      if (isInitialCapture) setImagePreview(null);
     }
+  };
+
+  const handleCapture = async (base64Data: string) => {
+    setImagePreview(base64Data);
+    const newMessages: ChatMessage[] = [{ role: 'user', imageBase64: base64Data }];
+    setMessages(newMessages);
+    await processRequest(newMessages, true);
+  };
+
+  const handleFollowUp = async (text?: string, imageBase64?: string) => {
+    if (!text && !imageBase64) return;
+
+    // Create new message object
+    const newMessage: ChatMessage = { role: 'user' };
+    if (text) newMessage.text = text;
+    if (imageBase64) newMessage.imageBase64 = imageBase64;
+
+    // Add to current conversation state
+    const currentMessages = [...messages, newMessage];
+    setMessages(currentMessages);
+
+    // Process request with full conversation history
+    await processRequest(currentMessages, false);
   };
 
   const handleRescan = () => {
     abortCurrentRequest();
     setImagePreview(null);
     setSolution("");
+    setMessages([]);
     setError(null);
     setIsProcessing(false);
     setIsStreaming(false);
@@ -153,14 +201,27 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     abortCurrentRequest();
     setImagePreview(null);
     setSolution("");
+    setMessages([]);
     setError(null);
     setIsProcessing(false);
     setIsStreaming(false);
   };
 
+  // For history item selection to set initial messages
+  const setInitialState = (imageBase64: string, solutionText: string) => {
+    setImagePreview(imageBase64);
+    setSolution(solutionText);
+    setMessages([
+      { role: 'user', imageBase64 },
+      { role: 'model', text: solutionText }
+    ]);
+  };
+
   return {
     imagePreview,
     setImagePreview,
+    messages,
+    setInitialState,
     isProcessing,
     setIsProcessing,
     solution,
@@ -170,6 +231,7 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     error,
     setError,
     handleCapture,
+    handleFollowUp,
     handleRescan,
     abortCurrentRequest,
     resetState

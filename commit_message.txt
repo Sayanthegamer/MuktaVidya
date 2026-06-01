@@ -1,5 +1,19 @@
-⚡ Cache GoogleGenAI instance in singleton
+✨ Implement Continuous Chat and Alien Floating Dock
 
-💡 **What:** Modified `app/api/solve/route.ts` to cache the `GoogleGenAI` instance using a lazy singleton pattern.
-🎯 **Why:** The previous code was re-instantiating the `GoogleGenAI` object on every single API request. While lazy initialization prevents build-time env var issues, lacking caching adds unnecessary memory allocation overhead and CPU cycles for constructing the SDK client on each request.
-📊 **Measured Improvement:** As caching the Google GenAI SDK client is a micro-optimization and V8 string/object allocation overhead is highly optimized, a synthetic benchmark would be brittle and primarily measure Node.js noise. The architectural reality is that caching external SDK clients in serverless/long-running environments is an established best practice to prevent memory thrashing and unnecessary repetitive allocations under high load. This implementation safely caches the instance globally on the server thread while still maintaining Next.js build safety.
+🎯 What
+- Transformed the static solution view into a continuous chat interface, allowing follow-up questions.
+- Added an "Alien" floating dock at the bottom of the screen with a breathing pure CSS edge glow, text input, and image attachment capability.
+- Updated the API endpoint to support passing a full conversation history (messages array).
+
+💡 Why
+- Users needed a way to ask follow-up questions to clarify solutions or dive deeper.
+- The floating dock keeps the interaction contextual and accessible without replacing the original layout logic.
+- The CSS-only glow implementation stays true to the architectural performance limits, avoiding heavy React framer-motion components or expensive reflows.
+
+✅ Verification
+- Next.js build passes cleanly.
+- TypeScript compiler verified all updated prop interfaces and payload updates.
+- Linter passed cleanly without any sweeping auto-fixes or out-of-scope slop.
+
+✨ Result
+- The user can now maintain contextual chat streams within the same UI panel, and the platform feels dynamic and alien as requested.

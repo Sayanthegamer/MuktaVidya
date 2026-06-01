@@ -41,7 +41,7 @@ describe('POST /api/solve IP Extraction Security', () => {
         origin: 'http://localhost:3000',
         ...headers,
       }),
-      body: JSON.stringify({ imageBase64: 'data:image/jpeg;base64,mock', language: 'en' }),
+      body: JSON.stringify({ messages: [{ role: 'user', imageBase64: 'data:image/jpeg;base64,mock' }], language: 'en' }),
     });
     return req;
   };
@@ -112,7 +112,7 @@ describe('Solve API route', () => {
   it('rejects payloads exceeding MAX_BODY_BYTES even if content-length header is 0', async () => {
     // Create a body larger than 5MB
     // Using string repetition to generate ~6MB of data
-    const largeData = 'A'.repeat(6 * 1024 * 1024);
+    const largeData = 'A'.repeat(11 * 1024 * 1024);
     const bodyContent = JSON.stringify({
       imageBase64: `data:image/jpeg;base64,${largeData}`,
       language: 'EN'
@@ -164,7 +164,7 @@ describe('Solve API route', () => {
 
   it('processes valid requests normally', async () => {
     const bodyContent = JSON.stringify({
-      imageBase64: 'data:image/jpeg;base64,validbase64',
+      messages: [{ role: 'user', imageBase64: 'data:image/jpeg;base64,validbase64' }],
       language: 'EN'
     });
 
