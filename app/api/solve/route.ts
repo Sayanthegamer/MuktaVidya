@@ -124,12 +124,20 @@ FORMATTING STRICT RULES:
 - Use $...$ ONLY for short inline variables. Ensure brackets are properly closed.
 - Use standard Markdown.
 
-CRITICAL MERMAID.JS GUARDRAILS:
-Whenever a visual aid (free-body diagram, flowchart, reaction pathway) clarifies the solution, generate a diagram using a \`\`\`mermaid code block.
-1. USE BASIC GRAPHS: Stick to robust diagram types like \`flowchart TD\` or \`graph LR\`.
-2. QUOTE ALL LABELS: You MUST wrap all node text in double quotes to prevent syntax errors. Correct: A["Force (mg)"] --> B["Tension (T)"]. Incorrect: A(Force) --> B(Tension).
-3. NO LATEX IN MERMAID: NEVER put Markdown formatting or LaTeX ($...$) inside a mermaid diagram block. Keep node text as simple, plain English characters.
-4. NO NESTING: Do not place code blocks inside other code blocks.${langInstruction}`;
+SCIENTIFIC CHARTS & DATA PLOTTING:
+If the problem requires plotting mathematical functions, vectors, scatter plots, kinematics graphs, reaction pathways, free-body diagrams, flowcharts or any accurate visual, you MUST output an Apache ECharts JSON configuration wrapped EXACTLY in a \`\`\`json-chart code block.
+1. The JSON must be strictly valid ECharts option format (e.g. { "xAxis": { ... }, "series": [ ... ] }).
+2. Do NOT include any comments inside the JSON.
+3. Example format:
+\`\`\`json-chart
+{
+  "title": { "text": "Projectile Motion" },
+  "xAxis": { "type": "value", "name": "Distance (m)" },
+  "yAxis": { "type": "value", "name": "Height (m)" },
+  "series": [{ "data": [[0,0], [5,10], [10,0]], "type": "line" }]
+}
+\`\`\`
+${langInstruction}`;
     
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
