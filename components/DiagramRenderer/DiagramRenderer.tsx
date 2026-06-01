@@ -32,29 +32,38 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         clean = clean.substring(0, lastSvgIndex + 6);
       }
 
-      // 3. Normalize structural white configurations to currentColor
+      // 3. Normalize white/light configurations to currentColor (responsive lines)
       clean = clean.replace(/stroke=["']\s*(?:#(?:fff|ffffff)|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))\s*["']/gi, 'stroke="currentColor"');
       clean = clean.replace(/stroke\s*:\s*(?:#(?:fff|ffffff)\b|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))/gi, 'stroke: currentColor');
 
+      // 3b. Normalize black/dark configurations to currentColor (prevents dark-mode invisibility)
+      clean = clean.replace(/stroke=["']\s*(?:#(?:000|000000)|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))\s*["']/gi, 'stroke="currentColor"');
+      clean = clean.replace(/stroke\s*:\s*(?:#(?:000|000000)\b|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/gi, 'stroke: currentColor');
+      
+      // 3c. Adjust text and canvas fills to scale cleanly across themes
+      clean = clean.replace(/fill=["']\s*(?:#(?:000|000000)|black)\s*["']/gi, 'fill="currentColor"');
+
       // 4. Safely isolate the root tag to update dimensions without breaking child primitives
-      const rootTagEnd = clean.indexOf('>');
-      if (rootTagEnd !== -1) {
-        let rootTag = clean.substring(0, rootTagEnd + 1);
-        const remainder = clean.substring(rootTagEnd + 1);
+      const rootTagEnd = clean.indexOf(' ');
+      const rootTagClose = clean.indexOf('>');
+      if (rootTagClose !== -1) {
+        const endOfTag = rootTagEnd !== -1 && rootTagEnd < rootTagClose ? rootTagEnd : rootTagClose;
+        let rootTag = clean.substring(0, rootTagClose + 1);
+        const remainder = clean.substring(rootTagClose + 1);
 
         if (!/viewBox/i.test(rootTag)) {
           // Support optional quotes and spaces around width and height elements
-          const widthMatch = rootTag.match(/width=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
-          const heightMatch = rootTag.match(/height=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
+          const widthMatch = rootTag.match(/width\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
+          const heightMatch = rootTag.match(/height\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
 
           const w = widthMatch ? parseInt(widthMatch[1], 10) : 400;
           const h = heightMatch ? parseInt(heightMatch[1], 10) : 250;
 
-          // Safely handle trailing spaces, newlines, or self-closing slashes at the end of the root tag
+          // Safely handle trailing spaces or self-closing slashes at the end of the root tag
           rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}">`);
         }
 
-        // Space-resilient removal pattern protecting internal structure tags cleanly
+        // Space-resilient removal pattern protecting internal child elements cleanly
         rootTag = rootTag.replace(/\b(width|height)\s*=\s*["']?[\d.+%px\s]*["']?/gi, '');
         clean = rootTag + remainder;
       }
@@ -131,8 +140,9 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
           style={{ color: 'var(--text-primary)' }}
           dangerouslySetInnerHTML={{ __html: cleanedSvg }}
         />
-        {/* Using a pure standard style injection node guarantees execution containment across all Next.js App Router render variations */}
-        <style>{`
+        
+        {/* Standard style injection forces immediate rendering independent of Next.js setup constraints */}
+        <style dangerouslySetInnerHTML={{ __html: `
           .svg-diagram-container svg {
             width: 100% !important;
             height: auto !important;
@@ -144,7 +154,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             font-family: var(--font-sans), system-ui, sans-serif !important;
           }
           
-          /* 1. Ensure a clear legibility baseline thickness for all structural elements omitting explicit stroke widths */
+          /* 1. Ensure absolute thickness fallback across all components missing explicit layout parameters */
           .svg-diagram-container svg line:not([stroke-width]),
           .svg-diagram-container svg circle:not([stroke-width]),
           .svg-diagram-container svg ellipse:not([stroke-width]),
@@ -155,7 +165,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             stroke-width: var(--svg-stroke-width, 2px);
           }
 
-          /* 2. Map structural color configurations to un-styled lines and geometric frames safely */
+          /* 2. Safely apply color fallbacks to wires and paths without clobbering filled elements */
           .svg-diagram-container svg line:not([stroke]),
           .svg-diagram-container svg circle:not([stroke]):not([fill]),
           .svg-diagram-container svg circle:not([stroke])[fill="none"],
@@ -171,7 +181,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
           .svg-diagram-container svg path:not([stroke])[fill="none"] {
             stroke: var(--text-secondary);
           }
-        `}</style>
+        ` }} />
       </div>
     );
   }
