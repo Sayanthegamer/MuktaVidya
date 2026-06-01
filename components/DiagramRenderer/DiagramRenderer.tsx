@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
-import DOMPurify from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface DiagramRendererProps {
   chartData: string;
@@ -14,7 +14,6 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
   const cleanedSvg = useMemo(() => {
     if (type !== 'svg') return null;
     try {
-      // Strip stray code block wrappers safely
       let clean = chartData
         .replace(/```svg-diagram/g, '')
         .replace(/```xml/g, '')
@@ -22,18 +21,53 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         .replace(/```/g, '')
         .trim();
 
-      // Ensure the SVG string starts properly
-      if (!clean.startsWith('<svg')) {
-        const firstSvgIndex = clean.indexOf('<svg');
-        if (firstSvgIndex !== -1) {
-          clean = clean.substring(firstSvgIndex);
-        } else {
-          return null; // Return null if it's genuinely not an SVG
-        }
+      // 1. Isolate the front boundary
+      const firstSvgIndex = clean.indexOf('<svg');
+      if (firstSvgIndex === -1) return null;
+      clean = clean.substring(firstSvgIndex);
+
+      // 2. Truncate trailing markdown clutter safely
+      const lastSvgIndex = clean.indexOf('</svg>');
+      if (lastSvgIndex !== -1) {
+        clean = clean.substring(0, lastSvgIndex + 6);
       }
-      return clean;
+
+      // 3. Normalize structural white configurations to currentColor
+      clean = clean.replace(/stroke=["']\s*(?:#(?:fff|ffffff)|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))\s*["']/gi, 'stroke="currentColor"');
+      clean = clean.replace(/stroke\s*:\s*(?:#(?:fff|ffffff)\b|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))/gi, 'stroke: currentColor');
+
+      // 4. Safely isolate the root tag to update dimensions without breaking child primitives
+      const rootTagEnd = clean.indexOf('>');
+      if (rootTagEnd !== -1) {
+        let rootTag = clean.substring(0, rootTagEnd + 1);
+        const remainder = clean.substring(rootTagEnd + 1);
+
+        if (!/viewBox/i.test(rootTag)) {
+          // Support optional quotes around width and height
+          const widthMatch = rootTag.match(/width=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
+          const heightMatch = rootTag.match(/height=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
+
+          const w = widthMatch ? parseInt(widthMatch[1], 10) : 400;
+          const h = heightMatch ? parseInt(heightMatch[1], 10) : 250;
+
+          // Safely handle trailing spaces, newlines, or self-closing slashes at the end of the root tag
+          rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}">`);
+        }
+
+        // Strip fixed width/height tokens comprehensively (supporting unquoted, px, or percent values)
+        rootTag = rootTag.replace(/(?:width|height)=["']?[\d.+%px]*["']?/gi, '');
+        clean = rootTag + remainder;
+      }
+
+      // Isomorphic-dompurify execution executes natively across both SSR and client environments synchronously
+      return DOMPurify.sanitize(clean, {
+        USE_PROFILES: { svg: true },
+        FORBID_TAGS: ['script', 'foreignObject'],
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+        ALLOWED_URI_REGEXP: /^(https?:|data:image\/)/i
+      });
     } catch (e) {
-      console.error('[DiagramRenderer] Failed to clean SVG data:', e);
+      console.error('[DiagramRenderer] Failed to process SVG pipeline data:', e);
       return null;
     }
   }, [chartData, type]);
@@ -90,23 +124,14 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
   if (type === 'svg') {
     if (!cleanedSvg) return <p className="text-xs text-[var(--error)] font-mono">Invalid diagram vector data.</p>;
 
-    // Sanitize the SVG to prevent XSS attacks
-    const sanitizedHtml = DOMPurify.sanitize(cleanedSvg, {
-      USE_PROFILES: { svg: true },
-      FORBID_TAGS: ['script', 'foreignObject'],
-      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-      ALLOWED_URI_REGEXP: /^(https?:|data:image\/)/i
-    });
-
     return (
       <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm transition-all">
         <div
           className="w-full max-w-[500px] text-[var(--text-primary)] svg-diagram-container"
           style={{
-            color: 'var(--text-primary)',
-            fill: 'none'
+            color: 'var(--text-primary)'
           }}
-          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+          dangerouslySetInnerHTML={{ __html: cleanedSvg }}
         />
         <style jsx global>{`
           /* Enforce dark-theme color safety across generated vectors dynamically */
@@ -114,20 +139,22 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             width: 100% !important;
             height: auto !important;
             max-height: 350px;
+            display: block;
           }
           .svg-diagram-container svg text {
             fill: var(--text-primary) !important;
             font-family: var(--font-sans), system-ui, sans-serif !important;
           }
-          .svg-diagram-container svg [stroke] {
-            /* If the stroke is intended to be visible dark line, map it to our border or text token */
-            stroke: var(--text-secondary) !important;
-          }
-          .svg-diagram-container svg line,
-          .svg-diagram-container svg path,
-          .svg-diagram-container svg circle,
-          .svg-diagram-container svg rect {
-            /* Fallback initialization for un-styled primitives */
+          /* Handle all un-styled structural geometric primitives uniformly */
+          .svg-diagram-container svg line:not([stroke]),
+          .svg-diagram-container svg circle:not([stroke]),
+          .svg-diagram-container svg ellipse:not([stroke]),
+          .svg-diagram-container svg rect:not([stroke]),
+          .svg-diagram-container svg polyline:not([stroke]),
+          .svg-diagram-container svg polygon:not([stroke]),
+          .svg-diagram-container svg path:not([stroke]):not([fill]),
+          .svg-diagram-container svg path:not([stroke])[fill="none"] {
+            stroke: var(--text-secondary);
             stroke-width: var(--svg-stroke-width, 2px);
           }
         `}</style>
