@@ -136,12 +136,14 @@ If the problem requires plotting mathematical functions, vectors, scatter plots,
 ${langInstruction}`;
     
     // Map our messages to Gemini API format
+    let systemPromptInjected = false;
     const contents = messages.map((msg, index) => {
       const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
 
       // Inject system prompt into the first user message
-      if (index === 0 && msg.role === 'user') {
+      if (msg.role === 'user' && !systemPromptInjected) {
         parts.push({ text: systemPrompt });
+        systemPromptInjected = true;
       }
 
       if (msg.text) {
@@ -155,7 +157,10 @@ ${langInstruction}`;
         parts.push({ inlineData: { mimeType, data: base64Data } });
       }
 
-      // If a user message has no text and only an image, Gemini requires at least some text if it's not the first one, or just the image is fine. But we ensure at least one part.
+      // Ensure at least one part exists (guard against empty parts array)
+      if (parts.length === 0) {
+        parts.push({ text: '' });
+      }
 
       return {
         role: msg.role === 'model' ? 'model' : 'user',

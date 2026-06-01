@@ -13,7 +13,7 @@ export function useSolutionPanel(solution: string) {
 
   const handleCopy = async (customText?: string) => {
     try {
-      await navigator.clipboard.writeText(customText || solution);
+      await navigator.clipboard.writeText(customText ?? solution);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -26,10 +26,10 @@ export function useSolutionPanel(solution: string) {
       if (navigator.share) {
         await navigator.share({
           title: 'MuktaVidya AI Solution',
-          text: customText || solution,
+          text: customText ?? solution,
         });
       } else {
-        handleCopy(customText);
+        await handleCopy(customText);
       }
     } catch (err) {
       console.error('Failed to share', err);
@@ -43,7 +43,7 @@ export function useSolutionPanel(solution: string) {
       const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, content: (customText || solution).substring(0, 100) }),
+        body: JSON.stringify({ type, content: (customText ?? solution).substring(0, 100) }),
       });
       if (!response.ok) {
         setFeedback(null);

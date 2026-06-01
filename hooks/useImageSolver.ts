@@ -106,7 +106,8 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
           // Update the last model message in the messages array
           setMessages(prev => {
             const newMessages = [...prev];
-            newMessages[newMessages.length - 1].text = streamedText;
+            const lastIndex = newMessages.length - 1;
+            newMessages[lastIndex] = { ...newMessages[lastIndex], text: streamedText };
             return newMessages;
           });
         }
@@ -117,7 +118,8 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
           if (isInitialCapture) setSolution(streamedText);
           setMessages(prev => {
             const newMessages = [...prev];
-            newMessages[newMessages.length - 1].text = streamedText;
+            const lastIndex = newMessages.length - 1;
+            newMessages[lastIndex] = { ...newMessages[lastIndex], text: streamedText };
             return newMessages;
           });
         }
@@ -130,7 +132,8 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
 
         setMessages(prev => {
           const newMessages = [...prev];
-          newMessages[newMessages.length - 1].text = finalSolution;
+          const lastIndex = newMessages.length - 1;
+          newMessages[lastIndex] = { ...newMessages[lastIndex], text: finalSolution };
           return newMessages;
         });
 

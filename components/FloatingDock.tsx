@@ -132,6 +132,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               <button
                 onClick={() => setAttachedImage(null)}
                 className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity"
+                aria-label="Remove attachment"
               >
                 <X size={20} className="text-white" />
               </button>
@@ -144,6 +145,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               onClick={() => fileInputRef.current?.click()}
               className="p-2 mb-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
               title="Attach Image"
+              aria-label="Attach image"
               disabled={isStreaming}
             >
               <ImageIcon size={22} />
@@ -174,6 +176,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                 onClick={onStop}
                 className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
                 title="Stop Generating"
+                aria-label="Stop"
               >
                 <Stop size={20} weight="fill" />
               </button>
@@ -183,10 +186,11 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                 disabled={!text.trim() && !attachedImage}
                 className={`p-2.5 mb-1 rounded-full transition-all duration-200 btn-press shrink-0 ${
                   (text.trim() || attachedImage)
-                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(var(--accent),0.5)]'
+                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed'
                 }`}
                 title="Send Message"
+                aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" />
               </button>

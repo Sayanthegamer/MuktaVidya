@@ -12,7 +12,7 @@ import EmptyState from "./SolutionPanel/EmptyState";
 import { ChatMessage } from "@/app/api/solve/route";
 import Image from "next/image";
 import { ArrowCounterClockwise } from "@phosphor-icons/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface SolutionPanelProps {
   isStreaming: boolean;
@@ -25,20 +25,102 @@ interface SolutionPanelProps {
 
 export default function SolutionPanel({ isStreaming, isLoading, solution, messages = [], hasStartedChat, onRescan }: SolutionPanelProps) {
   const {
-    copied,
-    feedback,
-    handleCopy,
-    handleShare,
-    handleFeedback
+    handleCopy: legacyHandleCopy,
+    handleShare: legacyHandleShare,
+    handleFeedback: legacyHandleFeedback
   } = useSolutionPanel(solution);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [feedbackMap, setFeedbackMap] = useState<Record<number, 'up' | 'down'>>({});
 
-  // Auto-scroll to bottom when streaming
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const lastScrollTimeRef = useRef<number>(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleCopy = async (index: number, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+
+  const handleShare = async (index: number, text: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'MuktaVidya AI Solution',
+          text: text,
+        });
+      } else {
+        await handleCopy(index, text);
+      }
+    } catch (err) {
+      console.error('Failed to share', err);
+    }
+  };
+
+  const handleFeedback = async (index: number, type: 'up' | 'down', text: string) => {
+    if (feedbackMap[index]) return; // Locked
+    setFeedbackMap(prev => ({ ...prev, [index]: type }));
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, content: text.substring(0, 100) }),
+      });
+      if (!response.ok) {
+        setFeedbackMap(prev => {
+          const newMap = { ...prev };
+          delete newMap[index];
+          return newMap;
+        });
+        console.error("Feedback failed, response not ok");
+      }
+    } catch (e) {
+      setFeedbackMap(prev => {
+        const newMap = { ...prev };
+        delete newMap[index];
+        return newMap;
+      });
+      console.error("Feedback failed", e);
+    }
+  };
+
+  // Auto-scroll to bottom when streaming (throttled)
   useEffect(() => {
     if (isStreaming && bottomRef.current) {
+      const now = Date.now();
+      const timeSinceLastScroll = now - lastScrollTimeRef.current;
+
+      if (timeSinceLastScroll >= 100) {
+        // Immediate scroll if enough time has passed
+        bottomRef.current.scrollIntoView({ behavior: "instant" });
+        lastScrollTimeRef.current = now;
+      } else {
+        // Schedule a scroll after the remaining time
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        scrollTimeoutRef.current = setTimeout(() => {
+          if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: "instant" });
+            lastScrollTimeRef.current = Date.now();
+          }
+        }, 100 - timeSinceLastScroll);
+      }
+    } else if (!isStreaming && bottomRef.current) {
+      // Final smooth scroll when streaming completes
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
+
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [isStreaming, messages]);
 
   // Support legacy behavior if messages are not provided or empty and it's not a chat
@@ -120,10 +202,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}
                         components={{
-                          code({ className, children, inline, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
+                          code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: any }) {
                             const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
                             const lang = match ? match[1] : '';
-                            const isInline = inline;
+                            const isInline = !lang && (!node || node.type === 'inlineCode');
 
                             if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
                               return <ChartRenderer chartData={String(children)} />;
@@ -153,11 +235,11 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
                 {!isCurrentlyStreaming && msg.text && (
                   <div className="mt-4">
                     <ActionBar
-                      copied={copied}
-                      feedback={feedback}
-                      onCopy={() => handleCopy(msg.text || "")}
-                      onShare={() => handleShare(msg.text || "")}
-                      onFeedback={(type) => handleFeedback(type, msg.text || "")}
+                      copied={copiedIndex === index}
+                      feedback={feedbackMap[index] ?? null}
+                      onCopy={() => handleCopy(index, msg.text || "")}
+                      onShare={() => handleShare(index, msg.text || "")}
+                      onFeedback={(type) => handleFeedback(index, type, msg.text || "")}
                     />
                   </div>
                 )}
