@@ -21,13 +21,13 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         .replace(/```/g, '')
         .trim();
 
-      // 1. Isolate the front boundary
-      const firstSvgIndex = clean.indexOf('<svg');
+      // 1. Isolate the front boundary case-insensitively
+      const firstSvgIndex = clean.search(/<svg/i);
       if (firstSvgIndex === -1) return null;
       clean = clean.substring(firstSvgIndex);
 
       // 2. Truncate trailing markdown clutter safely
-      const lastSvgIndex = clean.indexOf('</svg>');
+      const lastSvgIndex = clean.search(/<\/svg>/i);
       if (lastSvgIndex !== -1) {
         clean = clean.substring(0, lastSvgIndex + 6);
       }
@@ -43,7 +43,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         const remainder = clean.substring(rootTagEnd + 1);
 
         if (!/viewBox/i.test(rootTag)) {
-          // Support optional quotes around width and height
+          // Support optional quotes and spaces around width and height elements
           const widthMatch = rootTag.match(/width=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
           const heightMatch = rootTag.match(/height=["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
 
@@ -54,17 +54,16 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
           rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}">`);
         }
 
-        // Strip fixed width/height tokens comprehensively (supporting unquoted, px, or percent values)
-        rootTag = rootTag.replace(/(?:width|height)=["']?[\d.+%px]*["']?/gi, '');
+        // Space-resilient removal pattern protecting internal structure tags cleanly
+        rootTag = rootTag.replace(/\b(width|height)\s*=\s*["']?[\d.+%px\s]*["']?/gi, '');
         clean = rootTag + remainder;
       }
 
-      // Isomorphic-dompurify execution executes natively across both SSR and client environments synchronously
+      // Sanitize output while preserving internal reference targets (# URLs for gradients/masks)
       return DOMPurify.sanitize(clean, {
         USE_PROFILES: { svg: true },
         FORBID_TAGS: ['script', 'foreignObject'],
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-        // Allows http, https, inline base64 images, and local fragment markers (#) for masks/gradients/markers
         ALLOWED_URI_REGEXP: /^(https?:|data:image\/|#)/i
       });
     } catch (e) {
@@ -129,13 +128,11 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
       <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm transition-all">
         <div
           className="w-full max-w-[500px] text-[var(--text-primary)] svg-diagram-container"
-          style={{
-            color: 'var(--text-primary)'
-          }}
+          style={{ color: 'var(--text-primary)' }}
           dangerouslySetInnerHTML={{ __html: cleanedSvg }}
         />
-        <style jsx global>{`
-          /* Enforce dark-theme color safety across generated vectors dynamically */
+        {/* Using a pure standard style injection node guarantees execution containment across all Next.js App Router render variations */}
+        <style>{`
           .svg-diagram-container svg {
             width: 100% !important;
             height: auto !important;
@@ -146,7 +143,19 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             fill: var(--text-primary) !important;
             font-family: var(--font-sans), system-ui, sans-serif !important;
           }
-          /* Handle all un-styled structural geometric primitives uniformly without breaking solid-filled shapes */
+          
+          /* 1. Ensure a clear legibility baseline thickness for all structural elements omitting explicit stroke widths */
+          .svg-diagram-container svg line:not([stroke-width]),
+          .svg-diagram-container svg circle:not([stroke-width]),
+          .svg-diagram-container svg ellipse:not([stroke-width]),
+          .svg-diagram-container svg rect:not([stroke-width]),
+          .svg-diagram-container svg polyline:not([stroke-width]),
+          .svg-diagram-container svg polygon:not([stroke-width]),
+          .svg-diagram-container svg path:not([stroke-width]) {
+            stroke-width: var(--svg-stroke-width, 2px);
+          }
+
+          /* 2. Map structural color configurations to un-styled lines and geometric frames safely */
           .svg-diagram-container svg line:not([stroke]),
           .svg-diagram-container svg circle:not([stroke]):not([fill]),
           .svg-diagram-container svg circle:not([stroke])[fill="none"],
@@ -161,7 +170,6 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
           .svg-diagram-container svg path:not([stroke]):not([fill]),
           .svg-diagram-container svg path:not([stroke])[fill="none"] {
             stroke: var(--text-secondary);
-            stroke-width: var(--svg-stroke-width, 2px);
           }
         `}</style>
       </div>
