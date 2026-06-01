@@ -2,7 +2,8 @@
 import { CameraPlus, Images, ArrowCounterClockwise } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useEffect } from "react";
+import { createPortal } from "react-dom";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
@@ -73,6 +74,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
   // Separate ref for the gallery input (no capture attribute)
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setTimeout(() => setMounted(true), 0); }, []);
 
   const onGalleryChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Reuse the same handler from the hook — just delegate to onFileChange
@@ -167,8 +170,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
 
       {/* State 3: Cropping UI */}
-      {imageToCrop && !imagePreview && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm">
+      {mounted && imageToCrop && !imagePreview && createPortal(
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm">
           {/* Header/Title area (optional, helps with spacing) */}
           <div className="shrink-0 p-4 flex justify-center items-center border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
             <span className="text-sm font-medium text-[var(--text-primary)]">Crop Image</span>
@@ -202,7 +205,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
               Crop & Solve
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* State 2: Image Preview */}

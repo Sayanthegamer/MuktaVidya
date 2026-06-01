@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import 'katex/dist/katex.min.css';
+import type { Element } from 'hast';
 import SkeletonLoader from "./SkeletonLoader";
 import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
 import ChartRenderer from "./ChartRenderer/ChartRenderer";
@@ -202,10 +203,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}
                         components={{
-                          code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: any }) {
+                          code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: Element }) {
                             const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
                             const lang = match ? match[1] : '';
-                            const isInline = !lang && (!node || node.type === 'inlineCode');
+                            const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
 
                             if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
                               return <ChartRenderer chartData={String(children)} />;
@@ -248,7 +249,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
           );
         })}
       </div>
-      <div ref={bottomRef} className="h-4" />
+      <div ref={bottomRef} id="solution-bottom-target" className="h-10 w-full shrink-0" />
     </div>
   );
 }
