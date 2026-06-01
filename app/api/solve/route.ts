@@ -100,6 +100,19 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
     }
 
+    // Validate that all messages have either text or imageBase64
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+      const hasText = msg.text && msg.text.trim().length > 0;
+      const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
+      if (!hasText && !hasImage) {
+        return new Response(
+          JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
+          { status: 400 }
+        );
+      }
+    }
+
     // Build language-aware structured prompt
     const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
     const langInstruction = upperLang !== 'EN'
@@ -155,11 +168,6 @@ ${langInstruction}`;
         const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
         const base64Data = msg.imageBase64.replace(/^data:image\/\w+;base64,/, "");
         parts.push({ inlineData: { mimeType, data: base64Data } });
-      }
-
-      // Ensure at least one part exists (guard against empty parts array)
-      if (parts.length === 0) {
-        parts.push({ text: '' });
       }
 
       return {
