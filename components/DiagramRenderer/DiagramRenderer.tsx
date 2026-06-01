@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
+import DOMPurify from 'dompurify';
 
 interface DiagramRendererProps {
   chartData: string;
@@ -89,6 +90,14 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
   if (type === 'svg') {
     if (!cleanedSvg) return <p className="text-xs text-[var(--error)] font-mono">Invalid diagram vector data.</p>;
 
+    // Sanitize the SVG to prevent XSS attacks
+    const sanitizedHtml = DOMPurify.sanitize(cleanedSvg, {
+      USE_PROFILES: { svg: true },
+      FORBID_TAGS: ['script', 'foreignObject'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+      ALLOWED_URI_REGEXP: /^(https?:|data:image\/)/i
+    });
+
     return (
       <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm transition-all">
         <div
@@ -97,7 +106,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             color: 'var(--text-primary)',
             fill: 'none'
           }}
-          dangerouslySetInnerHTML={{ __html: cleanedSvg }}
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />
         <style jsx global>{`
           /* Enforce dark-theme color safety across generated vectors dynamically */
