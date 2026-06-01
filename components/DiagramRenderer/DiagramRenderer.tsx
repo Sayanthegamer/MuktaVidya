@@ -32,46 +32,45 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         clean = clean.substring(0, lastSvgIndex + 6);
       }
 
-      // 3. Force uniform camelCase viewBox casing so DOMPurify doesn't strip it out
-      clean = clean.replace(/\bviewbox\s*=\s*/gi, 'viewBox=');
-
-      // 4. Normalize white/light configurations to currentColor (responsive lines)
+      // 3. Normalize stroke/fill configurations to respond to light/dark themes
       clean = clean.replace(/stroke=["']\s*(?:#(?:fff|ffffff)|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))\s*["']/gi, 'stroke="currentColor"');
       clean = clean.replace(/stroke\s*:\s*(?:#(?:fff|ffffff)\b|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))/gi, 'stroke: currentColor');
-
-      // 4b. Normalize black/dark configurations to currentColor (prevents dark-mode invisibility)
       clean = clean.replace(/stroke=["']\s*(?:#(?:000|000000)|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))\s*["']/gi, 'stroke="currentColor"');
       clean = clean.replace(/stroke\s*:\s*(?:#(?:000|000000)\b|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/gi, 'stroke: currentColor');
-      
-      // 4c. Adjust text and canvas fills to scale cleanly across dark themes
       clean = clean.replace(/fill=["']\s*(?:#(?:000|000000)|black)\s*["']/gi, 'fill="currentColor"');
 
-      // 5. Safely isolate the root tag to update dimensions without breaking child primitives
+      // 4. THE CRITICAL FIX: Isolate the root tag to fix missing namespaces
       const rootTagClose = clean.indexOf('>');
       if (rootTagClose !== -1) {
         let rootTag = clean.substring(0, rootTagClose + 1);
         const remainder = clean.substring(rootTagClose + 1);
 
-        if (!/viewBox/.test(rootTag)) {
-          // Support optional quotes and spaces around width and height elements
+        // FIX A: Inject the missing XML namespace so DOMPurify doesn't destroy the canvas
+        if (!/xmlns/i.test(rootTag)) {
+          rootTag = rootTag.replace(/<svg/i, '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+
+        // FIX B: Force uniform viewBox casing (DOMPurify deletes lowercase 'viewbox')
+        rootTag = rootTag.replace(/\bviewbox\s*=\s*/gi, 'viewBox=');
+
+        // FIX C: If there is no viewBox, calculate it from width/height
+        if (!/viewBox/i.test(rootTag)) {
           const widthMatch = rootTag.match(/width\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
           const heightMatch = rootTag.match(/height\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
 
           const w = widthMatch ? parseInt(widthMatch[1], 10) : 400;
           const h = heightMatch ? parseInt(heightMatch[1], 10) : 250;
-
-          // Safely handle trailing spaces or self-closing slashes at the end of the root tag
           rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}">`);
         }
 
-        // Space-resilient removal pattern protecting internal child element attributes cleanly
+        // FIX D: Strip hardcoded width/height so CSS can scale it responsibly
         rootTag = rootTag.replace(/\b(width|height)\s*=\s*["']?[\d.+%px\s]*["']?/gi, '');
+        
         clean = rootTag + remainder;
       }
 
-      // Sanitize output while preserving internal reference targets (# URLs for gradients/masks)
+      // 5. Sanitize (Using default profile which safely allows SVG+HTML without nuking it)
       return DOMPurify.sanitize(clean, {
-        USE_PROFILES: { svg: true },
         FORBID_TAGS: ['script', 'foreignObject'],
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
         ALLOWED_URI_REGEXP: /^(https?:|data:image\/|#)/i
