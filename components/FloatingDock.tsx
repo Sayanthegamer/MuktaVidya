@@ -18,39 +18,33 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Scroll detection to hide/show dock based on rules:
-  // Visible if streaming OR if user has scrolled to absolute bottom.
+  // Intersection Observer for visibility
   useEffect(() => {
-    const handleScroll = () => {
-      // If streaming, always visible
-      if (isStreaming) {
-        setIsVisible(true);
-        return;
-      }
-
-      // Check if at the bottom of the scroll container
-      // Since it's a layout with overflow, we need to check the main container
-      const container = document.querySelector('section.overflow-y-auto');
-      if (container) {
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 50; // 50px threshold
-        setIsVisible(isAtBottom);
-      }
-    };
-
-    const container = document.querySelector('section.overflow-y-auto');
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      // Trigger once on mount
-      handleScroll();
+    if (isStreaming) {
+      setTimeout(() => setIsVisible(true), 0);
+      return;
     }
 
-    // Also listen to window resize to recalculate
-    window.addEventListener('resize', handleScroll);
+    const target = document.getElementById('solution-bottom-target');
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      {
+        root: null, // viewport or closest scroll container
+        rootMargin: '100px', // trigger a bit before hitting absolute bottom
+        threshold: 0,
+      }
+    );
+
+    observer.observe(target);
 
     return () => {
-      if (container) container.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      observer.disconnect();
     };
   }, [isStreaming]);
 
@@ -112,18 +106,26 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-transform duration-500 ease-out flex justify-center pointer-events-none ${
-        isVisible ? 'translate-y-0' : 'translate-y-full'
+      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
+        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
     >
       <div className="w-full max-w-3xl relative pointer-events-auto group">
 
-        {/* Alien Glow Effect (CSS only, behind the dock) */}
-        <div className="absolute -inset-1 bg-black rounded-2xl opacity-0" />
-        <div className={`absolute -inset-1 rounded-2xl bg-[var(--accent)] filter blur-md opacity-20 transition-opacity duration-1000 ${isStreaming ? 'animate-alien-breathe' : 'group-hover:opacity-30'}`} />
+        {/* Alien Glow Effect (Architecturally accurate pseudo-style) */}
+        <div
+          className="absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out"
+          style={{
+             background: 'var(--accent)',
+             filter: 'blur(20px)',
+             opacity: isStreaming ? 0.25 : 0.1,
+             willChange: 'opacity, transform'
+          }}
+          aria-hidden="true"
+        />
 
         {/* Main Dock Container */}
-        <div className="relative w-full bg-black border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 shadow-2xl backdrop-blur-md">
+        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl">
 
           {/* Image Preview Area */}
           {attachedImage && (
