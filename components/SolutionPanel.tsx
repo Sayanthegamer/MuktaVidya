@@ -7,10 +7,10 @@ import type { Element } from 'hast';
 import SkeletonLoader from "./SkeletonLoader";
 import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
 import DiagramRenderer from "./DiagramRenderer/DiagramRenderer";
-import { useSolutionPanel } from "../hooks/useSolutionPanel";
 import ActionBar from "./SolutionPanel/ActionBar";
 import EmptyState from "./SolutionPanel/EmptyState";
 import { ChatMessage } from "@/app/api/solve/route";
+import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 import Image from "next/image";
 import { ArrowCounterClockwise } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
@@ -25,11 +25,7 @@ interface SolutionPanelProps {
 }
 
 export default function SolutionPanel({ isStreaming, isLoading, solution, messages = [], hasStartedChat, onRescan }: SolutionPanelProps) {
-  const {
-    handleCopy: legacyHandleCopy,
-    handleShare: legacyHandleShare,
-    handleFeedback: legacyHandleFeedback
-  } = useSolutionPanel(solution);
+  // useSolutionPanel(solution) was here, removed unused variables
 
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackMap, setFeedbackMap] = useState<Record<number, 'up' | 'down'>>({});
@@ -230,7 +226,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
                           }
                         }}
                       >
-                        {msg.text || ""}
+                        {preprocessMarkdown(msg.text || "")}
                       </ReactMarkdown>
                     </div>
                   </SolutionErrorBoundary>

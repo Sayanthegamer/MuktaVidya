@@ -8,7 +8,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['@google/genai'],
+  serverExternalPackages: ['@google/genai', 'isomorphic-dompurify'],
   turbopack: {},
 };
 

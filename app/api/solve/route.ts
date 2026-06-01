@@ -149,7 +149,7 @@ ${langInstruction}`;
     
     // Map our messages to Gemini API format
     let systemPromptInjected = false;
-    const contents = messages.map((msg, index) => {
+    const contents = messages.map((msg) => {
       const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
 
       // Inject system prompt into the first user message
