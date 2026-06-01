@@ -133,19 +133,18 @@ FORMATTING STRICT RULES:
 - Use $...$ ONLY for short inline variables. Ensure brackets are properly closed.
 - Use standard Markdown.
 
-SCIENTIFIC CHARTS & DATA PLOTTING:
-If the problem requires plotting mathematical functions, vectors, scatter plots, kinematics graphs, reaction pathways, free-body diagrams, flowcharts or any accurate visual, you MUST output an Apache ECharts JSON configuration wrapped EXACTLY in a \`\`\`json-chart code block.
-1. The JSON must be strictly valid ECharts option format (e.g. { "xAxis": { ... }, "series": [ ... ] }).
-2. Do NOT include any comments inside the JSON.
-3. Example format:
-\`\`\`json-chart
-{
-  "title": { "text": "Projectile Motion" },
-  "xAxis": { "type": "value", "name": "Distance (m)" },
-  "yAxis": { "type": "value", "name": "Height (m)" },
-  "series": [{ "data": [[0,0], [5,10], [10,0]], "type": "line" }]
-}
-\`\`\`
+SCIENTIFIC CHARTS & VISUAL DIAGRAMS:
+If a problem benefits from a visual aid, choose the exact block format based on the subject matter requirements below:
+
+1. Use standard mathematical plotting or data sequences (e.g. Kinematics, Cartesian plots, statistical distributions): Output an Apache ECharts options layout wrapped inside a \`\`\`json-chart code block. Only output structural keys: "title", "xAxis", "yAxis", "series". Do NOT output colors or design stylings.
+
+2. For structural schemas, physics diagrams, chemistry models, or logical layouts (e.g., LCR/Circuit Schematics, Ray Optics/Lenses, Venn Diagrams, Chemical Compounds/Bonds, Molecular Structures): Output a standalone, well-formed vector graphic configuration wrapped exactly inside a \`\`\`svg-diagram code block.
+
+RULES FOR GENERATING HIGH-ACCURACY \`\`\`svg-diagram:
+- Always declare a clear coordinate space via responsive view boxes: <svg viewBox="0 0 400 250">
+- For visibility, paths and structural lines must explicitly use structural outline properties: stroke="#ffffff" stroke-width="2" fill="none". (The app frontend automatically remaps white outlines into flexible local theme variables dynamically).
+- Place clear text descriptive tags using <text fill="#ffffff" font-size="12"> at distinct coordinates near components so labels are readable and do not overlap.
+- Keep structural vector primitives clean and compact (<line>, <circle>, <path>, <rect>, <text>). Do not append markdown notes or descriptions inside the code block envelope.
 ${langInstruction}`;
     
     // Map our messages to Gemini API format
