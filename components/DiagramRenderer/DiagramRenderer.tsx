@@ -72,8 +72,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
       // 5. Sanitize (Using default profile which safely allows SVG+HTML without nuking it)
       return DOMPurify.sanitize(clean, {
         FORBID_TAGS: ['script', 'foreignObject'],
-        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-        ALLOWED_URI_REGEXP: /^(https?:|data:image\/|#)/i
+        FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
       });
     } catch (e) {
       console.error('[DiagramRenderer] Failed to process SVG pipeline data:', e);

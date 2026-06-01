@@ -8,7 +8,9 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 /** @type {import('jest').Config} */
 const config = {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
+  transformIgnorePatterns: ['/node_modules/(?!@exodus/bytes|isomorphic-dompurify)/'],
+  transformIgnorePatterns: ['/node_modules/(?!@exodus/bytes)/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
