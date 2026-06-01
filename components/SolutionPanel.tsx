@@ -5,7 +5,7 @@ import rehypeKatex from "rehype-katex";
 import 'katex/dist/katex.min.css';
 import SkeletonLoader from "./SkeletonLoader";
 import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
-import MermaidDiagram from "./MermaidDiagram";
+import ChartRenderer from "./ChartRenderer/ChartRenderer";
 import { useSolutionPanel } from "../hooks/useSolutionPanel";
 import ActionBar from "./SolutionPanel/ActionBar";
 import EmptyState from "./SolutionPanel/EmptyState";
@@ -64,13 +64,15 @@ export default function SolutionPanel({ isStreaming, isLoading, solution }: Solu
                     rehypePlugins={[rehypeKatex]}
                     components={{
                       code({ className, children, inline, ...props }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) {
-                        const match = /language-(\w+)/.exec(className || '');
+
+                        const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
                         const lang = match ? match[1] : '';
                         const isInline = inline;
 
-                        if (!isInline && lang === 'mermaid') {
-                          return <MermaidDiagram chart={String(children).replace(/\n$/, '')} />;
+                        if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
+                          return <ChartRenderer chartData={String(children)} />;
                         }
+
 
                         return !isInline ? (
                           <div className="overflow-x-auto">
