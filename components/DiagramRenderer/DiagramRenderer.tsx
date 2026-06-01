@@ -64,7 +64,8 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
         USE_PROFILES: { svg: true },
         FORBID_TAGS: ['script', 'foreignObject'],
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-        ALLOWED_URI_REGEXP: /^(https?:|data:image\/)/i
+        // Allows http, https, inline base64 images, and local fragment markers (#) for masks/gradients/markers
+        ALLOWED_URI_REGEXP: /^(https?:|data:image\/|#)/i
       });
     } catch (e) {
       console.error('[DiagramRenderer] Failed to process SVG pipeline data:', e);
@@ -145,13 +146,18 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
             fill: var(--text-primary) !important;
             font-family: var(--font-sans), system-ui, sans-serif !important;
           }
-          /* Handle all un-styled structural geometric primitives uniformly */
+          /* Handle all un-styled structural geometric primitives uniformly without breaking solid-filled shapes */
           .svg-diagram-container svg line:not([stroke]),
-          .svg-diagram-container svg circle:not([stroke]),
-          .svg-diagram-container svg ellipse:not([stroke]),
-          .svg-diagram-container svg rect:not([stroke]),
-          .svg-diagram-container svg polyline:not([stroke]),
-          .svg-diagram-container svg polygon:not([stroke]),
+          .svg-diagram-container svg circle:not([stroke]):not([fill]),
+          .svg-diagram-container svg circle:not([stroke])[fill="none"],
+          .svg-diagram-container svg ellipse:not([stroke]):not([fill]),
+          .svg-diagram-container svg ellipse:not([stroke])[fill="none"],
+          .svg-diagram-container svg rect:not([stroke]):not([fill]),
+          .svg-diagram-container svg rect:not([stroke])[fill="none"],
+          .svg-diagram-container svg polyline:not([stroke]):not([fill]),
+          .svg-diagram-container svg polyline:not([stroke])[fill="none"],
+          .svg-diagram-container svg polygon:not([stroke]):not([fill]),
+          .svg-diagram-container svg polygon:not([stroke])[fill="none"],
           .svg-diagram-container svg path:not([stroke]):not([fill]),
           .svg-diagram-container svg path:not([stroke])[fill="none"] {
             stroke: var(--text-secondary);
