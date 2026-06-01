@@ -6,7 +6,7 @@ import 'katex/dist/katex.min.css';
 import type { Element } from 'hast';
 import SkeletonLoader from "./SkeletonLoader";
 import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
-import ChartRenderer from "./ChartRenderer/ChartRenderer";
+import DiagramRenderer from "./DiagramRenderer/DiagramRenderer";
 import { useSolutionPanel } from "../hooks/useSolutionPanel";
 import ActionBar from "./SolutionPanel/ActionBar";
 import EmptyState from "./SolutionPanel/EmptyState";
@@ -209,8 +209,12 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
                             const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
 
                             if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
-                              return <ChartRenderer chartData={String(children)} />;
-                            }
+                                return <DiagramRenderer chartData={String(children)} type="chart" />;
+                              }
+
+                              if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
+                                return <DiagramRenderer chartData={String(children)} type="svg" />;
+                              }
 
                             return !isInline ? (
                               <div className="overflow-x-auto">
