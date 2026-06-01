@@ -75,7 +75,9 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
   // Separate ref for the gallery input (no capture attribute)
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setTimeout(() => setMounted(true), 0); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const onGalleryChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Reuse the same handler from the hook — just delegate to onFileChange
@@ -171,10 +173,10 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
       {/* State 3: Cropping UI */}
       {mounted && imageToCrop && !imagePreview && createPortal(
-        <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
           {/* Header/Title area (optional, helps with spacing) */}
           <div className="shrink-0 p-4 flex justify-center items-center border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
-            <span className="text-sm font-medium text-[var(--text-primary)]">Crop Image</span>
+            <span id="crop-dialog-title" className="text-sm font-medium text-[var(--text-primary)]">Crop Image</span>
           </div>
 
           {/* Image container */}

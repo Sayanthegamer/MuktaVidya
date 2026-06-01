@@ -106,7 +106,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-transform duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
+      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
     >
