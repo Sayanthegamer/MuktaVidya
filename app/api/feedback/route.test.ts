@@ -105,7 +105,7 @@ describe('POST /api/feedback', () => {
         method: 'POST',
         body: JSON.stringify({ type: 'thumbs-up' }),
         headers: {
-          origin: 'https://preview-muktavidya-xyz.vercel.app'
+          origin: 'https://muktavidya-preview-xyz.vercel.app'
         }
       });
 
