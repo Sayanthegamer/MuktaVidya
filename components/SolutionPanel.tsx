@@ -1,19 +1,8 @@
-"use client";
-import ReactMarkdown from "react-markdown";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import 'katex/dist/katex.min.css';
-import type { Element } from 'hast';
 import SkeletonLoader from "./SkeletonLoader";
-import { SolutionErrorBoundary } from "./SolutionErrorBoundary";
-import DiagramRenderer from "./DiagramRenderer/DiagramRenderer";
-import ActionBar from "./SolutionPanel/ActionBar";
 import EmptyState from "./SolutionPanel/EmptyState";
 import { ChatMessage } from "@/app/api/solve/route";
-import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
-import Image from "next/image";
-import { ArrowCounterClockwise } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import ChatMessageItem from "./ChatMessageItem";
 
 interface SolutionPanelProps {
   isStreaming: boolean;
@@ -25,8 +14,6 @@ interface SolutionPanelProps {
 }
 
 export default function SolutionPanel({ isStreaming, isLoading, solution, messages = [], hasStartedChat, onRescan }: SolutionPanelProps) {
-  // useSolutionPanel(solution) was here, removed unused variables
-
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackMap, setFeedbackMap] = useState<Record<number, 'up' | 'down'>>({});
 
@@ -34,7 +21,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleCopy = async (index: number, text: string) => {
+  const handleCopy = useCallback(async (index: number, text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
@@ -42,9 +29,9 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
     } catch (err) {
       console.error('Failed to copy', err);
     }
-  };
+  }, []);
 
-  const handleShare = async (index: number, text: string) => {
+  const handleShare = useCallback(async (index: number, text: string) => {
     try {
       if (navigator.share) {
         await navigator.share({
@@ -57,11 +44,17 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
     } catch (err) {
       console.error('Failed to share', err);
     }
-  };
+  }, [handleCopy]);
 
-  const handleFeedback = async (index: number, type: 'up' | 'down', text: string) => {
-    if (feedbackMap[index]) return; // Locked
-    setFeedbackMap(prev => ({ ...prev, [index]: type }));
+  const handleFeedback = useCallback(async (index: number, type: 'up' | 'down', text: string) => {
+    setFeedbackMap(prev => {
+      if (prev[index]) return prev; // Locked
+      return { ...prev, [index]: type };
+    });
+
+    // We get the current value to check if it was already set
+    if (feedbackMap[index]) return;
+
     try {
       const response = await fetch('/api/feedback', {
         method: 'POST',
@@ -84,7 +77,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
       });
       console.error("Feedback failed", e);
     }
-  };
+  }, [feedbackMap]);
 
   // Auto-scroll to bottom when streaming (throttled)
   useEffect(() => {
@@ -125,7 +118,6 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
     const isEmpty = !isLoading && !isStreaming && !solution;
     const showSkeleton = isLoading && !solution;
 
-
     return (
       <div className="w-full max-w-3xl mx-auto px-6 py-8 md:px-8 flex flex-col min-h-full">
         <div className="flex-1 grid grid-cols-1 grid-rows-1 relative">
@@ -149,103 +141,20 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
           const isLastMessage = index === messages.length - 1;
           const isCurrentlyStreaming = isLastMessage && !isUser && isStreaming;
 
-          if (isUser) {
-            return (
-              <div key={index} className="flex justify-end w-full fade-up">
-                <div className="flex flex-col items-end gap-2 max-w-[85%]">
-                  {msg.imageBase64 && (
-                    <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-1)] shadow-sm max-w-xs sm:max-w-sm">
-                       <Image
-                         src={msg.imageBase64}
-                         alt="Uploaded reference"
-                         width={400}
-                         height={300}
-                         className="object-contain max-h-[300px] w-auto"
-                         unoptimized
-                       />
-                       {index === 0 && onRescan && !isStreaming && (
-                         <button
-                           onClick={onRescan}
-                           className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm"
-                           title="Start Over"
-                         >
-                           <ArrowCounterClockwise size={14} weight="bold" />
-                         </button>
-                       )}
-                    </div>
-                  )}
-                  {msg.text && (
-                    <div className="px-4 py-3 rounded-2xl rounded-tr-sm bg-[var(--surface-2)] text-[var(--text-primary)] text-[0.9375rem] border border-[var(--border-subtle)] shadow-sm">
-                      {msg.text}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          }
-
-          // Model Message
           return (
-            <div key={index} className="flex justify-start w-full fade-up">
-              <div className="w-full">
-                {isCurrentlyStreaming ? (
-                   <pre className="whitespace-pre-wrap font-mono text-sm text-[var(--text-secondary)] leading-relaxed streaming-cursor">
-                     {msg.text}
-                   </pre>
-                ) : (
-                  <SolutionErrorBoundary>
-                    <div className="prose w-full">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={{
-                          code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: Element }) {
-                            const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
-                            const lang = match ? match[1] : '';
-                            const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
-
-                            if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
-                                return <DiagramRenderer chartData={String(children)} type="chart" />;
-                              }
-
-                              if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
-                                return <DiagramRenderer chartData={String(children)} type="svg" />;
-                              }
-
-                            return !isInline ? (
-                              <div className="overflow-x-auto">
-                                <code className={className} {...props}>
-                                  {children}
-                                </code>
-                              </div>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            );
-                          }
-                        }}
-                      >
-                        {preprocessMarkdown(msg.text || "")}
-                      </ReactMarkdown>
-                    </div>
-                  </SolutionErrorBoundary>
-                )}
-
-                {/* Actions for complete model messages */}
-                {!isCurrentlyStreaming && msg.text && (
-                  <div className="mt-4">
-                    <ActionBar
-                      copied={copiedIndex === index}
-                      feedback={feedbackMap[index] ?? null}
-                      onCopy={() => handleCopy(index, msg.text || "")}
-                      onShare={() => handleShare(index, msg.text || "")}
-                      onFeedback={(type) => handleFeedback(index, type, msg.text || "")}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            <ChatMessageItem
+              key={index}
+              msg={msg}
+              index={index}
+              isStreaming={isStreaming}
+              isCurrentlyStreaming={isCurrentlyStreaming}
+              onRescan={onRescan}
+              copied={copiedIndex === index}
+              feedback={feedbackMap[index] ?? null}
+              onCopy={() => handleCopy(index, msg.text || "")}
+              onShare={() => handleShare(index, msg.text || "")}
+              onFeedback={(type) => handleFeedback(index, type, msg.text || "")}
+            />
           );
         })}
       </div>
