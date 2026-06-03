@@ -1,19 +1,6 @@
-✨ Implement Continuous Chat and Alien Floating Dock
+⚡ Bolt: [performance improvement]
 
-🎯 What
-- Transformed the static solution view into a continuous chat interface, allowing follow-up questions.
-- Added an "Alien" floating dock at the bottom of the screen with a breathing pure CSS edge glow, text input, and image attachment capability.
-- Updated the API endpoint to support passing a full conversation history (messages array).
-
-💡 Why
-- Users needed a way to ask follow-up questions to clarify solutions or dive deeper.
-- The floating dock keeps the interaction contextual and accessible without replacing the original layout logic.
-- The CSS-only glow implementation stays true to the architectural performance limits, avoiding heavy React framer-motion components or expensive reflows.
-
-✅ Verification
-- Next.js build passes cleanly.
-- TypeScript compiler verified all updated prop interfaces and payload updates.
-- Linter passed cleanly without any sweeping auto-fixes or out-of-scope slop.
-
-✨ Result
-- The user can now maintain contextual chat streams within the same UI panel, and the platform feels dynamic and alien as requested.
+💡 What: Extracted message rendering logic in `SolutionPanel.tsx` into a memoized `ChatMessageItem.tsx` component.
+🎯 Why: Prevents unnecessary heavy re-renders (involving ReactMarkdown, remarkMath, rehypeKatex) for all previous completed messages on every chunk while a new message is streaming.
+📊 Impact: Drastically reduces main thread CPU usage and eliminates UI stutter during model text generation by only rendering the active streaming message chunk.
+🔬 Measurement: Verify by typing a message, then monitoring React DevTools or Chrome Performance profiler during generation—only the new message will re-render instead of the entire chat history.
