@@ -1,6 +1,15 @@
-⚡ Bolt: [performance improvement]
+🎨 Palette: Accessibility & Micro-UX improvements
 
-💡 What: Extracted message rendering logic in `SolutionPanel.tsx` into a memoized `ChatMessageItem.tsx` component.
-🎯 Why: Prevents unnecessary heavy re-renders (involving ReactMarkdown, remarkMath, rehypeKatex) for all previous completed messages on every chunk while a new message is streaming.
-📊 Impact: Drastically reduces main thread CPU usage and eliminates UI stutter during model text generation by only rendering the active streaming message chunk.
-🔬 Measurement: Verify by typing a message, then monitoring React DevTools or Chrome Performance profiler during generation—only the new message will re-render instead of the entire chat history.
+💡 What:
+1. Set `aria-live="assertive"` in `ErrorBanner.tsx`.
+2. Include an `aria-label` to the main text area in `FloatingDock.tsx`.
+3. Enhance the `FloatingDock` input container with a `focus-within` visual indication to improve visual feedback when navigating or typing inside it.
+4. Provide an `aria-label` to the icon-only "Rescan" button in `ChatMessageItem.tsx`.
+
+🎯 Why:
+To ensure dynamic error states are properly announced by screen readers, and that interactive input elements without visible labels are fully accessible to screen reader users. The `focus-within` on the FloatingDock creates a more polished interactive experience when using keyboard navigation.
+
+♿ Accessibility:
+- Immediate screen reader announcement on error banners.
+- Clearer labels for floating dock input.
+- Clearer labels for icon-only action buttons.

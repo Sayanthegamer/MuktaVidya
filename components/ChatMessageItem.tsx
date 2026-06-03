@@ -57,6 +57,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                    onClick={onRescan}
                    className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm"
                    title="Start Over"
+                   aria-label="Start over"
                  >
                    <ArrowCounterClockwise size={14} weight="bold" />
                  </button>

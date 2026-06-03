@@ -125,7 +125,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
         />
 
         {/* Main Dock Container */}
-        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl">
+        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all duration-200">
 
           {/* Image Preview Area */}
           {attachedImage && (
@@ -166,6 +166,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
+              aria-label="Ask a follow-up question"
               placeholder="Ask a follow-up question..."
               className="flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] text-[var(--text-primary)] placeholder-[var(--text-muted)] font-sans leading-relaxed scrollbar-thin"
               disabled={isStreaming}
