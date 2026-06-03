@@ -100,12 +100,26 @@ describe('POST /api/feedback', () => {
       expect(text).toBe('Forbidden');
     });
 
+
+    it('should reject requests from spoofed vercel preview subdomains', async () => {
+      const request = new Request('http://localhost/api/feedback', {
+        method: 'POST',
+        body: JSON.stringify({ type: 'thumbs-up' }),
+        headers: {
+          origin: 'https://muktavidya-evil-abc.vercel.app'
+        }
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(403);
+    });
+
     it('should allow requests from valid vercel preview subdomains', async () => {
       const request = new Request('http://localhost/api/feedback', {
         method: 'POST',
         body: JSON.stringify({ type: 'thumbs-up' }),
         headers: {
-          origin: 'https://muktavidya-preview-xyz.vercel.app'
+          origin: 'https://muktavidya-a1b2c3d4e-xyz.vercel.app'
         }
       });
 
