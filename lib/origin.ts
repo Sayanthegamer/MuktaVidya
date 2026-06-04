@@ -31,7 +31,7 @@ export function isAllowedOrigin(request: Request): boolean {
         if (
           url.protocol === 'https:' &&
           (url.hostname === 'vercel.app' || url.hostname.endsWith('.vercel.app')) &&
-          url.hostname.includes(`-${process.env.VERCEL_PROJECT_NAME}-`)
+          ((url.hostname === `${process.env.VERCEL_PROJECT_NAME}.vercel.app`) || (new RegExp(`^${process.env.VERCEL_PROJECT_NAME}-[a-zA-Z0-9]{8,11}-[a-zA-Z0-9-]+\\.vercel\\.app$`).test(url.hostname)))
         ) {
           return true;
         }

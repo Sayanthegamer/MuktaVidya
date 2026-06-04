@@ -1,0 +1,5 @@
+# 2025-06-03 - Insecure CORS origin matching for Vercel preview domains
+
+**Vulnerability:** The CORS origin check in `lib/origin.ts` loosely checks if `url.hostname.includes('-' + process.env.VERCEL_PROJECT_NAME + '-')`. This allows an attacker to bypass CORS restrictions by registering a Vercel project name that simply includes `-{VERCEL_PROJECT_NAME}-`, such as `https://attacker-muktavidya-evil.vercel.app`.
+**Learning:** Checking for substrings in origin hostnames is a common security pitfall. Vercel preview URLs usually follow the format `[project-name]-[git-hash]-[workspace].vercel.app` or similar, but checking merely for `-projectname-` within any `.vercel.app` subdomain is easily spoofable by an attacker creating their own project with a name that contains that exact string.
+**Prevention:** Origin validation logic must be exact or use robust regular expressions tied to the specific structure. Vercel preview URLs usually start with the project name `[project-name]-`.

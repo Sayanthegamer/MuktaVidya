@@ -71,7 +71,7 @@ describe('isAllowedOrigin', () => {
     process.env.NODE_ENV = 'production';
     process.env.VERCEL_PROJECT_NAME = 'muktavidya';
     const req = new Request('http://localhost:3000', {
-      headers: { origin: 'https://something-muktavidya-something.vercel.app' }
+      headers: { origin: 'https://muktavidya-a1b2c3d4e-something.vercel.app' }
     });
     expect(isAllowedOrigin(req)).toBe(true);
   });
@@ -80,7 +80,7 @@ describe('isAllowedOrigin', () => {
     process.env.NODE_ENV = 'production';
     process.env.VERCEL_PROJECT_NAME = 'muktavidya';
     const req = new Request('http://localhost:3000', {
-      headers: { origin: 'https://something-muktavidya-something.otherdomain.com' }
+      headers: { origin: 'https://muktavidya-a1b2c3d4e-something.otherdomain.com' }
     });
     expect(isAllowedOrigin(req)).toBe(false);
   });
