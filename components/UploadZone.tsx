@@ -214,6 +214,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
       {/* State 2: Image Preview */}
       <div
+        aria-live="polite"
+        aria-busy={isProcessing}
         className={`
           relative w-full h-full rounded-lg overflow-hidden
           col-start-1 row-start-1

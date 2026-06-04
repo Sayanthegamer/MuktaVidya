@@ -1,5 +1,5 @@
 "use client";
-import { PaperPlaneRight, Stop, Image as ImageIcon, X } from "@phosphor-icons/react";
+import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
 import imageCompression from "browser-image-compression";
 import Image from "next/image";
@@ -14,6 +14,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +81,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
 
+    setIsCompressing(true);
     try {
       const options = {
         maxSizeMB: 1,
@@ -92,10 +94,12 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
         if (reader.result && typeof reader.result === 'string') {
           setAttachedImage(reader.result);
         }
+        setIsCompressing(false);
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       console.error("Error compressing image", error);
+      setIsCompressing(false);
     }
 
     // Reset input so the same file can be selected again if removed
@@ -148,9 +152,13 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               className="p-2 mb-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
               title="Attach Image"
               aria-label="Attach image"
-              disabled={isStreaming}
+              disabled={isStreaming || isCompressing}
             >
-              <ImageIcon size={22} />
+              {isCompressing ? (
+                <CircleNotch size={22} className="animate-spin" aria-label="Compressing image" />
+              ) : (
+                <ImageIcon size={22} />
+              )}
             </button>
             <input
               type="file"
