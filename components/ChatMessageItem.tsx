@@ -19,9 +19,9 @@ interface ChatMessageItemProps {
   onRescan?: () => void;
   copied: boolean;
   feedback: 'up' | 'down' | null;
-  onCopy: () => void;
-  onShare: () => void;
-  onFeedback: (type: 'up' | 'down') => void;
+  onCopy: (index: number, text: string) => void;
+  onShare: (index: number, text: string) => void;
+  onFeedback: (index: number, type: 'up' | 'down', text: string) => void;
 }
 
 const ChatMessageItem = memo(function ChatMessageItem({
@@ -128,9 +128,9 @@ const ChatMessageItem = memo(function ChatMessageItem({
             <ActionBar
               copied={copied}
               feedback={feedback}
-              onCopy={onCopy}
-              onShare={onShare}
-              onFeedback={onFeedback}
+              onCopy={() => onCopy(index, msg.text || "")}
+              onShare={() => onShare(index, msg.text || "")}
+              onFeedback={(type) => onFeedback(index, type, msg.text || "")}
             />
           </div>
         )}
