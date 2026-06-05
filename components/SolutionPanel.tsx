@@ -151,9 +151,9 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
               onRescan={onRescan}
               copied={copiedIndex === index}
               feedback={feedbackMap[index] ?? null}
-              onCopy={() => handleCopy(index, msg.text || "")}
-              onShare={() => handleShare(index, msg.text || "")}
-              onFeedback={(type) => handleFeedback(index, type, msg.text || "")}
+              onCopy={handleCopy}
+              onShare={handleShare}
+              onFeedback={handleFeedback}
             />
           );
         })}
