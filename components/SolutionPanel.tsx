@@ -20,6 +20,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackInProgressRef = useRef<Set<number>>(new Set());
 
   const handleCopy = useCallback(async (index: number, text: string) => {
     try {
@@ -47,13 +48,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   }, [handleCopy]);
 
   const handleFeedback = useCallback(async (index: number, type: 'up' | 'down', text: string) => {
-    setFeedbackMap(prev => {
-      if (prev[index]) return prev; // Locked
-      return { ...prev, [index]: type };
-    });
+    if (feedbackInProgressRef.current.has(index)) return;
+    feedbackInProgressRef.current.add(index);
 
-    // We get the current value to check if it was already set
-    if (feedbackMap[index]) return;
+    setFeedbackMap(prev => ({ ...prev, [index]: type }));
 
     try {
       const response = await fetch('/api/feedback', {
@@ -62,14 +60,18 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         body: JSON.stringify({ type, content: text.substring(0, 100) }),
       });
       if (!response.ok) {
+        feedbackInProgressRef.current.delete(index);
         setFeedbackMap(prev => {
           const newMap = { ...prev };
           delete newMap[index];
           return newMap;
         });
         console.error("Feedback failed, response not ok");
+      } else {
+        feedbackInProgressRef.current.delete(index);
       }
     } catch (e) {
+      feedbackInProgressRef.current.delete(index);
       setFeedbackMap(prev => {
         const newMap = { ...prev };
         delete newMap[index];
@@ -77,7 +79,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
       });
       console.error("Feedback failed", e);
     }
-  }, [feedbackMap]);
+  }, []);
 
   // Auto-scroll to bottom when streaming (throttled)
   useEffect(() => {
@@ -89,6 +91,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         // Immediate scroll if enough time has passed
         bottomRef.current.scrollIntoView({ behavior: "instant" });
         lastScrollTimeRef.current = now;
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+          scrollTimeoutRef.current = null;
+        }
       } else {
         // Schedule a scroll after the remaining time
         if (scrollTimeoutRef.current) {
@@ -97,7 +103,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         scrollTimeoutRef.current = setTimeout(() => {
           if (bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "instant" });
-            lastScrollTimeRef.current = Date.now();
+
           }
         }, 100 - timeSinceLastScroll);
       }
