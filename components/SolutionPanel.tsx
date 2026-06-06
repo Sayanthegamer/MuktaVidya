@@ -99,11 +99,11 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         // Schedule a scroll after the remaining time
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
-
+        }
         scrollTimeoutRef.current = setTimeout(() => {
           if (bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "instant" });
-            lastScrollTimeRef.current = Date.now();
+
           }
         }, 100 - timeSinceLastScroll);
       }
