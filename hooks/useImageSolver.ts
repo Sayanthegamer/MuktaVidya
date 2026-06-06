@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 import { ChatMessage } from "@/app/api/solve/route";
 
@@ -30,11 +30,11 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     };
   }, []);
 
-  const abortCurrentRequest = () => {
+  const abortCurrentRequest = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-  };
+  }, []);
 
   const processRequest = async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
     abortCurrentRequest();
@@ -190,7 +190,7 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     await processRequest(currentMessages, false);
   };
 
-  const handleRescan = () => {
+  const handleRescan = useCallback(() => {
     abortCurrentRequest();
     setImagePreview(null);
     setSolution("");
@@ -198,9 +198,9 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     setError(null);
     setIsProcessing(false);
     setIsStreaming(false);
-  };
+  }, [abortCurrentRequest]);
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     abortCurrentRequest();
     setImagePreview(null);
     setSolution("");
@@ -208,17 +208,17 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
     setError(null);
     setIsProcessing(false);
     setIsStreaming(false);
-  };
+  }, [abortCurrentRequest]);
 
   // For history item selection to set initial messages
-  const setInitialState = (imageBase64: string, solutionText: string) => {
+  const setInitialState = useCallback((imageBase64: string, solutionText: string) => {
     setImagePreview(imageBase64);
     setSolution(solutionText);
     setMessages([
       { role: 'user', imageBase64 },
       { role: 'model', text: solutionText }
     ]);
-  };
+  }, []);
 
   return {
     imagePreview,
