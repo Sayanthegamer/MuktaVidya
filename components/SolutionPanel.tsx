@@ -67,6 +67,8 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
           return newMap;
         });
         console.error("Feedback failed, response not ok");
+      } else {
+        feedbackInProgressRef.current.delete(index);
       }
     } catch (e) {
       feedbackInProgressRef.current.delete(index);
@@ -89,11 +91,15 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         // Immediate scroll if enough time has passed
         bottomRef.current.scrollIntoView({ behavior: "instant" });
         lastScrollTimeRef.current = now;
-
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+          scrollTimeoutRef.current = null;
+        }
+      } else {
         // Schedule a scroll after the remaining time
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
-        }
+
         scrollTimeoutRef.current = setTimeout(() => {
           if (bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: "instant" });
