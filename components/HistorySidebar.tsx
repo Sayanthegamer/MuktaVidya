@@ -33,6 +33,7 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
 
       {/* Sidebar Panel */}
       <div
+        id="history-sidebar"
         className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-1)] border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel ${isOpen ? "is-open" : ""}`}
         role="dialog"
         aria-modal="true"

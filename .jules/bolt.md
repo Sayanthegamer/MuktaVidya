@@ -15,3 +15,6 @@
 
 **Learning:** We had a component `ChatMessageItem` wrapped in `React.memo` inside a `map` loop. However, inline functions passed as props (`onCopy={() => handleCopy(index, ...)}`) broke memoization, causing all instances in the array to re-render synchronously whenever any parent state changed (like incoming stream chunks).
 **Action:** Always verify that components wrapped in `React.memo` receive referentially stable props. When passing callback functions to iterated elements, redefine the child's prop signature to accept the iteration variables (e.g., `index`, `data`), allowing you to pass down a single memoized parent callback function directly.
+## 2024-06-03 - React.memo Pitfalls
+**Learning:** React state updater callbacks execute asynchronously during the render phase when batched in event handlers. Mutating local variables directly inside the updater logic and reading them immediately afterwards will always yield the initial value, resulting in functional regressions like broken API locks.
+**Action:** When removing dependencies from useCallback, either embrace the dependencies if they rarely change (e.g., occasional UI feedback interactions won't impact streaming render limits), or use useRef to guarantee synchronous access to the latest state within the same event loop.
