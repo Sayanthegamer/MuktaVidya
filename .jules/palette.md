@@ -12,3 +12,7 @@
 
 **Learning:** During image compression with `browser-image-compression`, the application thread can be blocked or busy, and users receive no visual feedback that an action has been taken. Furthermore, adding `aria-live="polite"` directly to state-toggled wrapping elements (like the Analyzing overlay) creates reliable screen reader announcements when they appear or disappear.
 **Action:** Always wrap long-running client-side async processes (like file processing) in an explicit boolean state (e.g., `isCompressing`) and display a loading indicator. Apply `aria-live="polite"` and `aria-busy` to dynamically toggled processing overlays.
+
+## 2024-06-05 - Icon Button & Stateful Toggle Accessibility
+**Learning:** Several interactive toggles (like the History sidebar and Feedback thumbs) lacked `aria-expanded` and `aria-pressed` states, rendering their current status invisible to screen readers. Additionally, icon-only buttons lacked standard `title` attributes, missing an easy opportunity for visual tooltips.
+**Action:** When creating toggleable sidebars, always link the trigger button to the sidebar using `aria-controls="[id]"` and `aria-expanded`. For stateful toggle buttons (like thumbs up/down), utilize `aria-pressed` and dynamic `aria-label`s. Ensure all purely visual icons within accessible buttons use `aria-hidden="true"`.
