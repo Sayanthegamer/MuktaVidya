@@ -10,7 +10,6 @@ const createJestConfig = nextJest({
 const config = {
   testEnvironment: 'jsdom',
   transformIgnorePatterns: ['/node_modules/(?!@exodus/bytes|isomorphic-dompurify)/'],
-  transformIgnorePatterns: ['/node_modules/(?!@exodus/bytes)/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
