@@ -1,3 +1,4 @@
+/** @jest-environment node */
 import { isAllowedOrigin, ALLOWED_ORIGINS } from './origin';
 
 describe('isAllowedOrigin', () => {

@@ -203,7 +203,7 @@ ${langInstruction}`;
     });
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
-    return new Response(JSON.stringify({ error: message }), { status: 500 });
+    console.error('[Solve API Error]:', error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
