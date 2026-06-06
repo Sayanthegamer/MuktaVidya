@@ -81,11 +81,11 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
 
   // Auto-scroll to bottom when streaming (throttled)
   useEffect(() => {
-
+    if (isStreaming && bottomRef.current) {
       const now = Date.now();
       const timeSinceLastScroll = now - lastScrollTimeRef.current;
 
-      if (timeSinceLastScroll >= 100) {
+
         // Immediate scroll if enough time has passed
         bottomRef.current.scrollIntoView({ behavior: "instant" });
         lastScrollTimeRef.current = now;
