@@ -16,6 +16,7 @@ interface SolutionPanelProps {
 export default function SolutionPanel({ isStreaming, isLoading, solution, messages = [], hasStartedChat, onRescan }: SolutionPanelProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackMap, setFeedbackMap] = useState<Record<number, 'up' | 'down'>>({});
+  const feedbackInProgressRef = useRef<Set<number>>(new Set());
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
@@ -47,13 +48,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   }, [handleCopy]);
 
   const handleFeedback = useCallback(async (index: number, type: 'up' | 'down', text: string) => {
-    setFeedbackMap(prev => {
-      if (prev[index]) return prev; // Locked
-      return { ...prev, [index]: type };
-    });
+    if (feedbackInProgressRef.current.has(index)) return;
+    feedbackInProgressRef.current.add(index);
 
-    // We get the current value to check if it was already set
-    if (feedbackMap[index]) return;
+    setFeedbackMap(prev => ({ ...prev, [index]: type }));
 
     try {
       const response = await fetch('/api/feedback', {
@@ -67,6 +65,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
           delete newMap[index];
           return newMap;
         });
+        feedbackInProgressRef.current.delete(index);
         console.error("Feedback failed, response not ok");
       }
     } catch (e) {
@@ -75,9 +74,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         delete newMap[index];
         return newMap;
       });
+      feedbackInProgressRef.current.delete(index);
       console.error("Feedback failed", e);
     }
-  }, [feedbackMap]);
+  }, []);
 
   // Auto-scroll to bottom when streaming (throttled)
   useEffect(() => {
@@ -151,9 +151,9 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
               onRescan={onRescan}
               copied={copiedIndex === index}
               feedback={feedbackMap[index] ?? null}
-              onCopy={() => handleCopy(index, msg.text || "")}
-              onShare={() => handleShare(index, msg.text || "")}
-              onFeedback={(type) => handleFeedback(index, type, msg.text || "")}
+              onCopy={handleCopy}
+              onShare={handleShare}
+              onFeedback={handleFeedback}
             />
           );
         })}
