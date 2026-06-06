@@ -85,11 +85,11 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
       const now = Date.now();
       const timeSinceLastScroll = now - lastScrollTimeRef.current;
 
-
+      if (timeSinceLastScroll >= 100) {
         // Immediate scroll if enough time has passed
         bottomRef.current.scrollIntoView({ behavior: "instant" });
         lastScrollTimeRef.current = now;
-      } else {
+
         // Schedule a scroll after the remaining time
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
