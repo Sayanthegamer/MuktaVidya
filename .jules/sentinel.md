@@ -13,3 +13,9 @@
 **Vulnerability:** The `/api/solve` route was catching general execution errors and piping `error.message` directly into a client-facing 500 JSON response (`{ error: message }`).
 **Learning:** Returning dynamic JS error messages directly to the client is unsafe. It can leak internal application state, database connection strings, or underlying SDK implementation details (e.g. Gemini SDK internals).
 **Prevention:** Fail securely by logging the actual error internally using `console.error` and returning a static, sanitized string like "Internal Server Error" to the frontend.
+
+## 2026-06-07 - Add 'style' to FORBID_TAGS in DOMPurify to prevent CSS Injection
+
+**Vulnerability:** The application uses DOMPurify to sanitize AI-generated SVGs (`components/DiagramRenderer/DiagramRenderer.tsx`), but by default DOMPurify permits the `<style>` tag. Maliciously crafted `<style>` tags within SVGs can lead to CSS Injection or XSS vulnerabilities, potentially altering the entire page's display or exfiltrating data via CSS techniques.
+**Learning:** While DOMPurify strips active content like scripts and event handlers, CSS manipulation via allowed `<style>` tags inside SVG rendering remains a risk when using `dangerouslySetInnerHTML`.
+**Prevention:** Always add `'style'` to `FORBID_TAGS` when sanitizing standalone SVG or user-generated HTML fragments unless CSS styling is explicitly required and tightly constrained.
