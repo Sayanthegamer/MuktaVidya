@@ -9,9 +9,14 @@ const createJestConfig = nextJest({
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
-  transformIgnorePatterns: ['/node_modules/(?!@exodus/bytes|isomorphic-dompurify)/'],
+  transformIgnorePatterns: ['/node_modules/(?!@exodus|isomorphic-dompurify|dompurify|html-encoding-sniffer|whatwg-encoding)/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^@exodus/bytes/(.*)$': '<rootDir>/node_modules/@exodus/bytes/$1'
+  },
+  setupFiles: ['<rootDir>/jest.setup.mjs'],
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
 };
 

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   if (!ip) {
     const forwardedFor = request.headers.get('x-forwarded-for');
     if (forwardedFor) {
-      ip = forwardedFor.split(',')[0].trim();
+      ip = forwardedFor.split(',')[0].trim() || '127.0.0.1';
     } else {
       ip = '127.0.0.1';
     }
@@ -203,7 +203,7 @@ ${langInstruction}`;
     });
 
   } catch (error: unknown) {
-    console.error('[Solve API Error]:', error);
+    console.error('Solve API Error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
