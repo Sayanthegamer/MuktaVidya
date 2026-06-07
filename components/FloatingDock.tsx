@@ -58,7 +58,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
   }, [text]);
 
   const handleSubmit = () => {
-    if ((!text.trim() && !attachedImage) || isStreaming) return;
+    if ((!text.trim() && !attachedImage) || isStreaming || isCompressing) return;
 
     onFollowUp(text.trim(), attachedImage || undefined);
     setText("");
@@ -133,14 +133,16 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
 
           {/* Image Preview Area */}
           {attachedImage && (
-            <div className="relative self-start mt-2 ml-2 rounded-lg overflow-hidden border border-[var(--border-subtle)] w-20 h-20 group/preview">
-              <Image src={attachedImage} alt="Attached" fill className="object-cover" unoptimized />
+            <div className="relative self-start mt-4 ml-4">
+              <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] w-20 h-20">
+                <Image src={attachedImage} alt="Attached" fill className="object-cover" unoptimized />
+              </div>
               <button
                 onClick={() => setAttachedImage(null)}
-                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
                 aria-label="Remove attachment"
               >
-                <X size={20} className="text-white" />
+                <X size={12} weight="bold" aria-hidden="true" />
               </button>
             </div>
           )}
@@ -155,9 +157,9 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               disabled={isStreaming || isCompressing}
             >
               {isCompressing ? (
-                <CircleNotch size={22} className="animate-spin" aria-label="Compressing image" />
+                <CircleNotch size={22} className="animate-spin" aria-hidden="true" />
               ) : (
-                <ImageIcon size={22} />
+                <ImageIcon size={22} aria-hidden="true" />
               )}
             </button>
             <input
@@ -189,21 +191,21 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                 title="Stop Generating"
                 aria-label="Stop"
               >
-                <Stop size={20} weight="fill" />
+                <Stop size={20} weight="fill" aria-hidden="true" />
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                disabled={!text.trim() && !attachedImage}
+                disabled={(!text.trim() && !attachedImage) || isCompressing}
                 className={`p-2.5 mb-1 rounded-full transition-all duration-200 btn-press shrink-0 ${
-                  (text.trim() || attachedImage)
+                  (text.trim() || attachedImage) && !isCompressing
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]'
-                    : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed'
+                    : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
                 title="Send Message"
                 aria-label="Send"
               >
-                <PaperPlaneRight size={20} weight="fill" />
+                <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
               </button>
             )}
           </div>
