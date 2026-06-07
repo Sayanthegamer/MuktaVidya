@@ -59,6 +59,11 @@ describe('DiagramRenderer', () => {
   });
 
   describe('SVG rendering (type="svg")', () => {
+    beforeEach(() => {
+      const { sanitize } = require('isomorphic-dompurify');
+      sanitize.mockClear();
+    });
+
     it('renders a valid SVG', () => {
       const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
       const { container } = render(<DiagramRenderer chartData={svgData} type="svg" />);
@@ -66,6 +71,20 @@ describe('DiagramRenderer', () => {
       const svgElement = container.querySelector('svg');
       expect(svgElement).toBeInTheDocument();
       expect(svgElement?.innerHTML).toContain('<circle cx="50" cy="50" r="40"');
+    });
+
+    it('calls sanitize with security options', () => {
+      const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
+      render(<DiagramRenderer chartData={svgData} type="svg" />);
+
+      const { sanitize } = require('isomorphic-dompurify');
+      expect(sanitize).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          FORBID_TAGS: ['script', 'foreignObject', 'style'],
+          FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+        })
+      );
     });
 
     it('handles markdown fences in the SVG gracefully', () => {
