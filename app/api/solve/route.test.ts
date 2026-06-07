@@ -200,3 +200,52 @@ describe('Solve API route', () => {
     expect(result).toBe('mock response part 1mock response part 2');
   });
 });
+
+describe('Solve API Error Handling Security', () => {
+  const originalConsoleError = console.error;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    console.error = jest.fn(); // Suppress expected error logs
+    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
+    process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+    process.env.NODE_ENV = 'development';
+  });
+
+  afterEach(() => {
+    console.error = originalConsoleError;
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    process.env.NODE_ENV = 'test';
+  });
+
+  it('masks internal error details and returns a generic 500 error', async () => {
+    // Force an error by causing a JSON parse exception manually or using a faulty request
+    const request = new Request('http://localhost:3000/api/solve', {
+      method: 'POST',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'content-type': 'application/json',
+        'content-length': '10'
+      },
+      // Using custom stream that throws an error to trigger the catch block
+      body: new ReadableStream({
+        start(controller) {
+          controller.error(new Error('SENSITIVE_INTERNAL_DATABASE_ERROR'));
+        }
+      }),
+      duplex: 'half'
+    } as RequestInit);
+
+    const response = await POST(request as unknown as NextRequest);
+
+    expect(response.status).toBe(500);
+    const data = await response.json();
+
+    // Ensure the sensitive error message is NOT leaked to the client
+    expect(data.error).toBe('Internal Server Error');
+    expect(data.error).not.toContain('SENSITIVE_INTERNAL_DATABASE_ERROR');
+
+    // Ensure the error was actually logged internally
+    expect(console.error).toHaveBeenCalled();
+  });
+});

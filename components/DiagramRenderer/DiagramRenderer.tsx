@@ -71,7 +71,7 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
 
       // 5. Sanitize (Using default profile which safely allows SVG+HTML without nuking it)
       return DOMPurify.sanitize(clean, {
-        FORBID_TAGS: ['script', 'foreignObject'],
+        FORBID_TAGS: ['script', 'foreignObject', 'style'],
         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
       });
     } catch (e) {

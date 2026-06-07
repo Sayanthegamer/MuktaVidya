@@ -54,6 +54,9 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
       <button
         onClick={onHistoryClick}
         aria-label="Recent scans"
+        aria-expanded={isHistoryOpen}
+        aria-controls="history-sidebar"
+        title="Recent scans"
         className={`
           p-2 rounded-md transition-colors btn-press
           ${
