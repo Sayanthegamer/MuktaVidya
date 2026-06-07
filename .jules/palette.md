@@ -16,3 +16,7 @@
 ## 2024-06-05 - Icon Button & Stateful Toggle Accessibility
 **Learning:** Several interactive toggles (like the History sidebar and Feedback thumbs) lacked `aria-expanded` and `aria-pressed` states, rendering their current status invisible to screen readers. Additionally, icon-only buttons lacked standard `title` attributes, missing an easy opportunity for visual tooltips.
 **Action:** When creating toggleable sidebars, always link the trigger button to the sidebar using `aria-controls="[id]"` and `aria-expanded`. For stateful toggle buttons (like thumbs up/down), utilize `aria-pressed` and dynamic `aria-label`s. Ensure all purely visual icons within accessible buttons use `aria-hidden="true"`.
+
+## 2024-06-08 - [Mobile Hover States & Async Form Submission Feedback]
+**Learning:** A hover-only state for "remove attachment" rendered the action inaccessible on mobile touch screens, highlighting the need for persistent, accessible clear/close buttons. Additionally, hitting enter during async operations (like image compression) allowed premature submission due to the lack of an `isCompressing` check in the submission handler.
+**Action:** Use fixed-position close badges for mobile-accessible removable items. When introducing async processing that precedes a main submission, explicitly disable the submission buttons and add early returns in the handlers to prevent race conditions.
