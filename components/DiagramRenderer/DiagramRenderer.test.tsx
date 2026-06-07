@@ -7,6 +7,10 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import DiagramRenderer from './DiagramRenderer';
 
+jest.mock('isomorphic-dompurify', () => ({
+  sanitize: jest.fn((str) => str)
+}));
+
 // Mock the ReactECharts component since we're using JSDOM for testing this
 jest.mock('echarts-for-react', () => {
   return function DummyReactECharts(props: Record<string, unknown>) {
