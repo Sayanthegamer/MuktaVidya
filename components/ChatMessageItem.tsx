@@ -24,6 +24,37 @@ interface ChatMessageItemProps {
   onFeedback: (index: number, type: 'up' | 'down', text: string) => void;
 }
 
+const remarkPlugins = [remarkMath];
+const rehypePlugins = [rehypeKatex];
+
+const markdownComponents = {
+  code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: Element }) {
+    const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
+    const lang = match ? match[1] : '';
+    const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
+
+    if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
+        return <DiagramRenderer chartData={String(children)} type="chart" />;
+      }
+
+      if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
+        return <DiagramRenderer chartData={String(children)} type="svg" />;
+      }
+
+    return !isInline ? (
+      <div className="overflow-x-auto">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </div>
+    ) : (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
+  }
+};
+
 const ChatMessageItem = memo(function ChatMessageItem({
   msg,
   index,
@@ -86,35 +117,9 @@ const ChatMessageItem = memo(function ChatMessageItem({
           <SolutionErrorBoundary>
             <div className="prose w-full">
               <ReactMarkdown
-                remarkPlugins={[remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-                components={{
-                  code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: Element }) {
-                    const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
-                    const lang = match ? match[1] : '';
-                    const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
-
-                    if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
-                        return <DiagramRenderer chartData={String(children)} type="chart" />;
-                      }
-
-                      if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
-                        return <DiagramRenderer chartData={String(children)} type="svg" />;
-                      }
-
-                    return !isInline ? (
-                      <div className="overflow-x-auto">
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      </div>
-                    ) : (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    );
-                  }
-                }}
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+                components={markdownComponents}
               >
                 {preprocessMarkdown(msg.text || "")}
               </ReactMarkdown>
