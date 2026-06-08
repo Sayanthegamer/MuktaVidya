@@ -59,8 +59,9 @@ describe('DiagramRenderer', () => {
   });
 
   describe('SVG rendering (type="svg")', () => {
+    const DOMPurify = jest.requireMock('isomorphic-dompurify');
+
     beforeEach(() => {
-      const DOMPurify = jest.requireMock('isomorphic-dompurify');
       DOMPurify.sanitize.mockClear();
     });
 
@@ -77,7 +78,6 @@ describe('DiagramRenderer', () => {
       const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
       render(<DiagramRenderer chartData={svgData} type="svg" />);
 
-      const DOMPurify = jest.requireMock('isomorphic-dompurify');
       expect(DOMPurify.sanitize).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
