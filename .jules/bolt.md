@@ -18,3 +18,7 @@
 ## 2024-06-03 - React.memo Pitfalls
 **Learning:** React state updater callbacks execute asynchronously during the render phase when batched in event handlers. Mutating local variables directly inside the updater logic and reading them immediately afterwards will always yield the initial value, resulting in functional regressions like broken API locks.
 **Action:** When removing dependencies from useCallback, either embrace the dependencies if they rarely change (e.g., occasional UI feedback interactions won't impact streaming render limits), or use useRef to guarantee synchronous access to the latest state within the same event loop.
+
+## 2024-06-03 - ReactMarkdown Re-render Optimization
+**Learning:** Passing inline objects or arrays (e.g., `remarkPlugins={[remarkMath]}`, `components={{ code: ... }}`) directly as props to heavy components like `ReactMarkdown` causes them to fail referential equality checks on every parent re-render. In `ChatMessageItem`, this meant the entire markdown AST was being rebuilt and all DOM nodes re-mounted every time the `copied` or `feedback` state changed.
+**Action:** Always hoist static configuration objects, arrays, and component maps outside the React component function into module-level constants to ensure referential stability and preserve memoization.
