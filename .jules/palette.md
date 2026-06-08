@@ -20,3 +20,7 @@
 ## 2024-06-08 - [Mobile Hover States & Async Form Submission Feedback]
 **Learning:** A hover-only state for "remove attachment" rendered the action inaccessible on mobile touch screens, highlighting the need for persistent, accessible clear/close buttons. Additionally, hitting enter during async operations (like image compression) allowed premature submission due to the lack of an `isCompressing` check in the submission handler.
 **Action:** Use fixed-position close badges for mobile-accessible removable items. When introducing async processing that precedes a main submission, explicitly disable the submission buttons and add early returns in the handlers to prevent race conditions.
+
+## 2024-06-08 - [Dynamic Tooltips for Disabled States]
+**Learning:** The application had disabled buttons (like "Send Message" and "Attach Image" in `FloatingDock.tsx`, and "Thumbs Up / Thumbs Down" in `ActionBar.tsx`) that lacked clear indications for why they were disabled, leaving users confused. Native `disabled` attributes block pointer events on some browsers. To display tooltips correctly on disabled states, `aria-disabled="true"` with custom styling should be used to ensure the `title` attribute triggers correctly without dropping events.
+**Action:** When designing a disabled state for interactive elements where an explanatory tooltip is needed, use `aria-disabled="true"` and handle the disabled visual/functional logic through custom CSS and event handlers, instead of relying on the native `disabled` attribute.

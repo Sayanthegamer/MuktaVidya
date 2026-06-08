@@ -149,19 +149,20 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
 
           <div className="flex items-end gap-2 px-2 pb-1">
             {/* Attach Button */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2 mb-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
-              title="Attach Image"
-              aria-label="Attach image"
-              disabled={isStreaming || isCompressing}
-            >
-              {isCompressing ? (
-                <CircleNotch size={22} className="animate-spin" aria-hidden="true" />
-              ) : (
-                <ImageIcon size={22} aria-hidden="true" />
-              )}
-            </button>
+            <span title={isCompressing ? "Compressing image..." : isStreaming ? "Wait for response" : "Attach Image"} className="inline-flex">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 mb-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Attach image"
+                disabled={isStreaming || isCompressing}
+              >
+                {isCompressing ? (
+                  <CircleNotch size={22} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <ImageIcon size={22} aria-hidden="true" />
+                )}
+              </button>
+            </span>
             <input
               type="file"
               accept="image/*"
@@ -194,19 +195,20 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                 <Stop size={20} weight="fill" aria-hidden="true" />
               </button>
             ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={(!text.trim() && !attachedImage) || isCompressing}
-                className={`p-2.5 mb-1 rounded-full transition-all duration-200 btn-press shrink-0 ${
-                  (text.trim() || attachedImage) && !isCompressing
-                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]'
-                    : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
-                }`}
-                title="Send Message"
-                aria-label="Send"
-              >
-                <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
-              </button>
+              <span title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter a message" : "Send Message"} className="inline-flex">
+                <button
+                  onClick={handleSubmit}
+                  disabled={(!text.trim() && !attachedImage) || isCompressing}
+                  className={`p-2.5 mb-1 rounded-full transition-all duration-200 btn-press shrink-0 ${
+                    (text.trim() || attachedImage) && !isCompressing
+                      ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]'
+                      : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
+                  }`}
+                  aria-label="Send"
+                >
+                  <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
+                </button>
+              </span>
             )}
           </div>
         </div>
