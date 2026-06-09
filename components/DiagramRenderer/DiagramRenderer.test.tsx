@@ -60,6 +60,7 @@ describe('DiagramRenderer', () => {
 
   describe('SVG rendering (type="svg")', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { sanitize } = require('isomorphic-dompurify');
       sanitize.mockClear();
     });
@@ -77,6 +78,7 @@ describe('DiagramRenderer', () => {
       const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
       render(<DiagramRenderer chartData={svgData} type="svg" />);
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { sanitize } = require('isomorphic-dompurify');
       expect(sanitize).toHaveBeenCalledWith(
         expect.any(String),
