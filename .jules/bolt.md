@@ -22,3 +22,6 @@
 ## 2024-06-03 - ReactMarkdown Re-render Optimization
 **Learning:** Passing inline objects or arrays (e.g., `remarkPlugins={[remarkMath]}`, `components={{ code: ... }}`) directly as props to heavy components like `ReactMarkdown` causes them to fail referential equality checks on every parent re-render. In `ChatMessageItem`, this meant the entire markdown AST was being rebuilt and all DOM nodes re-mounted every time the `copied` or `feedback` state changed.
 **Action:** Always hoist static configuration objects, arrays, and component maps outside the React component function into module-level constants to ensure referential stability and preserve memoization.
+## 2024-06-03 - DiagramRenderer React.memo
+**Learning:** Found that \`DiagramRenderer\` was not wrapped in \`React.memo\`, meaning it would re-render whenever its parent (\`ChatMessageItem\` or \`ReactMarkdown\`) re-rendered, even though its internal string manipulations were wrapped in \`useMemo\`. Since the \`ReactECharts\` instance and SVG string operations are somewhat heavy, memoizing the component prevents unnecessary work if \`chartData\` and \`type\` haven't changed.
+**Action:** Wrapped \`DiagramRenderer\` in \`React.memo\`.
