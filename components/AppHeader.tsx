@@ -33,7 +33,7 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
 
       <div className="flex items-center gap-4">
         {/* Mode Selector */}
-        <div className="hidden sm:flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Solve mode">
+        <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Solve mode">
           <button
             onClick={() => setMode("NORMAL")}
             aria-pressed={mode === "NORMAL"}

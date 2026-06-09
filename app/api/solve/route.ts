@@ -3,6 +3,7 @@ import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
 import { NextRequest } from 'next/server';
+import { SolveMode } from '@/hooks/useMode';
 
 // Lazy initialization to avoid build-time env-var issues
 let aiInstance: GoogleGenAI | null = null;
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
     }
 
-    const { messages, language, mode } = bodyData as { messages?: ChatMessage[], language?: string, mode?: string };
+    const { messages, language, mode } = bodyData as { messages?: ChatMessage[], language?: string, mode?: SolveMode };
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
