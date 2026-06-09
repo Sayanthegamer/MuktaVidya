@@ -9,7 +9,7 @@ interface DiagramRendererProps {
   type: 'chart' | 'svg';
 }
 
-export default function DiagramRenderer({ chartData, type }: DiagramRendererProps) {
+const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }: DiagramRendererProps) {
   // --- SVG Rendering Pipeline ---
   const cleanedSvg = useMemo(() => {
     if (type !== 'svg') return null;
@@ -204,4 +204,6 @@ export default function DiagramRenderer({ chartData, type }: DiagramRendererProp
   }
 
   return null;
-}
+});
+
+export default DiagramRenderer;
