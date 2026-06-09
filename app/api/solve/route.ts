@@ -3,6 +3,7 @@ import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
 import { NextRequest } from 'next/server';
+import { SolveMode } from '@/hooks/useMode';
 
 // Lazy initialization to avoid build-time env-var issues
 let aiInstance: GoogleGenAI | null = null;
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
     }
 
-    const { messages, language } = bodyData as { messages?: ChatMessage[], language?: string };
+    const { messages, language, mode } = bodyData as { messages?: ChatMessage[], language?: string, mode?: SolveMode };
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
@@ -117,6 +118,10 @@ export async function POST(request: NextRequest) {
     const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
     const langInstruction = upperLang !== 'EN'
       ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
+      : '';
+
+    const modeInstruction = mode === 'FASTEST'
+      ? `\n\nPRIORITY INSTRUCTION: Provide the FASTEST and SHORTEST approach with the best solvability. Do NOT use overly complex, fabricated, or advanced college-level formulas if a simpler standard method exists. Be concise but accurate.`
       : '';
 
    const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
@@ -145,7 +150,7 @@ RULES FOR GENERATING HIGH-ACCURACY \`\`\`svg-diagram:
 - For visibility, paths and structural lines must explicitly use structural outline properties: stroke="#ffffff" stroke-width="2" fill="none". (The app frontend automatically remaps white outlines into flexible local theme variables dynamically).
 - Place clear text descriptive tags using <text fill="#ffffff" font-size="12"> at distinct coordinates near components so labels are readable and do not overlap.
 - Keep structural vector primitives clean and compact (<line>, <circle>, <path>, <rect>, <text>). Do not append markdown notes or descriptions inside the code block envelope.
-${langInstruction}`;
+${langInstruction}${modeInstruction}`;
     
     // Map our messages to Gemini API format
     let systemPromptInjected = false;

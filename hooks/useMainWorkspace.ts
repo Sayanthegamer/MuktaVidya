@@ -1,10 +1,12 @@
 import { useLanguage } from "./useLanguage";
+import { useMode } from "./useMode";
 import { useHistory } from "./useHistory";
 import { useImageSolver } from "./useImageSolver";
 import { HistoryItem } from "../types/history";
 
 export function useMainWorkspace() {
   const { language, handleLanguageChange } = useLanguage("EN");
+  const { mode, handleModeChange } = useMode("NORMAL");
   const { isHistoryOpen, setIsHistoryOpen, history, saveToHistory } = useHistory();
 
   const {
@@ -22,7 +24,8 @@ export function useMainWorkspace() {
     resetState
   } = useImageSolver({
     onSolveComplete: saveToHistory,
-    language
+    language,
+    mode
   });
 
   const handleSelectHistory = (item: HistoryItem) => {
@@ -32,6 +35,7 @@ export function useMainWorkspace() {
 
   return {
     language,
+    mode,
     isHistoryOpen,
     setIsHistoryOpen,
     history,
@@ -42,6 +46,7 @@ export function useMainWorkspace() {
     isStreaming,
     error,
     handleLanguageChange,
+    handleModeChange,
     handleSelectHistory,
     handleCapture,
     handleFollowUp,
