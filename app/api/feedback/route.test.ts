@@ -72,6 +72,33 @@ describe('POST /api/feedback', () => {
     expect(response.status).toBe(200);
   });
 
+  it('should return 413 if the payload size exceeds MAX_BODY_BYTES in the content-length header', async () => {
+    const request = new NextRequest('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'thumbs-up' }),
+    });
+    request.headers.delete('origin');
+
+    // 2MB + 1 byte
+    request.headers.set('content-length', (2 * 1024 * 1024 + 1).toString());
+
+    const response = await POST(request);
+    expect(response.status).toBe(413);
+  });
+
+  it('should return 413 if the actual payload size exceeds MAX_BODY_BYTES', async () => {
+    // Generate a payload slightly larger than 2MB
+    const largePayload = 'a'.repeat(2 * 1024 * 1024 + 1);
+    const request = new NextRequest('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ data: largePayload }),
+    });
+    request.headers.delete('origin');
+
+    const response = await POST(request);
+    expect(response.status).toBe(413);
+  });
+
   describe('CORS Validation in Production', () => {
     const originalNodeEnv = process.env.NODE_ENV;
     const originalProjectName = process.env.VERCEL_PROJECT_NAME;

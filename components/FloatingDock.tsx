@@ -150,11 +150,18 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
           <div className="flex items-end gap-2 px-2 pb-1">
             {/* Attach Button */}
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2 mb-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
-              title="Attach Image"
+              onClick={() => {
+                if (isStreaming || isCompressing) return;
+                fileInputRef.current?.click();
+              }}
+              className={`p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0 ${
+                isStreaming || isCompressing
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] btn-press'
+              }`}
+              title={isCompressing ? "Compressing image..." : isStreaming ? "Wait for response to finish" : "Attach Image"}
               aria-label="Attach image"
-              disabled={isStreaming || isCompressing}
+              aria-disabled={isStreaming || isCompressing}
             >
               {isCompressing ? (
                 <CircleNotch size={22} className="animate-spin" aria-hidden="true" />
@@ -195,14 +202,20 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               </button>
             ) : (
               <button
-                onClick={handleSubmit}
-                disabled={(!text.trim() && !attachedImage) || isCompressing}
-                className={`p-2.5 mb-1 rounded-full transition-all duration-200 btn-press shrink-0 ${
+                onClick={(e) => {
+                  if ((!text.trim() && !attachedImage) || isCompressing) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleSubmit();
+                }}
+                aria-disabled={(!text.trim() && !attachedImage) || isCompressing}
+                className={`p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
                   (text.trim() || attachedImage) && !isCompressing
-                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]'
+                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
-                title="Send Message"
+                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message"}
                 aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
