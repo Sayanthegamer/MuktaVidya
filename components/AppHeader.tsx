@@ -1,5 +1,6 @@
 "use client";
 import { ClockCounterClockwise } from "@phosphor-icons/react";
+import { SolveMode } from "../hooks/useMode";
 
 
 interface AppHeaderProps {
@@ -7,6 +8,8 @@ interface AppHeaderProps {
   isHistoryOpen: boolean;
   language: string;
   setLanguage: (lang: string) => void;
+  mode: SolveMode;
+  setMode: (mode: SolveMode) => void;
 }
 
 const LANGUAGES = [
@@ -15,7 +18,7 @@ const LANGUAGES = [
   { id: "HI", label: "HI" },
 ];
 
-export default function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage }: AppHeaderProps) {
+export default function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode }: AppHeaderProps) {
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
       {/* Logo */}
@@ -28,8 +31,42 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
         </span>
       </h1>
 
-      {/* Language Selector */}
-      <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
+      <div className="flex items-center gap-4">
+        {/* Mode Selector */}
+        <div className="hidden sm:flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Solve mode">
+          <button
+            onClick={() => setMode("NORMAL")}
+            aria-pressed={mode === "NORMAL"}
+            className={`
+              px-3 py-1 text-xs font-mono transition-colors border-r border-[var(--border-subtle)]
+              ${
+                mode === "NORMAL"
+                  ? "bg-[var(--surface-3)] text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+              }
+            `}
+          >
+            NORMAL
+          </button>
+          <button
+            onClick={() => setMode("FASTEST")}
+            aria-pressed={mode === "FASTEST"}
+            className={`
+              px-3 py-1 text-xs font-mono transition-colors
+              ${
+                mode === "FASTEST"
+                  ? "bg-[var(--surface-3)] text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+              }
+            `}
+            title="Fastest and Shortest approach with Best Solvability"
+          >
+            FASTEST
+          </button>
+        </div>
+
+        {/* Language Selector */}
+        <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
         {LANGUAGES.map((lang, index) => (
           <button
             key={lang.id}
@@ -48,6 +85,7 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
             {lang.label}
           </button>
         ))}
+        </div>
       </div>
 
       {/* History Toggle */}

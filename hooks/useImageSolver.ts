@@ -2,12 +2,15 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { preprocessMarkdown } from "@/lib/preprocessMarkdown";
 import { ChatMessage } from "@/app/api/solve/route";
 
+import { SolveMode } from "./useMode";
+
 interface UseImageSolverOptions {
+  mode?: SolveMode;
   onSolveComplete?: (solution: string, imageBase64: string, language: string) => void;
   language: string;
 }
 
-export function useImageSolver({ onSolveComplete, language }: UseImageSolverOptions) {
+export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: UseImageSolverOptions) {
   // Legacy states for compatibility and UI components that expect them
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [solution, setSolution] = useState("");
@@ -53,7 +56,7 @@ export function useImageSolver({ onSolveComplete, language }: UseImageSolverOpti
       const response = await fetch("/api/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: currentMessages, language }),
+        body: JSON.stringify({ messages: currentMessages, language, mode }),
         signal: abortController.signal,
       });
 

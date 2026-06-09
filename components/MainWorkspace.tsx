@@ -10,6 +10,7 @@ import { useMainWorkspace } from "../hooks/useMainWorkspace";
 export default function MainWorkspace() {
   const {
     language,
+    mode,
     isHistoryOpen,
     setIsHistoryOpen,
     history,
@@ -20,6 +21,7 @@ export default function MainWorkspace() {
     isStreaming,
     error,
     handleLanguageChange,
+    handleModeChange,
     handleSelectHistory,
     handleCapture,
     handleFollowUp,
@@ -36,6 +38,8 @@ export default function MainWorkspace() {
         isHistoryOpen={isHistoryOpen}
         language={language}
         setLanguage={handleLanguageChange}
+        mode={mode}
+        setMode={handleModeChange}
       />
 
       <main className={`flex-1 relative overflow-hidden transition-all duration-300 ease-out ${hasStartedChat ? 'flex flex-col' : 'grid grid-cols-1 md:grid-cols-[40fr_60fr]'}`}>
