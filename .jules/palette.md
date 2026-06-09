@@ -20,3 +20,7 @@
 ## 2024-06-08 - [Mobile Hover States & Async Form Submission Feedback]
 **Learning:** A hover-only state for "remove attachment" rendered the action inaccessible on mobile touch screens, highlighting the need for persistent, accessible clear/close buttons. Additionally, hitting enter during async operations (like image compression) allowed premature submission due to the lack of an `isCompressing` check in the submission handler.
 **Action:** Use fixed-position close badges for mobile-accessible removable items. When introducing async processing that precedes a main submission, explicitly disable the submission buttons and add early returns in the handlers to prevent race conditions.
+
+## 2024-06-10 - [Disabled Buttons and Tooltips]
+**Learning:** Native `disabled` attributes on buttons suppress pointer events, which means users cannot see `title` tooltips explaining *why* a button is disabled. This is bad UX when the reason isn't immediately obvious (e.g., waiting for image compression).
+**Action:** When a button's disabled reason needs explanation via tooltip, avoid the native `disabled` attribute. Instead, use `aria-disabled="true"`, conditionally apply disabled styling, and add an early return in the `onClick` handler.
