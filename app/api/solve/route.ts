@@ -101,9 +101,16 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
     }
 
+    if (messages.length > 50) {
+      return new Response(JSON.stringify({ error: 'Too many messages' }), { status: 400 });
+    }
+
     // Validate that all messages have either text or imageBase64
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
+      if (msg.text && msg.text.length > 10000) {
+        return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
+      }
       const hasText = msg.text && msg.text.trim().length > 0;
       const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
       if (!hasText && !hasImage) {
