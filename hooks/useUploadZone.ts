@@ -3,10 +3,12 @@ import imageCompression from "browser-image-compression";
 
 export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) return;
+    setIsCompressing(true);
 
     try {
       const options = {
@@ -18,10 +20,12 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
       const reader = new FileReader();
       reader.onerror = () => {
         console.error("FileReader error", reader.error);
+        setIsCompressing(false);
       };
       reader.onloadend = () => {
         if (reader.error) {
           console.error("Error reading file", reader.error);
+          setIsCompressing(false);
           return;
         }
         if (reader.result && typeof reader.result === 'string') {
@@ -29,10 +33,12 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
         } else {
           console.error("FileReader result is null or not a string");
         }
+        setIsCompressing(false);
       };
       reader.readAsDataURL(compressedFile);
     } catch (error) {
       console.error("Error compressing image", error);
+      setIsCompressing(false);
     }
   };
 
@@ -69,6 +75,7 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
 
   return {
     isDragging,
+    isCompressing,
     fileInputRef,
     onDragOver,
     onDragLeave,
