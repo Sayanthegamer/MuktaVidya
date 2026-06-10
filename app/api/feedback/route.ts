@@ -1,7 +1,8 @@
+import { MAX_BODY_BYTES_FEEDBACK } from "@/lib/constants";
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
 
-const MAX_BODY_BYTES = 2 * 1024 * 1024; // 2MB limit
+
 
 export async function POST(request: Request) {
 
@@ -32,13 +33,13 @@ export async function POST(request: Request) {
   }
 
   const contentLength = parseInt(request.headers.get('content-length') || '0', 10);
-  if (contentLength > MAX_BODY_BYTES) {
+  if (contentLength > MAX_BODY_BYTES_FEEDBACK) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
   }
 
   try {
     const bodyText = await request.text();
-    if (new TextEncoder().encode(bodyText).length > MAX_BODY_BYTES) {
+    if (new TextEncoder().encode(bodyText).length > MAX_BODY_BYTES_FEEDBACK) {
       return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
     }
 
