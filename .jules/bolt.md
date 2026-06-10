@@ -25,3 +25,6 @@
 ## 2024-06-03 - DiagramRenderer React.memo
 **Learning:** Found that \`DiagramRenderer\` was not wrapped in \`React.memo\`, meaning it would re-render whenever its parent (\`ChatMessageItem\` or \`ReactMarkdown\`) re-rendered, even though its internal string manipulations were wrapped in \`useMemo\`. Since the \`ReactECharts\` instance and SVG string operations are somewhat heavy, memoizing the component prevents unnecessary work if \`chartData\` and \`type\` haven't changed.
 **Action:** Wrapped \`DiagramRenderer\` in \`React.memo\`.
+## 2024-06-03 - Memoize Markdown Preprocessing
+**Learning:** `preprocessMarkdown` is called on every non-streaming render of `ChatMessageItem`. While ReactMarkdown is memoized properly with stable plugins and components, `preprocessMarkdown` runs string replacements synchronously and passing its fresh result triggers ReactMarkdown to re-render its entire AST.
+**Action:** Use `useMemo` on `preprocessMarkdown` with dependencies on `msg.text` and `isCurrentlyStreaming` to avoid re-calculating and producing a new string reference unnecessarily for old messages.
