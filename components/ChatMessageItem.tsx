@@ -14,7 +14,7 @@ import React, { memo } from "react";
 interface ChatMessageItemProps {
   msg: ChatMessage;
   index: number;
-  isStreaming: boolean;
+  showRescanButton?: boolean;
   isCurrentlyStreaming: boolean;
   onRescan?: () => void;
   copied: boolean;
@@ -58,7 +58,7 @@ const markdownComponents = {
 const ChatMessageItem = memo(function ChatMessageItem({
   msg,
   index,
-  isStreaming,
+  showRescanButton,
   isCurrentlyStreaming,
   onRescan,
   copied,
@@ -68,6 +68,13 @@ const ChatMessageItem = memo(function ChatMessageItem({
   onFeedback
 }: ChatMessageItemProps) {
   const isUser = msg.role === 'user';
+
+  const processedText = React.useMemo(() => {
+    if (!msg.text) return "";
+    // If it's streaming, we return the raw text to be rendered in the <pre> tag.
+    // If it's not streaming, we preprocess it for ReactMarkdown.
+    return isCurrentlyStreaming ? msg.text : preprocessMarkdown(msg.text);
+  }, [msg.text, isCurrentlyStreaming]);
 
   if (isUser) {
     return (
@@ -83,7 +90,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                  className="object-contain max-h-[300px] w-auto"
                  unoptimized
                />
-               {index === 0 && onRescan && !isStreaming && (
+               {showRescanButton && (
                  <button
                    onClick={onRescan}
                    className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm"
@@ -111,7 +118,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
       <div className="w-full">
         {isCurrentlyStreaming ? (
            <pre className="whitespace-pre-wrap font-mono text-sm text-[var(--text-secondary)] leading-relaxed streaming-cursor">
-             {msg.text}
+             {processedText}
            </pre>
         ) : (
           <SolutionErrorBoundary>
@@ -121,7 +128,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                 rehypePlugins={rehypePlugins}
                 components={markdownComponents}
               >
-                {preprocessMarkdown(msg.text || "")}
+                {processedText}
               </ReactMarkdown>
             </div>
           </SolutionErrorBoundary>

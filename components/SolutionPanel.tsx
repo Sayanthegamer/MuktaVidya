@@ -146,13 +146,14 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
           const isUser = msg.role === 'user';
           const isLastMessage = index === messages.length - 1;
           const isCurrentlyStreaming = isLastMessage && !isUser && isStreaming;
+          const showRescanButton = index === 0 && !!onRescan && !isStreaming;
 
           return (
             <ChatMessageItem
               key={index}
               msg={msg}
               index={index}
-              isStreaming={isStreaming}
+              showRescanButton={showRescanButton}
               isCurrentlyStreaming={isCurrentlyStreaming}
               onRescan={onRescan}
               copied={copiedIndex === index}
