@@ -106,7 +106,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
       const secondaryColor = 'var(--text-secondary)';
       const borderColor = 'var(--border-subtle)';
       const splitLineColor = 'rgba(255, 255, 255, 0.05)';
-      const applyAxisStyles = (axis: EChartsAxisConfig) => {
+      const applyAxisStyles = (axis?: EChartsAxisConfig) => {
         if (!axis) return { type: 'value', axisLine: { lineStyle: { color: borderColor } }, axisLabel: { color: secondaryColor }, splitLine: { lineStyle: { color: splitLineColor } } };
         return {
           ...axis,
