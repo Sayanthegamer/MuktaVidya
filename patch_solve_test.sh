@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > app/api/solve/route.test.ts
 /** @jest-environment node */
 import { POST } from './route';
 import { NextRequest } from 'next/server';
@@ -223,3 +225,4 @@ describe('Solve API Error Handling Security', () => {
     expect(console.error).toHaveBeenCalled();
   });
 });
+INNER_EOF

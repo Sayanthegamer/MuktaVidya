@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > app/api/feedback/route.test.ts
 /** @jest-environment node */
 import { NextRequest } from 'next/server';
 import { POST } from './route';
@@ -144,3 +146,4 @@ describe('POST /api/feedback', () => {
     });
   });
 });
+INNER_EOF

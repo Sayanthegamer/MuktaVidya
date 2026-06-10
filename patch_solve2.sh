@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > app/api/solve/route.ts
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = extractIP(request);
-  
+
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
     if (!success) {
@@ -150,7 +152,7 @@ RULES FOR GENERATING HIGH-ACCURACY \`\`\`svg-diagram:
 - Place clear text descriptive tags using <text fill="#ffffff" font-size="12"> at distinct coordinates near components so labels are readable and do not overlap.
 - Keep structural vector primitives clean and compact (<line>, <circle>, <path>, <rect>, <text>). Do not append markdown notes or descriptions inside the code block envelope.
 ${langInstruction}${modeInstruction}`;
-    
+
     // Map our messages to Gemini API format
     let systemPromptInjected = false;
     const contents = messages.map((msg) => {
@@ -211,3 +213,4 @@ ${langInstruction}${modeInstruction}`;
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
+INNER_EOF

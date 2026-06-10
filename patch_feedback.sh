@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > app/api/feedback/route.ts
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
 import { extractIP } from '@/lib/ip';
@@ -41,3 +43,4 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
   }
 }
+INNER_EOF

@@ -1,3 +1,5 @@
+#!/bin/bash
+cat << 'INNER_EOF' > app/api/solve/route.ts
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = extractIP(request);
-  
+
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
     if (!success) {
@@ -101,13 +103,13 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
       if (msg.text && msg.text.length > 10000) {
-        return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
+        return new Response(JSON.stringify({ error: \`Message text at index \${i} exceeds the maximum length of 10000 characters\` }), { status: 400 });
       }
       const hasText = msg.text && msg.text.trim().length > 0;
       const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
       if (!hasText && !hasImage) {
         return new Response(
-          JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
+          JSON.stringify({ error: \`Message at index \${i} has neither text nor image content\` }),
           { status: 400 }
         );
       }
@@ -116,14 +118,14 @@ export async function POST(request: NextRequest) {
     // Build language-aware structured prompt
     const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
     const langInstruction = upperLang !== 'EN'
-      ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
+      ? \`\nRespond entirely in \${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.\`
       : '';
 
     const modeInstruction = mode === 'FASTEST'
-      ? `\n\nPRIORITY INSTRUCTION: Provide the FASTEST and SHORTEST approach with the best solvability. Do NOT use overly complex, fabricated, or advanced college-level formulas if a simpler standard method exists. Be concise but accurate.`
+      ? \`\n\nPRIORITY INSTRUCTION: Provide the FASTEST and SHORTEST approach with the best solvability. Do NOT use overly complex, fabricated, or advanced college-level formulas if a simpler standard method exists. Be concise but accurate.\`
       : '';
 
-   const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
+   const systemPrompt = \`You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
 Analyze the image or answer the user's question. For the first image, identify the subject (Physics/Chemistry/Mathematics/Biology) and structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer. For MCQs, state which option is correct and why others are wrong.
 For follow-up questions, act as a helpful tutor guiding the student through the problem.
 
@@ -140,17 +142,17 @@ FORMATTING STRICT RULES:
 SCIENTIFIC CHARTS & VISUAL DIAGRAMS:
 If a problem benefits from a visual aid, choose the exact block format based on the subject matter requirements below:
 
-1. Use standard mathematical plotting or data sequences (e.g. Kinematics, Cartesian plots, statistical distributions): Output an Apache ECharts options layout wrapped inside a \`\`\`json-chart code block. Only output structural keys: "title", "xAxis", "yAxis", "series". Do NOT output colors or design stylings.
+1. Use standard mathematical plotting or data sequences (e.g. Kinematics, Cartesian plots, statistical distributions): Output an Apache ECharts options layout wrapped inside a \\\`\\\`\\\`json-chart code block. Only output structural keys: "title", "xAxis", "yAxis", "series". Do NOT output colors or design stylings.
 
-2. For structural schemas, physics diagrams, chemistry models, or logical layouts (e.g., LCR/Circuit Schematics, Ray Optics/Lenses, Venn Diagrams, Chemical Compounds/Bonds, Molecular Structures): Output a standalone, well-formed vector graphic configuration wrapped exactly inside a \`\`\`svg-diagram code block.
+2. For structural schemas, physics diagrams, chemistry models, or logical layouts (e.g., LCR/Circuit Schematics, Ray Optics/Lenses, Venn Diagrams, Chemical Compounds/Bonds, Molecular Structures): Output a standalone, well-formed vector graphic configuration wrapped exactly inside a \\\`\\\`\\\`svg-diagram code block.
 
-RULES FOR GENERATING HIGH-ACCURACY \`\`\`svg-diagram:
+RULES FOR GENERATING HIGH-ACCURACY \\\`\\\`\\\`svg-diagram:
 - Always declare a clear coordinate space via responsive view boxes: <svg viewBox="0 0 400 250">
 - For visibility, paths and structural lines must explicitly use structural outline properties: stroke="#ffffff" stroke-width="2" fill="none". (The app frontend automatically remaps white outlines into flexible local theme variables dynamically).
 - Place clear text descriptive tags using <text fill="#ffffff" font-size="12"> at distinct coordinates near components so labels are readable and do not overlap.
 - Keep structural vector primitives clean and compact (<line>, <circle>, <path>, <rect>, <text>). Do not append markdown notes or descriptions inside the code block envelope.
-${langInstruction}${modeInstruction}`;
-    
+\${langInstruction}\${modeInstruction}\`;
+
     // Map our messages to Gemini API format
     let systemPromptInjected = false;
     const contents = messages.map((msg) => {
@@ -211,3 +213,4 @@ ${langInstruction}${modeInstruction}`;
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
+INNER_EOF
