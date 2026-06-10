@@ -1,5 +1,5 @@
 "use client";
-import { CameraPlus, Images, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { CameraPlus, Images, ArrowCounterClockwise, CircleNotch } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
 import { useState, useRef, ChangeEvent } from "react";
@@ -64,12 +64,12 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
   const {
     isDragging,
+    isCompressing,
     fileInputRef,
     onDragOver,
     onDragLeave,
     onDrop,
-    onFileChange,
-    handleUploadZoneKeyDown
+    onFileChange
   } = useUploadZone(handleImageLoaded);
 
   // Separate ref for the gallery input (no capture attribute)
@@ -108,9 +108,6 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        onKeyDown={handleUploadZoneKeyDown}
-        tabIndex={-1}
-        role="presentation"
         className={`
           upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
           col-start-1 row-start-1
@@ -131,38 +128,48 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         {isDragging ? (
           <span className="text-[var(--text-muted)] text-sm font-medium">Release to analyze</span>
         ) : (
-          <>
+          <div aria-live="polite" aria-busy={isCompressing} className="flex flex-col items-center">
             <span className="text-[var(--text-muted)] text-sm font-medium mb-6">
-              Snap or upload a question
+              {isCompressing ? "Processing..." : "Snap or upload a question"}
             </span>
 
             {/* Two explicit action buttons */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium hover:bg-[var(--accent-hover)] transition-colors btn-press"
+                onClick={() => {
+                  if (isCompressing) return;
+                  fileInputRef.current?.click();
+                }}
+                disabled={isCompressing}
+                aria-disabled={isCompressing}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium hover:bg-[var(--accent-hover)] transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Take photo with camera"
               >
-                <CameraPlus size={15} weight="bold" />
-                Camera
+                {isCompressing ? <CircleNotch size={15} className="animate-spin" aria-hidden="true" /> : <CameraPlus size={15} weight="bold" aria-hidden="true" />}
+                {isCompressing ? "Processing..." : "Camera"}
               </button>
 
               <button
                 type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors btn-press"
+                onClick={() => {
+                  if (isCompressing) return;
+                  galleryInputRef.current?.click();
+                }}
+                disabled={isCompressing}
+                aria-disabled={isCompressing}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Upload from gallery"
               >
-                <Images size={15} />
-                Gallery
+                {isCompressing ? <CircleNotch size={15} className="animate-spin" aria-hidden="true" /> : <Images size={15} aria-hidden="true" />}
+                {isCompressing ? "Processing..." : "Gallery"}
               </button>
             </div>
 
             <span className="text-[var(--text-muted)] text-xs tracking-wider mt-6 font-mono uppercase">
               WBJEE · JEE · NEET
             </span>
-          </>
+          </div>
         )}
       </label>
 
