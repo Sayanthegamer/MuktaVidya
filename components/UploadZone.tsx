@@ -69,8 +69,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     onDragOver,
     onDragLeave,
     onDrop,
-    onFileChange,
-    handleUploadZoneKeyDown
+    onFileChange
   } = useUploadZone(handleImageLoaded);
 
   // Separate ref for the gallery input (no capture attribute)
@@ -109,9 +108,6 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        onKeyDown={handleUploadZoneKeyDown}
-        tabIndex={-1}
-        role="presentation"
         className={`
           upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
           col-start-1 row-start-1

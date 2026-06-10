@@ -8,6 +8,7 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) return;
+    if (isCompressing) return;
     setIsCompressing(true);
 
     try {
@@ -55,12 +56,14 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const onDrop = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     setIsDragging(false);
+    if (isCompressing) return;
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0]);
     }
   };
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (isCompressing) return;
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0]);
     }
@@ -69,6 +72,7 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const handleUploadZoneKeyDown = (e: React.KeyboardEvent<HTMLLabelElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      if (isCompressing) return;
       fileInputRef.current?.click();
     }
   };
