@@ -1,3 +1,4 @@
+import { MAX_BODY_BYTES_SOLVE } from "@/lib/constants";
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
@@ -14,7 +15,7 @@ function getAI() {
   return aiInstance;
 }
 
-const MAX_BODY_BYTES = 10 * 1024 * 1024; // Increased to 10MB to support multiple images in history
+
 
 export interface ChatMessage {
   role: 'user' | 'model';
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   const contentLength = parseInt(request.headers.get('content-length') || '0');
-  if (contentLength > MAX_BODY_BYTES) {
+  if (contentLength > MAX_BODY_BYTES_SOLVE) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
   }
 
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
       if (value) {
         receivedLength += value.length;
-        if (receivedLength > MAX_BODY_BYTES) {
+        if (receivedLength > MAX_BODY_BYTES_SOLVE) {
           reader.cancel();
           return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
         }
