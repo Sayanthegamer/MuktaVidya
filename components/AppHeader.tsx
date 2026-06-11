@@ -104,7 +104,7 @@ export default function AppHeader({ onHistoryClick, isHistoryOpen, language, set
           }
         `}
       >
-        <ClockCounterClockwise size={20} weight={isHistoryOpen ? "fill" : "regular"} />
+        <ClockCounterClockwise size={20} weight={isHistoryOpen ? "fill" : "regular"} aria-hidden="true" />
       </button>
     </header>
   );
