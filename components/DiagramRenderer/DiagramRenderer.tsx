@@ -4,33 +4,24 @@ import React, { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import DOMPurify from 'isomorphic-dompurify';
 
+
+interface EChartsAxisConfig {
+  type?: string;
+  axisLine?: { lineStyle?: { color?: string; [key: string]: unknown }; [key: string]: unknown };
+  axisLabel?: { color?: string; [key: string]: unknown };
+  nameTextStyle?: { color?: string; [key: string]: unknown };
+  splitLine?: { show?: boolean; lineStyle?: { color?: string; [key: string]: unknown }; [key: string]: unknown };
+  [key: string]: unknown;
+}
+
+interface EChartsTitleConfig {
+  textStyle?: { color?: string; [key: string]: unknown };
+  [key: string]: unknown;
+}
+
 interface DiagramRendererProps {
   chartData: string;
   type: 'chart' | 'svg';
-}
-
-
-interface EChartsTitle {
-  textStyle?: {
-    color?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-interface EChartsAxis {
-  axisLine?: {
-    lineStyle?: { color?: string; [key: string]: unknown };
-    [key: string]: unknown;
-  };
-  axisLabel?: { color?: string; [key: string]: unknown };
-  nameTextStyle?: { color?: string; [key: string]: unknown };
-  splitLine?: {
-    show?: boolean;
-    lineStyle?: { color?: string; [key: string]: unknown };
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
 }
 
 const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }: DiagramRendererProps) {
@@ -115,8 +106,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
       const secondaryColor = 'var(--text-secondary)';
       const borderColor = 'var(--border-subtle)';
       const splitLineColor = 'rgba(255, 255, 255, 0.05)';
-
-      const applyAxisStyles = (axis: EChartsAxis | undefined) => {
+      const applyAxisStyles = (axis?: EChartsAxisConfig) => {
         if (!axis) return { type: 'value', axisLine: { lineStyle: { color: borderColor } }, axisLabel: { color: secondaryColor }, splitLine: { lineStyle: { color: splitLineColor } } };
         return {
           ...axis,
@@ -136,7 +126,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         backgroundColor: 'transparent',
         textStyle: { ...rawOptions.textStyle, fontFamily: 'system-ui, sans-serif', color: secondaryColor },
         title: rawOptions.title ? (Array.isArray(rawOptions.title)
-          ? rawOptions.title.map((t: EChartsTitle) => ({ ...t, textStyle: { ...t.textStyle, color: primaryColor } }))
+          ? rawOptions.title.map((t: EChartsTitleConfig) => ({ ...t, textStyle: { ...t.textStyle, color: primaryColor } }))
           : { ...rawOptions.title, textStyle: { ...rawOptions.title?.textStyle, color: primaryColor } }
         ) : undefined,
         xAxis: Array.isArray(rawOptions.xAxis) ? rawOptions.xAxis.map(applyAxisStyles) : applyAxisStyles(rawOptions.xAxis),
