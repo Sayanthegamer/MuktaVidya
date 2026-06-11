@@ -1,7 +1,7 @@
 "use client";
 import { X, ClockCounterClockwise, FileText } from "@phosphor-icons/react";
 import Image from "next/image";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { HistoryItem } from "../types/history";
 
 interface HistorySidebarProps {
@@ -11,7 +11,7 @@ interface HistorySidebarProps {
   onSelect: (item: HistoryItem) => void;
 }
 
-export default function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
+const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
 
   // Close on Escape key
   useEffect(() => {
@@ -105,4 +105,6 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
       </div>
     </>
   );
-}
+});
+
+export default HistorySidebar;

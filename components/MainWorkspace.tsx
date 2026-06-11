@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import AppHeader from "./AppHeader";
 import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
@@ -31,10 +32,13 @@ export default function MainWorkspace() {
 
   const hasStartedChat = messages.length > 0;
 
+  const handleOpenHistory = React.useCallback(() => setIsHistoryOpen(true), [setIsHistoryOpen]);
+  const handleCloseHistory = React.useCallback(() => setIsHistoryOpen(false), [setIsHistoryOpen]);
+
   return (
     <>
       <AppHeader
-        onHistoryClick={() => setIsHistoryOpen(true)}
+        onHistoryClick={handleOpenHistory}
         isHistoryOpen={isHistoryOpen}
         language={language}
         setLanguage={handleLanguageChange}
@@ -99,7 +103,7 @@ export default function MainWorkspace() {
 
       <HistorySidebar
         isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
+        onClose={handleCloseHistory}
         history={history}
         onSelect={handleSelectHistory}
       />
