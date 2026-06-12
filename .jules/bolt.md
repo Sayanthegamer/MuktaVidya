@@ -31,3 +31,6 @@
 ## 2024-06-03 - Memoize Main Workspace Siblings
 **Learning:** High-frequency state updates in a parent component during streaming events will force unnecessary renders on structurally complex sibling UI. Without stabilizing function references via `React.useCallback`, `React.memo` wrappers on children immediately fail.
 **Action:** Always verify that components wrapped in `React.memo` receive referentially stable props, specifically memoizing event handlers using `React.useCallback`.
+## 2024-06-03 - Prevent Sibling Re-renders During Streaming
+**Learning:** High-frequency state updates in a parent component during streaming events will force unnecessary renders on structurally complex sibling UI. Without stabilizing function references via `React.useCallback`, `React.memo` wrappers on children immediately fail. FloatingDock was re-rendering on every stream chunk because its `onFollowUp` prop wasn't memoized.
+**Action:** Always verify that components wrapped in `React.memo` receive referentially stable props, specifically memoizing event handlers using `React.useCallback`.
