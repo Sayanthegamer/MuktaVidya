@@ -33,3 +33,8 @@
 **Vulnerability:** The application was missing a `Content-Security-Policy` header in its HTTP responses. This meant there was no defense-in-depth against XSS vulnerabilities or unauthorized framing.
 **Learning:** Even with secure rendering practices (like React and DOMPurify), a CSP is a necessary secondary layer of defense. Next.js makes it easy to add headers globally via `next.config.ts`.
 **Prevention:** Always configure a restrictive `Content-Security-Policy` header in `next.config.ts` to limit execution and loading of resources.
+
+## 2026-06-07 - Add payload size validation to prevent DoS via massive JSON parsing
+**Vulnerability:** The `/api/feedback` route invoked `await request.text()` directly without bounding the maximum allowed body size. A malicious user could submit a multimegabyte payload designed to consume all server memory (OOM) or block the event loop while attempting to parse the massive JSON document.
+**Learning:** Next.js API Routes (using Edge or Node environments) don't enforce strict body parsing bounds for arbitrary `Request` objects out of the box like traditional middleware. Security headers like `content-length` can be easily spoofed or bypassed.
+**Prevention:** Always implement an application-level hard boundary using `MAX_BODY_BYTES_FEEDBACK`. Check `content-length` for early fast-fail, then subsequently track the actual bytes decoded (via `TextEncoder` on `request.text()` or using streams) before calling `JSON.parse()`.
