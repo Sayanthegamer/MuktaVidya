@@ -28,6 +28,3 @@
 ## 2024-06-03 - Memoize Markdown Preprocessing
 **Learning:** `preprocessMarkdown` is called on every non-streaming render of `ChatMessageItem`. While ReactMarkdown is memoized properly with stable plugins and components, `preprocessMarkdown` runs string replacements synchronously and passing its fresh result triggers ReactMarkdown to re-render its entire AST.
 **Action:** Use `useMemo` on `preprocessMarkdown` with dependencies on `msg.text` and `isCurrentlyStreaming` to avoid re-calculating and producing a new string reference unnecessarily for old messages.
-## 2024-06-03 - Memoize Main Workspace Siblings
-**Learning:** High-frequency state updates in a parent component during streaming events will force unnecessary renders on structurally complex sibling UI. Without stabilizing function references via `React.useCallback`, `React.memo` wrappers on children immediately fail.
-**Action:** Always verify that components wrapped in `React.memo` receive referentially stable props, specifically memoizing event handlers using `React.useCallback`.

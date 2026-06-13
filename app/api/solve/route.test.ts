@@ -84,7 +84,7 @@ describe('Solve API route', () => {
     process.env.NODE_ENV = 'test';
   });
 
-  it('rejects payloads exceeding MAX_BODY_BYTES_SOLVE even if content-length header is 0', async () => {
+  it('rejects payloads exceeding MAX_BODY_BYTES even if content-length header is 0', async () => {
     // Create a body larger than 5MB
     // Using string repetition to generate ~6MB of data
     const largeData = 'A'.repeat(11 * 1024 * 1024);
