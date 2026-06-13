@@ -17,6 +17,13 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   // New chat history state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Use a ref to track messages synchronously without triggering re-renders
+  // This allows callbacks (like handleFollowUp) to maintain referential equality
+  // while still accessing the most up-to-date conversation state.
+  const messagesRef = useRef<ChatMessage[]>([]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -39,7 +46,8 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     }
   }, []);
 
-  const processRequest = async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
+  // Memoize processRequest to stabilize downstream handlers
+  const processRequest = useCallback(async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
     abortCurrentRequest();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -168,16 +176,18 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
       setMessages(currentMessages);
       if (isInitialCapture) setImagePreview(null);
     }
-  };
+  }, [language, mode, onSolveComplete, abortCurrentRequest]);
 
-  const handleCapture = async (base64Data: string) => {
+  // Stabilize handleCapture to prevent MainWorkspace/UploadZone re-renders
+  const handleCapture = useCallback(async (base64Data: string) => {
     setImagePreview(base64Data);
     const newMessages: ChatMessage[] = [{ role: 'user', imageBase64: base64Data }];
     setMessages(newMessages);
     await processRequest(newMessages, true);
-  };
+  }, [processRequest]);
 
-  const handleFollowUp = async (text?: string, imageBase64?: string) => {
+  // Stabilize handleFollowUp to prevent FloatingDock re-renders during high-frequency streaming updates
+  const handleFollowUp = useCallback(async (text?: string, imageBase64?: string) => {
     if (!text && !imageBase64) return;
 
     // Create new message object
@@ -185,13 +195,13 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     if (text) newMessage.text = text;
     if (imageBase64) newMessage.imageBase64 = imageBase64;
 
-    // Add to current conversation state
-    const currentMessages = [...messages, newMessage];
+    // Add to current conversation state using the ref to avoid 'messages' dependency
+    const currentMessages = [...messagesRef.current, newMessage];
     setMessages(currentMessages);
 
     // Process request with full conversation history
     await processRequest(currentMessages, false);
-  };
+  }, [processRequest]);
 
   const handleRescan = useCallback(() => {
     abortCurrentRequest();

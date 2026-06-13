@@ -48,6 +48,7 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect }: H
             onClick={onClose}
             className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
             aria-label="Close history"
+            title="Close history"
           >
             <X size={16} />
           </button>
