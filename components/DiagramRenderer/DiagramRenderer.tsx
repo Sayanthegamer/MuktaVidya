@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import ReactECharts from 'echarts-for-react';
+import dynamic from 'next/dynamic';
 import DOMPurify from 'isomorphic-dompurify';
+
+const ReactECharts = dynamic(() => import('echarts-for-react'), {
+  ssr: false,
+  loading: () => <div className="h-[350px] w-full flex items-center justify-center text-xs font-mono text-[var(--text-muted)]">Loading visualization engine...</div>
+});
+
 
 interface DiagramRendererProps {
   chartData: string;

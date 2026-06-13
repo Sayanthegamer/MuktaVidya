@@ -1,7 +1,6 @@
 "use client";
 import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
-import imageCompression from "browser-image-compression";
 import Image from "next/image";
 
 interface FloatingDockProps {
@@ -83,6 +82,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
 
     setIsCompressing(true);
     try {
+      const imageCompression = (await import("browser-image-compression")).default;
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,

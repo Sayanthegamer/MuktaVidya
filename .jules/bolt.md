@@ -28,3 +28,6 @@
 ## 2024-06-03 - Memoize Markdown Preprocessing
 **Learning:** `preprocessMarkdown` is called on every non-streaming render of `ChatMessageItem`. While ReactMarkdown is memoized properly with stable plugins and components, `preprocessMarkdown` runs string replacements synchronously and passing its fresh result triggers ReactMarkdown to re-render its entire AST.
 **Action:** Use `useMemo` on `preprocessMarkdown` with dependencies on `msg.text` and `isCurrentlyStreaming` to avoid re-calculating and producing a new string reference unnecessarily for old messages.
+## 2024-06-03 - Dynamic Imports for Heavy Client Libraries
+**Learning:** Initial page loads were downloading massive dependencies like `echarts` (~1MB) and `browser-image-compression` unconditionally because they were statically imported at the top-level of their respective components, even though these features are only used conditionally (rendering a chart or compressing a user-selected image).
+**Action:** Use Next.js `dynamic` (with `ssr: false`) for heavy optional rendering components like `ReactECharts`, and use dynamic `await import()` directly inside the event handler for functional libraries like `browser-image-compression`. This drastically reduces the initial JS bundle size.

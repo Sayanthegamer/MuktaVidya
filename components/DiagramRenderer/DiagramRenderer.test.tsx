@@ -21,18 +21,19 @@ jest.mock('echarts-for-react', () => {
 
 describe('DiagramRenderer', () => {
   describe('ECharts rendering (type="chart")', () => {
-    it('renders a valid echarts JSON option', () => {
+    it('renders a valid echarts JSON option', async () => {
       const chartData = `
       {
         "title": { "text": "Test Chart" },
         "series": [{ "data": [1, 2, 3], "type": "line" }]
       }`;
 
-      const { getByTestId, queryByText } = render(<DiagramRenderer chartData={chartData} type="chart" />);
+      const { findByTestId, queryByText } = render(<DiagramRenderer chartData={chartData} type="chart" />);
 
-      expect(getByTestId('mock-echarts')).toBeInTheDocument();
+      const mockEcharts = await findByTestId('mock-echarts');
+      expect(mockEcharts).toBeInTheDocument();
       // It should have injected the default colors and themes
-      const renderedOption = JSON.parse(getByTestId('mock-echarts').textContent!);
+      const renderedOption = JSON.parse(mockEcharts.textContent!);
       expect(renderedOption.backgroundColor).toBe('transparent');
       expect(renderedOption.title.textStyle.color).toBe('var(--text-primary)');
       expect(queryByText('Failed to render chart configuration.')).not.toBeInTheDocument();
@@ -45,16 +46,17 @@ describe('DiagramRenderer', () => {
       expect(getByText(invalidData)).toBeInTheDocument();
     });
 
-    it('handles markdown fences in the JSON gracefully', () => {
+    it('handles markdown fences in the JSON gracefully', async () => {
       const fencedData = `\`\`\`json
       {
         "title": { "text": "Fenced Chart" }
       }
       \`\`\``;
 
-      const { getByTestId } = render(<DiagramRenderer chartData={fencedData} type="chart" />);
-      expect(getByTestId('mock-echarts')).toBeInTheDocument();
-      const renderedOption = JSON.parse(getByTestId('mock-echarts').textContent!);
+      const { findByTestId } = render(<DiagramRenderer chartData={fencedData} type="chart" />);
+      const mockEcharts = await findByTestId('mock-echarts');
+      expect(mockEcharts).toBeInTheDocument();
+      const renderedOption = JSON.parse(mockEcharts.textContent!);
       expect(renderedOption.title.text).toBe('Fenced Chart');
     });
   });
