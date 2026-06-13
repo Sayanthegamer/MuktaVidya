@@ -28,13 +28,3 @@
 **Vulnerability:** While `/api/solve` enforced a raw byte size limit (`MAX_BODY_BYTES`) to prevent memory exhaustion, it did not restrict the internal length or structure of the JSON contents. A malicious actor could submit a payload that fits within 10MB but contains thousands of empty messages or excessively long individual text fields (e.g., a single 5MB string). This could trigger expensive backend processing or easily exhaust rate limits and quota allocations with the upstream Gemini API.
 **Learning:** Raw byte limits are only the first line of defense against DoS. Application-layer validation (such as enforcing maximum array lengths or string lengths for specific properties) is required to prevent semantic abuse that bypassed size constraints.
 **Prevention:** In addition to byte-level `MAX_BODY_BYTES` checks, always explicitly validate the semantic properties of incoming parsed JSON payloads, explicitly restricting array counts and string lengths to practical boundaries.
-
-## 2026-06-07 - Missing Content-Security-Policy header
-**Vulnerability:** The application was missing a `Content-Security-Policy` header in its HTTP responses. This meant there was no defense-in-depth against XSS vulnerabilities or unauthorized framing.
-**Learning:** Even with secure rendering practices (like React and DOMPurify), a CSP is a necessary secondary layer of defense. Next.js makes it easy to add headers globally via `next.config.ts`.
-**Prevention:** Always configure a restrictive `Content-Security-Policy` header in `next.config.ts` to limit execution and loading of resources.
-
-## 2026-06-07 - Add payload size validation to prevent DoS via massive JSON parsing
-**Vulnerability:** The `/api/feedback` route invoked `await request.text()` directly without bounding the maximum allowed body size. A malicious user could submit a multimegabyte payload designed to consume all server memory (OOM) or block the event loop while attempting to parse the massive JSON document.
-**Learning:** Next.js API Routes (using Edge or Node environments) don't enforce strict body parsing bounds for arbitrary `Request` objects out of the box like traditional middleware. Security headers like `content-length` can be easily spoofed or bypassed.
-**Prevention:** Always implement an application-level hard boundary using `MAX_BODY_BYTES_FEEDBACK`. Check `content-length` for early fast-fail, then subsequently track the actual bytes decoded (via `TextEncoder` on `request.text()` or using streams) before calling `JSON.parse()`.

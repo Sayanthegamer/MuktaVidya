@@ -58,7 +58,7 @@ describe('POST /api/feedback', () => {
     expect(data).toEqual({ success: true });
   });
 
-  it('should return 413 if the payload size exceeds MAX_BODY_BYTES in the content-length header', async () => {
+  it('should return 413 if the payload size exceeds MAX_BODY_BYTES_FEEDBACK_FEEDBACK in the content-length header', async () => {
     const request = new NextRequest('http://localhost/api/feedback', {
       method: 'POST',
       body: JSON.stringify({ type: 'thumbs-up' }),
@@ -72,7 +72,7 @@ describe('POST /api/feedback', () => {
     expect(response.status).toBe(413);
   });
 
-  it('should return 413 if the actual payload size exceeds MAX_BODY_BYTES', async () => {
+  it('should return 413 if the actual payload size exceeds MAX_BODY_BYTES_FEEDBACK', async () => {
     // Generate a payload slightly larger than 2MB
     const largePayload = 'a'.repeat(2 * 1024 * 1024 + 1);
     const request = new NextRequest('http://localhost/api/feedback', {
