@@ -1,7 +1,7 @@
 "use client";
 import { X, ClockCounterClockwise, FileText } from "@phosphor-icons/react";
 import Image from "next/image";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { HistoryItem } from "../types/history";
 
 interface HistorySidebarProps {
@@ -11,7 +11,7 @@ interface HistorySidebarProps {
   onSelect: (item: HistoryItem) => void;
 }
 
-const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
+export default function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
 
   // Close on Escape key
   useEffect(() => {
@@ -48,9 +48,8 @@ const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, his
             onClick={onClose}
             className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
             aria-label="Close history"
-            title="Close history"
           >
-            <X size={16} aria-hidden="true" />
+            <X size={16} />
           </button>
         </div>
 
@@ -58,7 +57,7 @@ const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, his
         <div className="flex-1 overflow-y-auto">
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-              <ClockCounterClockwise size={32} className="text-[var(--text-muted)] mb-4" aria-hidden="true" />
+              <ClockCounterClockwise size={32} className="text-[var(--text-muted)] mb-4" />
               <p className="text-[var(--text-muted)] text-sm font-medium mb-1">No scans yet</p>
               <p className="text-[var(--text-muted)] text-xs">Questions you analyze will appear here.</p>
             </div>
@@ -78,7 +77,7 @@ const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, his
                     {item.imageBase64 ? (
                       <Image src={item.imageBase64} alt="" fill className="w-full h-full object-cover" unoptimized />
                     ) : (
-                      <FileText size={24} className="text-[var(--text-muted)]" aria-hidden="true" />
+                      <FileText size={24} className="text-[var(--text-muted)]" />
                     )}
                   </div>
 
@@ -106,6 +105,4 @@ const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, his
       </div>
     </>
   );
-});
-
-export default HistorySidebar;
+}

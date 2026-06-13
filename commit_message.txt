@@ -1,6 +1,13 @@
-🧹 Extract magic constants
+✨ feature: implement fastest and shortest solution mode
 
-🎯 What: Extracted MAX_BODY_BYTES magic numbers to lib/constants.ts
-💡 Why: Improve code maintainability and reusability
-✅ Verification: Ran pnpm lint and pnpm test, all passed
-✨ Result: Code is cleaner and more centralized
+💡 What
+Added a new 'Fastest' solve mode togglable via the AppHeader, which instructs the AI to prioritize short, standard methods over complex/fabricated college-level formulas.
+
+🎯 Why
+Allows users to quickly grasp the most direct approach to a problem without the overhead of detailed, long-form explanations, while avoiding overly complex methods.
+
+✅ Verification
+- Mode persists in localStorage (`useMode` hook).
+- Toggling the UI switch correctly updates the state and sends `mode: "FASTEST"` in the `/api/solve` payload.
+- API correctly injects the new directive into the `systemPrompt`.
+- Passed linting, test suite, and build checks.

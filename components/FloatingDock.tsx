@@ -1,7 +1,6 @@
 "use client";
 import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
-import React from "react";
 import imageCompression from "browser-image-compression";
 import Image from "next/image";
 
@@ -11,7 +10,7 @@ interface FloatingDockProps {
   onStop: () => void;
 }
 
-const FloatingDock = React.memo(function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
+export default function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -142,7 +141,6 @@ const FloatingDock = React.memo(function FloatingDock({ onFollowUp, isStreaming,
                 onClick={() => setAttachedImage(null)}
                 className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
                 aria-label="Remove attachment"
-                title="Remove attachment"
               >
                 <X size={12} weight="bold" aria-hidden="true" />
               </button>
@@ -235,6 +233,4 @@ const FloatingDock = React.memo(function FloatingDock({ onFollowUp, isStreaming,
       </div>
     </div>
   );
-});
-
-export default FloatingDock;
+}

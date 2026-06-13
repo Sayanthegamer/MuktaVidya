@@ -123,7 +123,6 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
           size={32}
           className={`mb-4 transition-colors ${isDragging ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}`}
           weight={isDragging ? "fill" : "regular"}
-          aria-hidden="true"
         />
 
         {isDragging ? (
@@ -142,10 +141,10 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   if (isCompressing) return;
                   fileInputRef.current?.click();
                 }}
+                disabled={isCompressing}
                 aria-disabled={isCompressing}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium hover:bg-[var(--accent-hover)] transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Take photo with camera"
-                title={isCompressing ? "Processing..." : "Take photo with camera"}
               >
                 {isCompressing ? <CircleNotch size={15} className="animate-spin" aria-hidden="true" /> : <CameraPlus size={15} weight="bold" aria-hidden="true" />}
                 {isCompressing ? "Processing..." : "Camera"}
@@ -157,10 +156,10 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   if (isCompressing) return;
                   galleryInputRef.current?.click();
                 }}
+                disabled={isCompressing}
                 aria-disabled={isCompressing}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Upload from gallery"
-                title={isCompressing ? "Processing..." : "Upload from gallery"}
               >
                 {isCompressing ? <CircleNotch size={15} className="animate-spin" aria-hidden="true" /> : <Images size={15} aria-hidden="true" />}
                 {isCompressing ? "Processing..." : "Gallery"}
