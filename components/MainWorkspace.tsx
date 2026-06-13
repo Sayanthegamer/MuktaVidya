@@ -6,6 +6,7 @@ import HistorySidebar from "./HistorySidebar";
 import ErrorBanner from "./ErrorBanner";
 import FloatingDock from "./FloatingDock";
 import { useMainWorkspace } from "../hooks/useMainWorkspace";
+import { useCallback } from "react";
 
 export default function MainWorkspace() {
   const {
@@ -29,12 +30,15 @@ export default function MainWorkspace() {
     abortCurrentRequest
   } = useMainWorkspace();
 
+  const handleOpenHistory = useCallback(() => setIsHistoryOpen(true), [setIsHistoryOpen]);
+  const handleCloseHistory = useCallback(() => setIsHistoryOpen(false), [setIsHistoryOpen]);
+
   const hasStartedChat = messages.length > 0;
 
   return (
     <>
       <AppHeader
-        onHistoryClick={() => setIsHistoryOpen(true)}
+        onHistoryClick={handleOpenHistory}
         isHistoryOpen={isHistoryOpen}
         language={language}
         setLanguage={handleLanguageChange}
@@ -99,7 +103,7 @@ export default function MainWorkspace() {
 
       <HistorySidebar
         isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
+        onClose={handleCloseHistory}
         history={history}
         onSelect={handleSelectHistory}
       />
