@@ -141,6 +141,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                 onClick={() => setAttachedImage(null)}
                 className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
                 aria-label="Remove attachment"
+                title="Remove attachment"
               >
                 <X size={12} weight="bold" aria-hidden="true" />
               </button>

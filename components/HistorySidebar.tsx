@@ -48,6 +48,7 @@ const HistorySidebar = React.memo(function HistorySidebar({ isOpen, onClose, his
             onClick={onClose}
             className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
             aria-label="Close history"
+            title="Close history"
           >
             <X size={16} aria-hidden="true" />
           </button>
