@@ -31,3 +31,6 @@
 ## 2024-06-03 - Memoize Main Workspace Siblings
 **Learning:** High-frequency state updates in a parent component during streaming events will force unnecessary renders on structurally complex sibling UI. Without stabilizing function references via `React.useCallback`, `React.memo` wrappers on children immediately fail.
 **Action:** Always verify that components wrapped in `React.memo` receive referentially stable props, specifically memoizing event handlers using `React.useCallback`.
+## 2024-06-03 - Dynamic Imports for Heavy Client Libraries
+**Learning:** Initial page loads were downloading massive dependencies like `echarts` (~1MB) and `browser-image-compression` unconditionally because they were statically imported at the top-level of their respective components, even though these features are only used conditionally (rendering a chart or compressing a user-selected image).
+**Action:** Use Next.js `dynamic` (with `ssr: false`) for heavy optional rendering components like `ReactECharts`, and use dynamic `await import()` directly inside the event handler for functional libraries like `browser-image-compression`. This drastically reduces the initial JS bundle size.
