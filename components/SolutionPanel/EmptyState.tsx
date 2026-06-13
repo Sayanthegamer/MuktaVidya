@@ -5,7 +5,7 @@ const SUBJECTS = ["Physics", "Chemistry", "Mathematics", "Biology"];
 export default function EmptyState() {
   return (
     <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-      <FileText size={48} weight="light" className="text-[var(--text-muted)] mb-6" aria-hidden="true" />
+      <FileText size={48} weight="light" className="text-[var(--text-muted)] mb-6" />
       <h2 className="text-base font-medium tracking-tight text-[var(--text-primary)] mb-2">
         Scan a question to get started
       </h2>

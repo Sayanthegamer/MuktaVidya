@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 export function useLanguage(defaultLanguage: string = "EN") {
   // Use lazy initialization for state to avoid setting state in effect on mount
@@ -16,9 +16,7 @@ export function useLanguage(defaultLanguage: string = "EN") {
   });
 
   // Save language changes
-  // Memoized to maintain referential equality, allowing AppHeader to safely use React.memo
-  // and prevent unnecessary re-renders during high-frequency streaming events.
-  const handleLanguageChange = React.useCallback((lang: string) => {
+  const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     if (typeof window !== "undefined") {
       try {
@@ -27,7 +25,7 @@ export function useLanguage(defaultLanguage: string = "EN") {
         console.error("Failed to save language to localStorage", e);
       }
     }
-  }, []);
+  };
 
   return {
     language,

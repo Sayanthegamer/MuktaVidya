@@ -1,8 +1,8 @@
-import { MAX_BODY_BYTES_SOLVE } from "@/lib/constants";
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
+import { extractIP } from '@/lib/ip';
 import { NextRequest } from 'next/server';
 import { SolveMode } from '@/hooks/useMode';
 
@@ -15,7 +15,7 @@ function getAI() {
   return aiInstance;
 }
 
-
+const MAX_BODY_BYTES = 10 * 1024 * 1024; // Increased to 10MB to support multiple images in history
 
 export interface ChatMessage {
   role: 'user' | 'model';
@@ -32,20 +32,11 @@ export async function POST(request: NextRequest) {
   }
 
   const contentLength = parseInt(request.headers.get('content-length') || '0');
-  if (contentLength > MAX_BODY_BYTES_SOLVE) {
+  if (contentLength > MAX_BODY_BYTES) {
     return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
   }
 
-  // Secure IP extraction
-  let ip = request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-real-ip');
-  if (!ip) {
-    const forwardedFor = request.headers.get('x-forwarded-for');
-    if (forwardedFor) {
-      ip = forwardedFor.split(',')[0].trim() || '127.0.0.1';
-    } else {
-      ip = '127.0.0.1';
-    }
-  }
+  const ip = extractIP(request);
   
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
@@ -72,7 +63,7 @@ export async function POST(request: NextRequest) {
 
       if (value) {
         receivedLength += value.length;
-        if (receivedLength > MAX_BODY_BYTES_SOLVE) {
+        if (receivedLength > MAX_BODY_BYTES) {
           reader.cancel();
           return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
         }

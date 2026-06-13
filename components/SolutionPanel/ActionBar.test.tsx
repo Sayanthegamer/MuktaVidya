@@ -36,13 +36,13 @@ describe('ActionBar Accessibility', () => {
     let upBtn = screen.getByRole('button', { name: 'Mark as helpful' });
     expect(upBtn).toBeInTheDocument();
     expect(upBtn).toHaveAttribute('aria-pressed', 'false');
-    expect(upBtn).toHaveAttribute('title', 'Mark as helpful');
+    expect(upBtn.parentElement).toHaveAttribute('title', 'Mark as helpful');
 
     // Rerender with feedback='up'
     rerender(<ActionBar {...defaultProps} feedback="up" />);
     upBtn = screen.getByRole('button', { name: 'Marked as helpful' });
     expect(upBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(upBtn).toHaveAttribute('title', 'Feedback already provided');
+    expect(upBtn.parentElement).toHaveAttribute('title', 'Feedback already provided');
   });
 
   it('renders thumbs down button with correct attributes based on state', () => {
@@ -51,12 +51,12 @@ describe('ActionBar Accessibility', () => {
     let downBtn = screen.getByRole('button', { name: 'Mark as not helpful' });
     expect(downBtn).toBeInTheDocument();
     expect(downBtn).toHaveAttribute('aria-pressed', 'false');
-    expect(downBtn).toHaveAttribute('title', 'Mark as not helpful');
+    expect(downBtn.parentElement).toHaveAttribute('title', 'Mark as not helpful');
 
     // Rerender with feedback='down'
     rerender(<ActionBar {...defaultProps} feedback="down" />);
     downBtn = screen.getByRole('button', { name: 'Marked as not helpful' });
     expect(downBtn).toHaveAttribute('aria-pressed', 'true');
-    expect(downBtn).toHaveAttribute('title', 'Feedback already provided');
+    expect(downBtn.parentElement).toHaveAttribute('title', 'Feedback already provided');
   });
 });
