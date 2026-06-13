@@ -32,3 +32,7 @@
 ## 2024-06-11 - Disabled Buttons and Tooltips
 **Learning:** Browsers do not fire mouse events (including hover for tooltips) on elements that have the native `disabled` attribute. Relying on `<span title="...">` wrappers can also be unsemantic or inconsistent.
 **Action:** Do not use the native `disabled` attribute if you need tooltips to explain why the button is disabled. Instead, use `aria-disabled="true"`, conditionally apply disabled styling (like `opacity-50 cursor-not-allowed`), and add an early return in the `onClick` handler. This allows the native `title` attribute directly on the button to work correctly.
+
+## $(date +%Y-%m-%d) - [Tooltips on dynamically disabled buttons]
+**Learning:** Buttons disabled using `aria-disabled` (due to async operations like `isCompressing` or `isStreaming`) can still be hovered over to reveal tooltips via the `title` attribute, unlike buttons that use the native `disabled` attribute. Providing a contextual `title` during these dynamic loading states significantly improves the user experience by clarifying why a button isn't immediately interactive.
+**Action:** When creating interactable elements with disabled states using `aria-disabled`, actively verify whether a corresponding conditional `title` attribute is present to inform the user.
