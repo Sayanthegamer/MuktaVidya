@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import AppHeader from "./AppHeader";
 import UploadZone from "./UploadZone";
 import SolutionPanel from "./SolutionPanel";
@@ -7,6 +6,7 @@ import HistorySidebar from "./HistorySidebar";
 import ErrorBanner from "./ErrorBanner";
 import FloatingDock from "./FloatingDock";
 import { useMainWorkspace } from "../hooks/useMainWorkspace";
+import { useCallback } from "react";
 
 export default function MainWorkspace() {
   const {
@@ -30,10 +30,10 @@ export default function MainWorkspace() {
     abortCurrentRequest
   } = useMainWorkspace();
 
-  const hasStartedChat = messages.length > 0;
+  const handleOpenHistory = useCallback(() => setIsHistoryOpen(true), [setIsHistoryOpen]);
+  const handleCloseHistory = useCallback(() => setIsHistoryOpen(false), [setIsHistoryOpen]);
 
-  const handleOpenHistory = React.useCallback(() => setIsHistoryOpen(true), [setIsHistoryOpen]);
-  const handleCloseHistory = React.useCallback(() => setIsHistoryOpen(false), [setIsHistoryOpen]);
+  const hasStartedChat = messages.length > 0;
 
   return (
     <>

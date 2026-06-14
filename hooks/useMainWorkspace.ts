@@ -1,9 +1,9 @@
-import React from "react";
 import { useLanguage } from "./useLanguage";
 import { useMode } from "./useMode";
 import { useHistory } from "./useHistory";
 import { useImageSolver } from "./useImageSolver";
 import { HistoryItem } from "../types/history";
+import { useCallback } from "react";
 
 export function useMainWorkspace() {
   const { language, handleLanguageChange } = useLanguage("EN");
@@ -29,9 +29,7 @@ export function useMainWorkspace() {
     mode
   });
 
-  // Memoized to preserve reference equality when passed to HistorySidebar,
-  // preventing unnecessary re-renders of the sidebar during stream updates.
-  const handleSelectHistory = React.useCallback((item: HistoryItem) => {
+  const handleSelectHistory = useCallback((item: HistoryItem) => {
     resetState();
     setInitialState(item.imageBase64, item.solution);
   }, [resetState, setInitialState]);

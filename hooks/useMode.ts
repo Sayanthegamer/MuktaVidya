@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useCallback } from "react";
 
 export type SolveMode = "NORMAL" | "FASTEST";
 
@@ -18,9 +18,7 @@ export function useMode(defaultMode: SolveMode = "NORMAL") {
     return defaultMode;
   });
 
-  // Memoized to maintain referential equality, allowing AppHeader to safely use React.memo
-  // and prevent unnecessary re-renders during high-frequency streaming events.
-  const handleModeChange = React.useCallback((newMode: SolveMode) => {
+  const handleModeChange = useCallback((newMode: SolveMode) => {
     setMode(newMode);
     if (typeof window !== "undefined") {
       try {
