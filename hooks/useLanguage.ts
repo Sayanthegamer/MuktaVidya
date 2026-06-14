@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export function useLanguage(defaultLanguage: string = "EN") {
   // Use lazy initialization for state to avoid setting state in effect on mount
@@ -16,7 +16,7 @@ export function useLanguage(defaultLanguage: string = "EN") {
   });
 
   // Save language changes
-  const handleLanguageChange = (lang: string) => {
+  const handleLanguageChange = useCallback((lang: string) => {
     setLanguage(lang);
     if (typeof window !== "undefined") {
       try {
@@ -25,7 +25,7 @@ export function useLanguage(defaultLanguage: string = "EN") {
         console.error("Failed to save language to localStorage", e);
       }
     }
-  };
+  }, []);
 
   return {
     language,

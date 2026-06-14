@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export type SolveMode = "NORMAL" | "FASTEST";
 
@@ -18,7 +18,7 @@ export function useMode(defaultMode: SolveMode = "NORMAL") {
     return defaultMode;
   });
 
-  const handleModeChange = (newMode: SolveMode) => {
+  const handleModeChange = useCallback((newMode: SolveMode) => {
     setMode(newMode);
     if (typeof window !== "undefined") {
       try {
@@ -27,7 +27,7 @@ export function useMode(defaultMode: SolveMode = "NORMAL") {
         console.error("Failed to save mode to localStorage", e);
       }
     }
-  };
+  }, []);
 
   return {
     mode,

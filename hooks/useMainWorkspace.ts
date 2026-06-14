@@ -3,6 +3,7 @@ import { useMode } from "./useMode";
 import { useHistory } from "./useHistory";
 import { useImageSolver } from "./useImageSolver";
 import { HistoryItem } from "../types/history";
+import { useCallback } from "react";
 
 export function useMainWorkspace() {
   const { language, handleLanguageChange } = useLanguage("EN");
@@ -28,10 +29,10 @@ export function useMainWorkspace() {
     mode
   });
 
-  const handleSelectHistory = (item: HistoryItem) => {
+  const handleSelectHistory = useCallback((item: HistoryItem) => {
     resetState();
     setInitialState(item.imageBase64, item.solution);
-  };
+  }, [resetState, setInitialState]);
 
   return {
     language,
