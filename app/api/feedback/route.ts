@@ -58,9 +58,11 @@ export async function POST(request: Request) {
 
     const bodyText = new TextDecoder().decode(totalBuffer);
 
-    if (bodyText) {
-      JSON.parse(bodyText);
+    if (!bodyText) {
+      throw new Error('Empty body');
     }
+    JSON.parse(bodyText);
+
     // In a real app, you would log this to Supabase or another DB.
     return new Response(JSON.stringify({ success: true }));
   } catch (error) {
