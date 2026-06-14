@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 let text = fs.readFileSync('.jules/bolt.md', 'utf8');
 

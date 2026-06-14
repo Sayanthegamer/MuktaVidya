@@ -35,42 +35,48 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
       <div className="flex items-center gap-3">
         <span className="text-xs text-[var(--text-muted)]">Was this helpful?</span>
         <div className="flex items-center gap-1">
-          <span title={feedback !== null ? "Feedback already provided" : "Mark as helpful"} className="inline-flex">
-            <button
-              onClick={() => onFeedback('up')}
-              disabled={feedback !== null}
-              aria-pressed={feedback === 'up'}
-              className={`p-1.5 rounded transition-colors disabled:cursor-not-allowed ${
-                feedback === 'up'
-                  ? "text-[var(--accent)]"
-                  : feedback === 'down'
-                    ? "text-[var(--text-disabled)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
-              }`}
-              aria-label={feedback === 'up' ? "Marked as helpful" : "Mark as helpful"}
-              aria-disabled={feedback !== null}
-            >
-              <ThumbsUp size={16} weight={feedback === 'up' ? "fill" : "regular"} aria-hidden="true" />
-            </button>
-          </span>
-          <span title={feedback !== null ? "Feedback already provided" : "Mark as not helpful"} className="inline-flex">
-            <button
-              onClick={() => onFeedback('down')}
-              disabled={feedback !== null}
-              aria-pressed={feedback === 'down'}
-              className={`p-1.5 rounded transition-colors disabled:cursor-not-allowed ${
-                feedback === 'down'
-                  ? "text-[var(--error)]"
-                  : feedback === 'up'
-                    ? "text-[var(--text-disabled)]"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
-              }`}
-              aria-label={feedback === 'down' ? "Marked as not helpful" : "Mark as not helpful"}
-              aria-disabled={feedback !== null}
-            >
-              <ThumbsDown size={16} weight={feedback === 'down' ? "fill" : "regular"} aria-hidden="true" />
-            </button>
-          </span>
+          <button
+            onClick={() => {
+              if (feedback !== null) return;
+              onFeedback('up');
+            }}
+            aria-pressed={feedback === 'up'}
+            className={`p-1.5 rounded transition-colors ${
+              feedback !== null ? 'cursor-not-allowed' : ''
+            } ${
+              feedback === 'up'
+                ? "text-[var(--accent)]"
+                : feedback === 'down'
+                  ? "text-[var(--text-disabled)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            }`}
+            title={feedback !== null ? "Feedback already provided" : "Mark as helpful"}
+            aria-label={feedback === 'up' ? "Marked as helpful" : "Mark as helpful"}
+            aria-disabled={feedback !== null}
+          >
+            <ThumbsUp size={16} weight={feedback === 'up' ? "fill" : "regular"} aria-hidden="true" />
+          </button>
+          <button
+            onClick={() => {
+              if (feedback !== null) return;
+              onFeedback('down');
+            }}
+            aria-pressed={feedback === 'down'}
+            className={`p-1.5 rounded transition-colors ${
+              feedback !== null ? 'cursor-not-allowed' : ''
+            } ${
+              feedback === 'down'
+                ? "text-[var(--error)]"
+                : feedback === 'up'
+                  ? "text-[var(--text-disabled)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            }`}
+            title={feedback !== null ? "Feedback already provided" : "Mark as not helpful"}
+            aria-label={feedback === 'down' ? "Marked as not helpful" : "Mark as not helpful"}
+            aria-disabled={feedback !== null}
+          >
+            <ThumbsDown size={16} weight={feedback === 'down' ? "fill" : "regular"} aria-hidden="true" />
+          </button>
         </div>
       </div>
     </div>
