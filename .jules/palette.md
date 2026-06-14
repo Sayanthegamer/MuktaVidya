@@ -32,3 +32,7 @@
 ## 2024-06-11 - Disabled Buttons and Tooltips
 **Learning:** Browsers do not fire mouse events (including hover for tooltips) on elements that have the native `disabled` attribute. Relying on `<span title="...">` wrappers can also be unsemantic or inconsistent.
 **Action:** Do not use the native `disabled` attribute if you need tooltips to explain why the button is disabled. Instead, use `aria-disabled="true"`, conditionally apply disabled styling (like `opacity-50 cursor-not-allowed`), and add an early return in the `onClick` handler. This allows the native `title` attribute directly on the button to work correctly.
+
+## 2024-06-12 - [Invalid ARIA Nesting & Focus Rings]
+**Learning:** Adding `role="button"` or `tabIndex={0}` to an element (like a `<label>` or `<div>`) that *already* contains interactive elements (like `<button>`) results in an invalid HTML/ARIA structure. This severely degrades the screen reader experience. Focus rings should instead be added to the individual native interactive elements.
+**Action:** Always check the children of a container before making it focusable or changing its role. Use `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]` on native interactive elements (like `<button>` or `<a>`) to ensure a consistent, accessible keyboard navigation experience.
