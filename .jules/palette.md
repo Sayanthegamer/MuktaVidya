@@ -28,3 +28,8 @@
 ## 2026-06-10 - [Dynamic Loading Feedback during Upload Compression]
 **Learning:** Operations like client-side image compression block the main thread momentarily and take noticeable time, especially on low-end devices. Disabling inputs without explicit visual feedback like a spinner or "Processing..." text leaves the user guessing if their click registered or if the app froze.
 **Action:** Always surface explicit, active loading text and an `aria-busy` region for any multi-second client-side file processing, even if it happens before an API request begins. Replace relevant icon buttons with spinners and use `aria-live` properties.
+
+
+## 2024-06-12 - [Invalid ARIA Nesting & Focus Rings]
+**Learning:** Adding `role="button"` or `tabIndex={0}` to an element (like a `<label>` or `<div>`) that *already* contains interactive elements (like `<button>`) results in an invalid HTML/ARIA structure. This severely degrades the screen reader experience. Focus rings should instead be added to the individual native interactive elements.
+**Action:** Always check the children of a container before making it focusable or changing its role. Use `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]` on native interactive elements (like `<button>` or `<a>`) to ensure a consistent, accessible keyboard navigation experience.
