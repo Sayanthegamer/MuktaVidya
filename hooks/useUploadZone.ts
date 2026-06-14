@@ -1,5 +1,4 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import imageCompression from "browser-image-compression";
 
 export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const [isDragging, setIsDragging] = useState(false);
@@ -12,6 +11,7 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
     setIsCompressing(true);
 
     try {
+      const imageCompression = (await import("browser-image-compression")).default;
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,

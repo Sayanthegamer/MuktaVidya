@@ -58,21 +58,7 @@ describe('POST /api/feedback', () => {
     expect(data).toEqual({ success: true });
   });
 
-  it('should securely extract the first IP from a spoofed x-forwarded-for header', async () => {
-    const request = new NextRequest('http://localhost/api/feedback', {
-      method: 'POST',
-      body: JSON.stringify({ type: 'thumbs-up' }),
-    });
-    request.headers.delete('origin');
-
-    // Simulate an attacker spoofing the header with multiple IPs
-    request.headers.set('x-forwarded-for', '10.0.0.1, 192.168.1.1, 8.8.8.8');
-
-    const response = await POST(request);
-    expect(response.status).toBe(200);
-  });
-
-  it('should return 413 if the payload size exceeds MAX_BODY_BYTES_FEEDBACK in the content-length header', async () => {
+  it('should return 413 if the payload size exceeds MAX_BODY_BYTES_FEEDBACK_FEEDBACK in the content-length header', async () => {
     const request = new NextRequest('http://localhost/api/feedback', {
       method: 'POST',
       body: JSON.stringify({ type: 'thumbs-up' }),

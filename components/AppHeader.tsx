@@ -1,8 +1,7 @@
 "use client";
-import React from "react";
 import { ClockCounterClockwise } from "@phosphor-icons/react";
 import { SolveMode } from "../hooks/useMode";
-
+import { memo } from "react";
 
 interface AppHeaderProps {
   onHistoryClick: () => void;
@@ -19,7 +18,7 @@ const LANGUAGES = [
   { id: "HI", label: "HI" },
 ];
 
-const AppHeader = React.memo(function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode }: AppHeaderProps) {
+const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode }: AppHeaderProps) {
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
       {/* Logo */}
@@ -105,7 +104,7 @@ const AppHeader = React.memo(function AppHeader({ onHistoryClick, isHistoryOpen,
           }
         `}
       >
-        <ClockCounterClockwise size={20} weight={isHistoryOpen ? "fill" : "regular"} aria-hidden="true" />
+        <ClockCounterClockwise size={20} weight={isHistoryOpen ? "fill" : "regular"} />
       </button>
     </header>
   );

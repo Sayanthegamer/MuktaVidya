@@ -40,17 +40,17 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
               if (feedback !== null) return;
               onFeedback('up');
             }}
-            title={feedback !== null ? "Feedback already provided" : "Mark as helpful"}
             aria-pressed={feedback === 'up'}
             className={`p-1.5 rounded transition-colors ${
-              feedback !== null ? "opacity-50 cursor-not-allowed " : ""
-            }${
+              feedback !== null ? 'cursor-not-allowed' : ''
+            } ${
               feedback === 'up'
                 ? "text-[var(--accent)]"
                 : feedback === 'down'
                   ? "text-[var(--text-disabled)]"
                   : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
             }`}
+            title={feedback !== null ? "Feedback already provided" : "Mark as helpful"}
             aria-label={feedback === 'up' ? "Marked as helpful" : "Mark as helpful"}
             aria-disabled={feedback !== null}
           >
@@ -61,17 +61,17 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
               if (feedback !== null) return;
               onFeedback('down');
             }}
-            title={feedback !== null ? "Feedback already provided" : "Mark as not helpful"}
             aria-pressed={feedback === 'down'}
             className={`p-1.5 rounded transition-colors ${
-              feedback !== null ? "opacity-50 cursor-not-allowed " : ""
-            }${
+              feedback !== null ? 'cursor-not-allowed' : ''
+            } ${
               feedback === 'down'
                 ? "text-[var(--error)]"
                 : feedback === 'up'
                   ? "text-[var(--text-disabled)]"
                   : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
             }`}
+            title={feedback !== null ? "Feedback already provided" : "Mark as not helpful"}
             aria-label={feedback === 'down' ? "Marked as not helpful" : "Mark as not helpful"}
             aria-disabled={feedback !== null}
           >
