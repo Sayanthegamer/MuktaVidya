@@ -28,7 +28,3 @@
 ## 2026-06-10 - [Dynamic Loading Feedback during Upload Compression]
 **Learning:** Operations like client-side image compression block the main thread momentarily and take noticeable time, especially on low-end devices. Disabling inputs without explicit visual feedback like a spinner or "Processing..." text leaves the user guessing if their click registered or if the app froze.
 **Action:** Always surface explicit, active loading text and an `aria-busy` region for any multi-second client-side file processing, even if it happens before an API request begins. Replace relevant icon buttons with spinners and use `aria-live` properties.
-
-## 2024-06-14 - Tooltips on disabled buttons
-**Learning:** Browsers do not fire mouse events (including hover) on elements that have the native `disabled` attribute, meaning native `title` tooltips won't appear.
-**Action:** Instead of `disabled`, use `aria-disabled` combined with a conditional cursor class (`cursor-not-allowed`) and programmatic click prevention (`if (isDisabled) return;`) so that tooltips remain accessible to all users.
