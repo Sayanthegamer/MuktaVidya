@@ -39,7 +39,14 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     }
   }, []);
 
-  const processRequest = async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
+  // To avoid circular dependencies and callback recreation during high-frequency streaming updates,
+  // we use a ref to always access the latest messages inside our callbacks without listing `messages` as a dependency.
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  const processRequest = useCallback(async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
     abortCurrentRequest();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -168,16 +175,16 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
       setMessages(currentMessages);
       if (isInitialCapture) setImagePreview(null);
     }
-  };
+  }, [abortCurrentRequest, language, mode, onSolveComplete]);
 
-  const handleCapture = async (base64Data: string) => {
+  const handleCapture = useCallback(async (base64Data: string) => {
     setImagePreview(base64Data);
     const newMessages: ChatMessage[] = [{ role: 'user', imageBase64: base64Data }];
     setMessages(newMessages);
     await processRequest(newMessages, true);
-  };
+  }, [processRequest]);
 
-  const handleFollowUp = async (text?: string, imageBase64?: string) => {
+  const handleFollowUp = useCallback(async (text?: string, imageBase64?: string) => {
     if (!text && !imageBase64) return;
 
     // Create new message object
@@ -185,13 +192,17 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     if (text) newMessage.text = text;
     if (imageBase64) newMessage.imageBase64 = imageBase64;
 
-    // Add to current conversation state
-    const currentMessages = [...messages, newMessage];
-    setMessages(currentMessages);
+    // Add to current conversation state using functional state updater
+    // to guarantee synchronous access to the latest state within the same event loop.
+    let currentMessages: ChatMessage[] = [];
+    setMessages(prev => {
+      currentMessages = [...prev, newMessage];
+      return currentMessages;
+    });
 
     // Process request with full conversation history
     await processRequest(currentMessages, false);
-  };
+  }, [processRequest]);
 
   const handleRescan = useCallback(() => {
     abortCurrentRequest();

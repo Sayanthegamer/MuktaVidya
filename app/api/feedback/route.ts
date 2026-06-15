@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
     // In a real app, you would log this to Supabase or another DB.
     return new Response(JSON.stringify({ success: true }));
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
   }
 }
