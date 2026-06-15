@@ -42,4 +42,18 @@ describe('extractIP', () => {
     const req = createRequest({});
     expect(extractIP(req)).toBe('127.0.0.1');
   });
+
+  it('safely falls back to 127.0.0.1 if x-vercel-forwarded-for is whitespace-only', () => {
+    const req = createRequest({
+      'x-vercel-forwarded-for': '   ',
+    });
+    expect(extractIP(req)).toBe('127.0.0.1');
+  });
+
+  it('safely falls back to 127.0.0.1 if x-real-ip is whitespace-only', () => {
+    const req = createRequest({
+      'x-real-ip': '\t \n ',
+    });
+    expect(extractIP(req)).toBe('127.0.0.1');
+  });
 });

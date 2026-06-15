@@ -1,6 +1,10 @@
 export function extractIP(request: Request): string {
   let ip = request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-real-ip');
 
+  if (ip) {
+    ip = ip.trim();
+  }
+
   if (!ip) {
     const forwardedFor = request.headers.get('x-forwarded-for');
     if (forwardedFor) {
@@ -10,5 +14,5 @@ export function extractIP(request: Request): string {
     }
   }
 
-  return ip;
+  return ip || '127.0.0.1';
 }
