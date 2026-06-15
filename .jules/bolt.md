@@ -34,3 +34,6 @@
 ## 2024-06-03 - Prevent Sibling Re-renders During Streaming
 **Learning:** Found that sibling components of `SolutionPanel` inside `MainWorkspace` (like `AppHeader` and `HistorySidebar`) were re-rendering unnecessarily during text streaming because inline functions were being passed as props.
 **Action:** Wrapped functions like `handleLanguageChange` in `useCallback`, replaced inline callbacks with memoized handlers, and wrapped the static sibling components in `React.memo()` to prevent costly layout recalculations during high-frequency streaming updates.
+## 2024-06-03 - Memoize FloatingDock to prevent streaming re-renders
+**Learning:** `FloatingDock` re-rendered on every streamed chunk because `useImageSolver` recreated `handleFollowUp` on every message update. This caused significant UI lag during active streaming. We can't just memoize `FloatingDock` if its props aren't stable. We also can't easily add `messages` as a dependency to `handleFollowUp` without recreating it.
+**Action:** Use a `useRef` (e.g. `messagesRef`) in the hook to keep a synchronous reference to the latest messages array, updating it in a `useEffect`. Then, `handleFollowUp` can use `messagesRef.current` without needing `messages` in its dependency array. Finally, wrap `FloatingDock` in `React.memo` so it stops re-rendering repeatedly while streaming.

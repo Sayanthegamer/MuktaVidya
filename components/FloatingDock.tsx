@@ -1,6 +1,6 @@
 "use client";
 import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
-import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
+import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent, memo } from "react";
 import Image from "next/image";
 
 interface FloatingDockProps {
@@ -9,7 +9,7 @@ interface FloatingDockProps {
   onStop: () => void;
 }
 
-export default function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
+const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -233,4 +233,6 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
       </div>
     </div>
   );
-}
+});
+
+export default FloatingDock;

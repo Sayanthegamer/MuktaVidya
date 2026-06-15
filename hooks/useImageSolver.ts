@@ -17,6 +17,11 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   // New chat history state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesRef = useRef<ChatMessage[]>([]);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -39,7 +44,7 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     }
   }, []);
 
-  const processRequest = async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
+  const processRequest = useCallback(async (currentMessages: ChatMessage[], isInitialCapture: boolean = false) => {
     abortCurrentRequest();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -168,16 +173,16 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
       setMessages(currentMessages);
       if (isInitialCapture) setImagePreview(null);
     }
-  };
+  }, [abortCurrentRequest, language, mode, onSolveComplete]);
 
-  const handleCapture = async (base64Data: string) => {
+  const handleCapture = useCallback(async (base64Data: string) => {
     setImagePreview(base64Data);
     const newMessages: ChatMessage[] = [{ role: 'user', imageBase64: base64Data }];
     setMessages(newMessages);
     await processRequest(newMessages, true);
-  };
+  }, [processRequest]);
 
-  const handleFollowUp = async (text?: string, imageBase64?: string) => {
+  const handleFollowUp = useCallback(async (text?: string, imageBase64?: string) => {
     if (!text && !imageBase64) return;
 
     // Create new message object
@@ -186,12 +191,12 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     if (imageBase64) newMessage.imageBase64 = imageBase64;
 
     // Add to current conversation state
-    const currentMessages = [...messages, newMessage];
+    const currentMessages = [...messagesRef.current, newMessage];
     setMessages(currentMessages);
 
     // Process request with full conversation history
     await processRequest(currentMessages, false);
-  };
+  }, [processRequest]);
 
   const handleRescan = useCallback(() => {
     abortCurrentRequest();
