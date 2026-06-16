@@ -167,9 +167,18 @@ ${langInstruction}${modeInstruction}`;
       }
 
       if (msg.imageBase64) {
-        const mimeMatch = msg.imageBase64.match(/^data:(image\/\w+);base64,/);
-        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-        const base64Data = msg.imageBase64.replace(/^data:image\/\w+;base64,/, "");
+        const commaIndex = msg.imageBase64.indexOf(',');
+        let mimeType = 'image/jpeg';
+        let base64Data = msg.imageBase64;
+
+        if (commaIndex !== -1) {
+          // Format is typically: data:image/jpeg;base64,
+          // Extract the mime type (e.g., image/jpeg) from the prefix
+          // 'data:' is 5 chars, ';base64' is 7 chars.
+          mimeType = msg.imageBase64.substring(5, commaIndex - 7);
+          base64Data = msg.imageBase64.substring(commaIndex + 1);
+        }
+
         parts.push({ inlineData: { mimeType, data: base64Data } });
       }
 
