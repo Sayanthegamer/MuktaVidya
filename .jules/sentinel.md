@@ -32,3 +32,8 @@
 **Vulnerability:** The `/api/feedback` route invoked `await request.text()` directly without bounding the maximum allowed body size chunk by chunk. A malicious user could submit a payload designed to consume all server memory (OOM).
 **Learning:** Next.js API Routes don’t natively stop reading stream on memory usage limits by default without manual validation.
 **Prevention:** Use a byte accumulator via `request.body.getReader()` to manually read chunks and cancel the stream proactively if the size limit gets exceeded.
+
+## 2025-06-03 - IP Spoofing via Whitespace Padding in Proxy Headers
+**Vulnerability:** The application extracted IP addresses via `request.headers.get('x-vercel-forwarded-for')` and directly passed the result into Upstash rate limiters without trimming whitespace. A malicious actor could spoof their IP by sending `x-vercel-forwarded-for: "   "`. Because a string consisting of only whitespace is truthy in JavaScript, the fallback logic was bypassed. The resulting whitespace string was used to bucket rate limits, effectively allowing attackers to bypass rate limits by submitting infinitely unique padded strings (e.g., `" "`, `"  "`, `"   "`).
+**Learning:** Truthy checks (`if (ip)`) on HTTP headers are insufficient because malicious clients can inject pure whitespace or invisible characters. Rate limit bucket strings must be fully stripped of padding.
+**Prevention:** Always explicitly `trim()` extracted proxy IP addresses and check for truthiness _after_ trimming to guarantee the application securely falls back to the next trusted header or the default `127.0.0.1`.
