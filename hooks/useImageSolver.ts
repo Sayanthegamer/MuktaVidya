@@ -195,6 +195,7 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     // Build the new messages array directly, then use it for both setState and processRequest
     const currentMessages = [...messagesRef.current, newMessage];
     setMessages(currentMessages);
+    messagesRef.current = currentMessages;
 
     // Process request with full conversation history
     await processRequest(currentMessages, false);
