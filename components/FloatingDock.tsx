@@ -1,6 +1,6 @@
 "use client";
 import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
-import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from "react";
+import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent, memo } from "react";
 import Image from "next/image";
 
 interface FloatingDockProps {
@@ -9,7 +9,9 @@ interface FloatingDockProps {
   onStop: () => void;
 }
 
-export default function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
+// Memoize the dock to prevent it from re-rendering 50+ times per second
+// during high-frequency AI streaming updates since it's a sibling of SolutionPanel.
+const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -55,6 +57,17 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [text]);
+
+  // Global Escape key to stop streaming
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === 'Escape' && isStreaming) {
+        onStop();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isStreaming, onStop]);
 
   const handleSubmit = () => {
     if ((!text.trim() && !attachedImage) || isStreaming || isCompressing) return;
@@ -184,9 +197,19 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               aria-label="Ask a follow-up question"
-              placeholder="Ask a follow-up question..."
-              className="flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] text-[var(--text-primary)] placeholder-[var(--text-muted)] font-sans leading-relaxed scrollbar-thin"
-              disabled={isStreaming}
+              placeholder={
+                isStreaming 
+                  ? "Generating response..." 
+                  : isCompressing 
+                  ? "Compressing image..." 
+                  : "Ask a follow-up question..."
+              }
+              className={`flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] font-sans leading-relaxed scrollbar-thin placeholder-[var(--text-muted)] ${
+                isStreaming || isCompressing 
+                  ? 'text-[var(--text-muted)] cursor-not-allowed' 
+                  : 'text-[var(--text-primary)]'
+              }`}
+              readOnly={isStreaming || isCompressing}
               rows={1}
             />
 
@@ -195,7 +218,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               <button
                 onClick={onStop}
                 className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
-                title="Stop Generating"
+                title="Stop Generating (Esc)"
                 aria-label="Stop"
               >
                 <Stop size={20} weight="fill" aria-hidden="true" />
@@ -215,7 +238,7 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
-                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message"}
+                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message (Enter)"}
                 aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
@@ -233,4 +256,6 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
       </div>
     </div>
   );
-}
+});
+
+export default FloatingDock;
