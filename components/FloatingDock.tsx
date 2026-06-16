@@ -184,9 +184,9 @@ export default function FloatingDock({ onFollowUp, isStreaming, onStop }: Floati
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               aria-label="Ask a follow-up question"
-              placeholder="Ask a follow-up question..."
-              className="flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] text-[var(--text-primary)] placeholder-[var(--text-muted)] font-sans leading-relaxed scrollbar-thin"
-              disabled={isStreaming}
+              placeholder={isStreaming ? "Generating response..." : isCompressing ? "Compressing image..." : "Ask a follow-up question..."}
+              className={`flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] ${isStreaming || isCompressing ? 'text-[var(--text-muted)]' : 'text-[var(--text-primary)]'} placeholder-[var(--text-muted)] font-sans leading-relaxed scrollbar-thin`}
+              readOnly={isStreaming || isCompressing}
               rows={1}
             />
 

@@ -33,3 +33,7 @@
 ## 2024-06-12 - [Invalid ARIA Nesting & Focus Rings]
 **Learning:** Adding `role="button"` or `tabIndex={0}` to an element (like a `<label>` or `<div>`) that *already* contains interactive elements (like `<button>`) results in an invalid HTML/ARIA structure. This severely degrades the screen reader experience. Focus rings should instead be added to the individual native interactive elements.
 **Action:** Always check the children of a container before making it focusable or changing its role. Use `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]` on native interactive elements (like `<button>` or `<a>`) to ensure a consistent, accessible keyboard navigation experience.
+
+## 2026-06-16 - [Preserving Input Interactions During Async Operations]
+**Learning:** Using the native `disabled` attribute on text inputs (like `<textarea>`) during long async operations (e.g., AI streaming or image compression) completely locks the element, preventing users from scrolling through their previously typed long text or selecting it for copying.
+**Action:** When locking text inputs during loading/streaming states, use `readOnly={isLoading}` instead of `disabled={isLoading}`. Pair this with a dynamic `placeholder` to explain the locked state (e.g., "Generating response..."), and conditionally apply a muted text color so it visually appears inactive without losing interactability.
