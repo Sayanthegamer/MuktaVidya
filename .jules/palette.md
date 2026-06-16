@@ -33,3 +33,7 @@
 ## 2024-06-12 - [Invalid ARIA Nesting & Focus Rings]
 **Learning:** Adding `role="button"` or `tabIndex={0}` to an element (like a `<label>` or `<div>`) that *already* contains interactive elements (like `<button>`) results in an invalid HTML/ARIA structure. This severely degrades the screen reader experience. Focus rings should instead be added to the individual native interactive elements.
 **Action:** Always check the children of a container before making it focusable or changing its role. Use `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]` on native interactive elements (like `<button>` or `<a>`) to ensure a consistent, accessible keyboard navigation experience.
+
+## 2024-06-15 - [Textarea Accessibility During Streaming States]
+**Learning:** Disabling a `textarea` during long, multi-second AI streaming generation states creates a poor UX because native `disabled` attributes block users from scrolling long multi-line text or selecting text to copy.
+**Action:** When locking inputs during streaming states, use `readOnly` instead of `disabled` to preserve interaction (scrolling, text selection) while preventing edits. Additionally, use a dynamic `placeholder` to provide immediate context on why the input is locked (e.g., "AI is generating...").
