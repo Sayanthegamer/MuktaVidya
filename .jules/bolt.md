@@ -34,6 +34,8 @@
 ## 2024-06-03 - Prevent Sibling Re-renders During Streaming
 **Learning:** Found that sibling components of `SolutionPanel` inside `MainWorkspace` (like `AppHeader` and `HistorySidebar`) were re-rendering unnecessarily during text streaming because inline functions were being passed as props.
 **Action:** Wrapped functions like `handleLanguageChange` in `useCallback`, replaced inline callbacks with memoized handlers, and wrapped the static sibling components in `React.memo()` to prevent costly layout recalculations during high-frequency streaming updates.
+
 ## 2024-06-03 - Memoizing FloatingDock and Sibling Prop Stabilization
+
 **Learning:** React siblings re-render during high-frequency parent state updates (like streaming AI chunks) if the parent passes unmemoized inline functions or newly constructed objects. Also, using `useCallback` on event handlers that need to access frequently updating state (like `messages` in a chat) without adding that state to the dependency array (which would recreate the callback anyway) requires utilizing the functional form of state updaters (`setState(prev => ...)`). Relying on a `useRef` updated via `useEffect` to avoid the dependency is technically a slight React anti-pattern as the `ref` updates *after* the render commits, leading to a small race condition window.
 **Action:** When a parent component receives high-frequency updates, strictly memoize large sibling components using `React.memo` and stabilize their callback props using `useCallback`. When those callbacks need access to the latest state but cannot list it as a dependency, use functional state updaters instead of a `useRef` cache.

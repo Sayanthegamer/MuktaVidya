@@ -192,13 +192,9 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     if (text) newMessage.text = text;
     if (imageBase64) newMessage.imageBase64 = imageBase64;
 
-    // Add to current conversation state using functional state updater
-    // to guarantee synchronous access to the latest state within the same event loop.
-    let currentMessages: ChatMessage[] = [];
-    setMessages(prev => {
-      currentMessages = [...prev, newMessage];
-      return currentMessages;
-    });
+    // Build the new messages array directly, then use it for both setState and processRequest
+    const currentMessages = [...messagesRef.current, newMessage];
+    setMessages(currentMessages);
 
     // Process request with full conversation history
     await processRequest(currentMessages, false);
