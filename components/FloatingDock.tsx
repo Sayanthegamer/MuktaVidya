@@ -197,9 +197,19 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               aria-label="Ask a follow-up question"
-              placeholder={isStreaming ? "AI is generating..." : "Ask a follow-up question..."}
-              className={`flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] text-[var(--text-primary)] placeholder-[var(--text-muted)] font-sans leading-relaxed scrollbar-thin ${isStreaming ? 'cursor-not-allowed text-[var(--text-muted)]' : ''}`}
-              readOnly={isStreaming}
+              placeholder={
+                isStreaming 
+                  ? "Generating response..." 
+                  : isCompressing 
+                  ? "Compressing image..." 
+                  : "Ask a follow-up question..."
+              }
+              className={`flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] font-sans leading-relaxed scrollbar-thin placeholder-[var(--text-muted)] ${
+                isStreaming || isCompressing 
+                  ? 'text-[var(--text-muted)] cursor-not-allowed' 
+                  : 'text-[var(--text-primary)]'
+              }`}
+              readOnly={isStreaming || isCompressing}
               rows={1}
             />
 
