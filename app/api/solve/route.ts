@@ -167,16 +167,17 @@ ${langInstruction}${modeInstruction}`;
       }
 
       if (msg.imageBase64) {
-        const commaIndex = msg.imageBase64.indexOf(',');
         let mimeType = 'image/jpeg';
         let base64Data = msg.imageBase64;
 
-        if (commaIndex !== -1) {
-          // Format is typically: data:image/jpeg;base64,
-          // Extract the mime type (e.g., image/jpeg) from the prefix
-          // 'data:' is 5 chars, ';base64' is 7 chars.
-          mimeType = msg.imageBase64.substring(5, commaIndex - 7);
-          base64Data = msg.imageBase64.substring(commaIndex + 1);
+        // Validate proper data URL format: data:<mime>;base64,<data>
+        if (msg.imageBase64.startsWith('data:')) {
+          const base64Index = msg.imageBase64.indexOf(';base64,');
+          if (base64Index !== -1) {
+            // Extract MIME type between 'data:' and ';base64,'
+            mimeType = msg.imageBase64.substring(5, base64Index);
+            base64Data = msg.imageBase64.substring(base64Index + 8);
+          }
         }
 
         parts.push({ inlineData: { mimeType, data: base64Data } });
