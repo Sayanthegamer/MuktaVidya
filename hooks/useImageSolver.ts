@@ -26,10 +26,9 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   // Cleanup: abort any in-flight requests on unmount
   useEffect(() => {
+    const controller = abortControllerRef;
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      controller.current?.abort();
     };
   }, []);
 
@@ -100,6 +99,7 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
       try {
         while (true) {
+          // react-doctor-disable-next-line react-doctor/async-await-in-loop
           const { done, value } = await reader.read();
           if (done) break;
 

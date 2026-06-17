@@ -13,6 +13,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
     <div className="mt-12 flex items-center justify-between fade-up sticky bottom-4 z-10 px-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/70 backdrop-blur-md shadow-lg">
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={onCopy}
           className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
           aria-label={copied ? "Copied solution" : "Copy solution"}
@@ -22,6 +23,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
           <span className="text-xs font-medium">{copied ? "Copied" : "Copy"}</span>
         </button>
         <button
+          type="button"
           onClick={onShare}
           className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
           aria-label="Share solution"
@@ -36,6 +38,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
         <span className="text-xs text-[var(--text-muted)]">Was this helpful?</span>
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => {
               if (feedback !== null) return;
               onFeedback('up');
@@ -57,6 +60,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
             <ThumbsUp size={16} weight={feedback === 'up' ? "fill" : "regular"} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={() => {
               if (feedback !== null) return;
               onFeedback('down');
