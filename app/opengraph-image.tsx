@@ -12,6 +12,7 @@ export default async function Image() {
   return new ImageResponse(
     (
       <div
+        // react-doctor-disable-next-line react-doctor/no-inline-exhaustive-style
         style={{
           height: "100%",
           width: "100%",

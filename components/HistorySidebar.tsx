@@ -1,7 +1,7 @@
 "use client";
 import { X, ClockCounterClockwise, FileText } from "@phosphor-icons/react";
 import Image from "next/image";
-import { useEffect, memo } from "react";
+import { useEffect, memo, useRef } from "react";
 import { HistoryItem } from "../types/history";
 
 interface HistorySidebarProps {
@@ -13,25 +13,33 @@ interface HistorySidebarProps {
 
 const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key === 'Escape' && isOpen) onCloseRef.current();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   return (
     <>
       {/* Backdrop */}
-      <div
+      <button
+        type="button"
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
-        aria-hidden={!isOpen}
+        aria-hidden="true"
+        tabIndex={-1}
       />
 
       {/* Sidebar Panel */}
+      {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role, react-doctor/prefer-html-dialog */}
       <div
         id="history-sidebar"
         className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-1)] border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel ${isOpen ? "is-open" : ""}`}
@@ -45,6 +53,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
             Recent Scans
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
             aria-label="Close history"
@@ -63,9 +72,10 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
             </div>
           ) : (
             <div className="flex flex-col">
-              {history.map((item, index) => (
+               {history.map((item, index) => (
                 <button
                   key={item.id || index}
+                  type="button"
                   onClick={() => {
                     onSelect(item);
                     onClose();
@@ -75,7 +85,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
                   {/* Thumbnail */}
                   <div className="relative shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
                     {item.imageBase64 ? (
-                      <Image src={item.imageBase64} alt="" fill className="w-full h-full object-cover" unoptimized />
+                      <Image src={item.imageBase64} alt="" fill sizes="48px" className="w-full h-full object-cover" unoptimized />
                     ) : (
                       <FileText size={24} className="text-[var(--text-muted)]" />
                     )}

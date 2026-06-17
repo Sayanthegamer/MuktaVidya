@@ -58,16 +58,21 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
     }
   }, [text]);
 
+  const onStopRef = useRef(onStop);
+  useEffect(() => {
+    onStopRef.current = onStop;
+  }, [onStop]);
+
   // Global Escape key to stop streaming
   useEffect(() => {
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'Escape' && isStreaming) {
-        onStop();
+        onStopRef.current();
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [isStreaming, onStop]);
+  }, [isStreaming]);
 
   const handleSubmit = () => {
     if ((!text.trim() && !attachedImage) || isStreaming || isCompressing) return;
@@ -130,13 +135,13 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
       <div className="w-full max-w-3xl relative pointer-events-auto group">
 
         {/* Alien Glow Effect (Architecturally accurate pseudo-style) */}
+        {/* react-doctor-disable-next-line react-doctor/no-large-animated-blur */}
         <div
           className="absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out"
           style={{
              background: 'var(--accent)',
              filter: 'blur(20px)',
-             opacity: isStreaming ? 0.25 : 0.1,
-             willChange: 'opacity, transform'
+             opacity: isStreaming ? 0.25 : 0.1
           }}
           aria-hidden="true"
         />
@@ -148,9 +153,10 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
           {attachedImage && (
             <div className="relative self-start mt-4 ml-4">
               <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] w-20 h-20">
-                <Image src={attachedImage} alt="Attached" fill className="object-cover" unoptimized />
+                <Image src={attachedImage} alt="Attached" fill sizes="80px" className="object-cover" unoptimized />
               </div>
               <button
+                type="button"
                 onClick={() => setAttachedImage(null)}
                 className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
                 aria-label="Remove attachment"
@@ -163,6 +169,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
           <div className="flex items-end gap-2 px-2 pb-1">
             {/* Attach Button */}
             <button
+              type="button"
               onClick={() => {
                 if (isStreaming || isCompressing) return;
                 fileInputRef.current?.click();
@@ -188,6 +195,8 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               className="hidden"
               ref={fileInputRef}
               onChange={handleFileChange}
+              aria-label="Upload question image"
+              tabIndex={-1}
             />
 
             {/* Auto-resizing Textarea */}
@@ -216,6 +225,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
             {/* Submit / Stop Button */}
             {isStreaming ? (
               <button
+                type="button"
                 onClick={onStop}
                 className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
                 title="Stop Generating (Esc)"
@@ -225,6 +235,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               </button>
             ) : (
               <button
+                type="button"
                 onClick={(e) => {
                   if ((!text.trim() && !attachedImage) || isCompressing) {
                     e.preventDefault();

@@ -13,14 +13,19 @@ interface SolutionPanelProps {
   onRescan?: () => void;
 }
 
-export default function SolutionPanel({ isStreaming, isLoading, solution, messages = [], hasStartedChat, onRescan }: SolutionPanelProps) {
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
+export default function SolutionPanel({ isStreaming, isLoading, solution, messages = EMPTY_MESSAGES, hasStartedChat, onRescan }: SolutionPanelProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [feedbackMap, setFeedbackMap] = useState<Record<number, 'up' | 'down'>>({});
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackInProgressRef = useRef<Set<number>>(new Set());
+  const feedbackInProgressRef = useRef<Set<number>>(null as any);
+  if (!feedbackInProgressRef.current) {
+    feedbackInProgressRef.current = new Set();
+  }
 
   const handleCopy = useCallback(async (index: number, text: string) => {
     try {
@@ -150,6 +155,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
 
           return (
             <ChatMessageItem
+              // react-doctor-disable-next-line react-doctor/no-array-index-as-key
               key={index}
               msg={msg}
               index={index}

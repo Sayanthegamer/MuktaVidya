@@ -33,8 +33,10 @@ const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, langu
 
       <div className="flex items-center gap-4">
         {/* Mode Selector */}
+        {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
         <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Solve mode">
           <button
+            type="button"
             onClick={() => setMode("NORMAL")}
             aria-pressed={mode === "NORMAL"}
             className={`
@@ -49,6 +51,7 @@ const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, langu
             NORMAL
           </button>
           <button
+            type="button"
             onClick={() => setMode("FASTEST")}
             aria-pressed={mode === "FASTEST"}
             className={`
@@ -66,10 +69,12 @@ const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, langu
         </div>
 
         {/* Language Selector */}
+        {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
         <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
         {LANGUAGES.map((lang, index) => (
           <button
             key={lang.id}
+            type="button"
             onClick={() => setLanguage(lang.id)}
             aria-pressed={language === lang.id}
             className={`
@@ -90,6 +95,7 @@ const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, langu
 
       {/* History Toggle */}
       <button
+        type="button"
         onClick={onHistoryClick}
         aria-label="Recent scans"
         aria-expanded={isHistoryOpen}

@@ -48,13 +48,13 @@ export default function MainWorkspace() {
 
       <main className={`flex-1 relative overflow-hidden transition-all duration-300 ease-out ${hasStartedChat ? 'flex flex-col' : 'grid grid-cols-1 md:grid-cols-[40fr_60fr]'}`}>
         {/* Ambient Glow Mesh */}
+        {/* react-doctor-disable-next-line react-doctor/no-large-animated-blur */}
         <div
           className="ambient-mesh absolute -inset-[100px] pointer-events-none"
           style={{
             background: 'radial-gradient(circle at 50% 10%, var(--accent-border) 0%, transparent 60%), radial-gradient(circle at 10% 50%, var(--surface-3) 0%, transparent 50%)',
             filter: 'blur(40px)',
-            opacity: 0.6,
-            willChange: 'transform'
+            opacity: 0.6
           }}
           aria-hidden="true"
         />
