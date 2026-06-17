@@ -152,7 +152,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               </div>
               <button
                 onClick={() => setAttachedImage(null)}
-                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
+                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 aria-label="Remove attachment"
               >
                 <X size={12} weight="bold" aria-hidden="true" />
@@ -167,7 +167,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                 if (isStreaming || isCompressing) return;
                 fileInputRef.current?.click();
               }}
-              className={`p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0 ${
+              className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0 ${
                 isStreaming || isCompressing
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] btn-press'
@@ -217,7 +217,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
             {isStreaming ? (
               <button
                 onClick={onStop}
-                className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
+                className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                 title="Stop Generating (Esc)"
                 aria-label="Stop"
               >
@@ -233,7 +233,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                   handleSubmit();
                 }}
                 aria-disabled={(!text.trim() && !attachedImage) || isCompressing}
-                className={`p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
+                className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
                   (text.trim() || attachedImage) && !isCompressing
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'

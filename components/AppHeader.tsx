@@ -22,7 +22,7 @@ const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, langu
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
       {/* Logo */}
-      <h1 className="flex items-center gap-1.5 select-none">
+      <h1 className="flex items-center gap-1.5 select-none" aria-label="MuktaVidya AI">
         <span className="font-mono text-sm tracking-widest text-[var(--text-muted)] uppercase">
           MuktaVidya
         </span>

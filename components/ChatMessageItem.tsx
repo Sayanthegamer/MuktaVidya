@@ -93,7 +93,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                {showRescanButton && (
                  <button
                    onClick={onRescan}
-                   className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm"
+                   className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                    title="Start Over"
                    aria-label="Start over"
                  >
