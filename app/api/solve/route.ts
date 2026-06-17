@@ -168,9 +168,19 @@ ${langInstruction}${modeInstruction}`;
       }
 
       if (msg.imageBase64) {
-        const mimeMatch = msg.imageBase64.match(/^data:(image\/\w+);base64,/);
-        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-        const base64Data = msg.imageBase64.replace(/^data:image\/\w+;base64,/, "");
+        let mimeType = 'image/jpeg';
+        let base64Data = msg.imageBase64;
+
+        // Validate proper data URL format: data:<mime>;base64,<data>
+        if (msg.imageBase64.startsWith('data:')) {
+          const base64Index = msg.imageBase64.indexOf(';base64,');
+          if (base64Index !== -1) {
+            // Extract MIME type between 'data:' and ';base64,'
+            mimeType = msg.imageBase64.substring(5, base64Index);
+            base64Data = msg.imageBase64.substring(base64Index + 8);
+          }
+        }
+
         parts.push({ inlineData: { mimeType, data: base64Data } });
       }
 
