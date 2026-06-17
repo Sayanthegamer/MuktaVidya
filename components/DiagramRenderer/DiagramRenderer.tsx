@@ -143,11 +143,12 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         <div
           className="w-full max-w-[500px] text-[var(--text-primary)] svg-diagram-container"
           style={{ color: 'var(--text-primary)' }}
+          // react-doctor-disable-next-line react-doctor/no-danger
           dangerouslySetInnerHTML={{ __html: cleanedSvg }}
         />
         
         {/* Standard template block forces layout engine evaluation independent of hydration timings */}
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style>{`
           .svg-diagram-container svg {
             width: 100% !important;
             height: auto !important;
@@ -186,7 +187,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
           .svg-diagram-container svg path:not([stroke])[fill="none"] {
             stroke: var(--text-secondary);
           }
-        ` }} />
+        `}</style>
       </div>
     );
   }

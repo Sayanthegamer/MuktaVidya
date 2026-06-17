@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     const chunks = [];
 
     while (true) {
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop
       const { done, value } = await reader.read();
       if (done) break;
 
