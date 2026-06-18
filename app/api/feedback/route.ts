@@ -62,11 +62,37 @@ export async function POST(request: Request) {
     if (!bodyText) {
       throw new Error('Empty body');
     }
-    JSON.parse(bodyText);
+
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(bodyText);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+    }
+
+    if (typeof parsedBody !== 'object' || parsedBody === null || Array.isArray(parsedBody)) {
+      return new Response(JSON.stringify({ error: 'Invalid payload structure' }), { status: 400 });
+    }
+
+    const { type, content } = parsedBody as { type?: string, content?: string };
+
+    if (type !== 'up' && type !== 'down') {
+      return new Response(JSON.stringify({ error: 'Invalid feedback type' }), { status: 400 });
+    }
+
+    if (content !== undefined) {
+      if (typeof content !== 'string') {
+        return new Response(JSON.stringify({ error: 'Content must be a string' }), { status: 400 });
+      }
+      if (content.length > 1000) {
+        return new Response(JSON.stringify({ error: 'Content exceeds maximum length' }), { status: 400 });
+      }
+    }
 
     // In a real app, you would log this to Supabase or another DB.
     return new Response(JSON.stringify({ success: true }));
-  } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+  } catch (error) {
+    console.error('Feedback API Error:', error);
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
