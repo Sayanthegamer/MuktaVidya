@@ -47,3 +47,7 @@
 
 **Learning:** Using the native `disabled` attribute on text inputs (like `<textarea>`) during long async operations (e.g., AI streaming or image compression) completely locks the element, preventing users from scrolling through their previously typed long text or selecting it for copying.
 **Action:** When locking text inputs during loading/streaming states, use `readOnly={isLoading}` instead of `disabled={isLoading}`. Pair this with a dynamic `placeholder` to explain the locked state (e.g., "Generating response..."), and conditionally apply a muted text color so it visually appears inactive without losing interactability.
+
+## 2026-06-19 - [Invalid HTML Structure in Drag and Drop Containers]
+**Learning:** Wrapping a drag-and-drop file upload zone in a `<label>` element that contains other interactive children (like "Take Photo" or "Choose from Gallery" buttons) results in invalid HTML and breaks keyboard/screen reader navigation.
+**Action:** When a drop zone contains its own explicit buttons, use a semantic `<div>` container instead of `<label>` to avoid nesting interactive elements.
