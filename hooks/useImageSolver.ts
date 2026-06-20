@@ -11,12 +11,12 @@ interface UseImageSolverOptions {
 }
 
 export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: UseImageSolverOptions) {
-  // Legacy states for compatibility and UI components that expect them
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [solution, setSolution] = useState("");
-
   // New chat history state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  // Derive legacy states dynamically for components that expect them
+  const imagePreview = messages.length > 0 && messages[0].role === "user" ? messages[0].imageBase64 || null : null;
+  const solution = messages.length > 1 && messages[1].role === "model" ? messages[1].text || "" : "";
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -56,7 +56,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
     // Add a placeholder message for the model's response
     setMessages([...currentMessages, { role: 'model', text: '' }]);
-    if (isInitialCapture) setSolution("");
 
     try {
       const response = await fetch("/api/solve", {
@@ -83,7 +82,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
         }
         setIsProcessing(false);
         setIsStreaming(false);
-        if (isInitialCapture) setImagePreview(null);
         // Remove the empty model message
         setMessages(currentMessages);
         return;
@@ -111,8 +109,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
           const chunk = decoder.decode(value, { stream: true });
           streamedText += chunk;
 
-          if (isInitialCapture) setSolution(streamedText);
-
           // Update the last model message in the messages array
           setMessages(prev => {
             const newMessages = [...prev];
@@ -125,7 +121,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
         const finalChunk = decoder.decode();
         if (finalChunk) {
           streamedText += finalChunk;
-          if (isInitialCapture) setSolution(streamedText);
           setMessages(prev => {
             const newMessages = [...prev];
             const lastIndex = newMessages.length - 1;
@@ -137,8 +132,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
         if (abortController.signal.aborted) return;
 
         const finalSolution = preprocessMarkdown(streamedText);
-
-        if (isInitialCapture) setSolution(finalSolution);
 
         setMessages(prev => {
           const newMessages = [...prev];
@@ -173,12 +166,10 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
       setIsStreaming(false);
       // Remove the empty model message
       setMessages(currentMessages);
-      if (isInitialCapture) setImagePreview(null);
     }
   }, [abortCurrentRequest, language, mode, onSolveComplete]);
 
   const handleCapture = useCallback(async (base64Data: string) => {
-    setImagePreview(base64Data);
     const newMessages: ChatMessage[] = [{ role: 'user', imageBase64: base64Data }];
     setMessages(newMessages);
     await processRequest(newMessages, true);
@@ -203,8 +194,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   const handleRescan = useCallback(() => {
     abortCurrentRequest();
-    setImagePreview(null);
-    setSolution("");
     setMessages([]);
     setError(null);
     setIsProcessing(false);
@@ -213,8 +202,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   const resetState = useCallback(() => {
     abortCurrentRequest();
-    setImagePreview(null);
-    setSolution("");
     setMessages([]);
     setError(null);
     setIsProcessing(false);
@@ -223,8 +210,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   // For history item selection to set initial messages
   const setInitialState = useCallback((imageBase64: string, solutionText: string) => {
-    setImagePreview(imageBase64);
-    setSolution(solutionText);
     setMessages([
       { role: 'user', imageBase64 },
       { role: 'model', text: solutionText }
@@ -233,13 +218,11 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
 
   return {
     imagePreview,
-    setImagePreview,
     messages,
     setInitialState,
     isProcessing,
     setIsProcessing,
     solution,
-    setSolution,
     isStreaming,
     setIsStreaming,
     error,
