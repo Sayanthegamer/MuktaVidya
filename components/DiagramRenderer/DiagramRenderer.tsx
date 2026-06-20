@@ -21,10 +21,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
     if (type !== 'svg') return null;
     try {
       let clean = chartData
-        .replace(/```svg-diagram/g, '')
-        .replace(/```xml/g, '')
-        .replace(/```svg/g, '')
-        .replace(/```/g, '')
+        .replace(/```(?:svg-diagram|xml|svg)?/gi, '')
         .trim();
 
       // 1. Isolate the front boundary case-insensitively
@@ -90,7 +87,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
   const parsedOptions = useMemo(() => {
     if (type !== 'chart') return null;
     try {
-      const cleanedData = chartData.replace(/```json-chart/g, '').replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanedData = chartData.replace(/```(?:json-chart|json)?/gi, '').trim();
       const rawOptions = JSON.parse(cleanedData);
 
       const primaryColor = 'var(--text-primary)';
