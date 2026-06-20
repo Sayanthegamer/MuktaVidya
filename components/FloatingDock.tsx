@@ -19,34 +19,40 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Intersection Observer for visibility
   useEffect(() => {
     if (isStreaming) {
       setTimeout(() => setIsVisible(true), 0);
+      if (observerRef.current) observerRef.current.disconnect();
       return;
     }
 
     const target = document.getElementById('solution-bottom-target');
     if (!target) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-        });
-      },
-      {
-        root: null, // viewport or closest scroll container
-        rootMargin: '100px', // trigger a bit before hitting absolute bottom
-        threshold: 0,
-      }
-    );
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            setIsVisible(entry.isIntersecting);
+          });
+        },
+        {
+          root: null, // viewport or closest scroll container
+          rootMargin: '100px', // trigger a bit before hitting absolute bottom
+          threshold: 0,
+        }
+      );
+    }
 
-    observer.observe(target);
+    observerRef.current.observe(target);
 
     return () => {
-      observer.disconnect();
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
   }, [isStreaming]);
 
