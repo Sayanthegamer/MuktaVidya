@@ -55,7 +55,7 @@ const markdownComponents = {
   }
 };
 
-const ChatMessageItem = memo(function ChatMessageItem({
+export default memo(function ChatMessageItem({
   msg,
   index,
   showRescanButton,
@@ -71,8 +71,6 @@ const ChatMessageItem = memo(function ChatMessageItem({
 
   const processedText = React.useMemo(() => {
     if (!msg.text) return "";
-    // If it's streaming, we return the raw text to be rendered in the <pre> tag.
-    // If it's not streaming, we preprocess it for ReactMarkdown.
     return isCurrentlyStreaming ? msg.text : preprocessMarkdown(msg.text);
   }, [msg.text, isCurrentlyStreaming]);
 
@@ -151,5 +149,3 @@ const ChatMessageItem = memo(function ChatMessageItem({
     </div>
   );
 });
-
-export default ChatMessageItem;
