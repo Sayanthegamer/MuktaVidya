@@ -53,19 +53,14 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: 'No body provided' }), { status: 400 });
     }
 
-    const reader = request.body.getReader();
     let receivedLength = 0;
-    const chunks = [];
+    const chunks: Uint8Array[] = [];
 
-    while (true) {
-      // react-doctor-disable-next-line react-doctor/async-await-in-loop
-      const { done, value } = await reader.read();
-      if (done) break;
-
+    // Use for await...of for optimal stream consumption instead of blocking while/await
+    for await (const value of request.body as unknown as AsyncIterable<Uint8Array>) {
       if (value) {
         receivedLength += value.length;
         if (receivedLength > MAX_BODY_BYTES) {
-          reader.cancel();
           return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
         }
         chunks.push(value);
