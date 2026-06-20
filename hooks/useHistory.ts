@@ -22,7 +22,8 @@ export function useHistory() {
           item.timestamp &&
           item.imageBase64 &&
           item.language &&
-          item.imageBase64.trim() !== "" &&
+          // ⚡ Bolt: Avoid calling .trim() on massive Base64 strings during history hydration to prevent blocking the main thread with massive string allocations.
+          item.imageBase64.length > 0 &&
           item.language.trim() !== ""
         );
 
