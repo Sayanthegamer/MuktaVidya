@@ -15,35 +15,32 @@ export function useHistory() {
     get("muktavidya_history").then(parsed => {
       if (isCancelled) return;
       if (Array.isArray(parsed)) {
-        const validHistory = parsed.filter((item: HistoryItem) =>
-          item &&
-          item.id &&
-          item.solution &&
-          item.timestamp &&
-          item.imageBase64 &&
-          item.language &&
-          item.imageBase64.trim() !== "" &&
-          item.language.trim() !== ""
-        );
-
-        // Deduplicate within parsed array itself, keeping the first occurrence by id
-        const seenIds = new Set<string>();
-        const deduplicatedHistory = validHistory.filter((item: HistoryItem) => {
-          if (item.id && seenIds.has(item.id)) {
-            return false;
-          }
-          if (item.id) {
-            seenIds.add(item.id);
-          }
-          return true;
-        });
-
         setHistory(currentHistory => {
           const existingIds = currentHistory.reduce((acc, item) => {
             if (item.id !== undefined) acc.add(item.id);
             return acc;
           }, new Set<string>());
-          const newHydratedItems = deduplicatedHistory.filter((item: HistoryItem) => !item.id || !existingIds.has(item.id));
+
+          const seenIds = new Set<string>(existingIds);
+          const newHydratedItems: HistoryItem[] = [];
+
+          for (const item of parsed as HistoryItem[]) {
+            if (
+              item &&
+              item.id &&
+              !seenIds.has(item.id) &&
+              item.solution &&
+              item.timestamp &&
+              item.imageBase64 &&
+              item.language &&
+              item.imageBase64.trim() !== "" &&
+              item.language.trim() !== ""
+            ) {
+              seenIds.add(item.id);
+              newHydratedItems.push(item);
+            }
+          }
+
           return [...currentHistory, ...newHydratedItems].slice(0, 50);
         });
       }
