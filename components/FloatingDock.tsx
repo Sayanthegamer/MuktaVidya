@@ -17,6 +17,9 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
   const [isVisible, setIsVisible] = useState(true);
   const [isCompressing, setIsCompressing] = useState(false);
 
+  const hasContent = Boolean(text.trim() || attachedImage);
+  const canSubmit = hasContent && !isCompressing;
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,7 +78,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
   }, [isStreaming]);
 
   const handleSubmit = () => {
-    if ((!text.trim() && !attachedImage) || isStreaming || isCompressing) return;
+    if (!canSubmit || isStreaming) return;
 
     onFollowUp(text.trim(), attachedImage || undefined);
     setText("");
@@ -237,19 +240,19 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               <button
                 type="button"
                 onClick={(e) => {
-                  if ((!text.trim() && !attachedImage) || isCompressing) {
+                  if (!canSubmit) {
                     e.preventDefault();
                     return;
                   }
                   handleSubmit();
                 }}
-                aria-disabled={(!text.trim() && !attachedImage) || isCompressing}
+                aria-disabled={!canSubmit}
                 className={`p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
-                  (text.trim() || attachedImage) && !isCompressing
+                  canSubmit
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
-                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message (Enter)"}
+                title={isCompressing ? "Compressing image..." : !hasContent ? "Enter text or attach an image to send" : "Send Message (Enter)"}
                 aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
