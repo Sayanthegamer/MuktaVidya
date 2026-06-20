@@ -22,7 +22,7 @@ export function useHistory() {
           item.timestamp &&
           item.imageBase64 &&
           item.language &&
-          item.imageBase64.trim() !== "" &&
+          item.imageBase64.length > 0 &&
           item.language.trim() !== ""
         );
 

@@ -44,3 +44,7 @@
 
 **Learning:** Found that using Regular Expressions (`match` and `replace`) to extract the MIME type and payload from massive Data URLs (base64 image strings up to 10MB) inside a tight map loop in the `POST` solve route caused unnecessary engine overhead and memory allocations. Furthermore, the existing regex `/^data:(image\/\w+);base64,/` was technically flawed as it failed to capture MIME types containing non-word characters like `+` (e.g., `image/svg+xml`).
 **Action:** Replaced the regex approach with simple string indexing (`indexOf(',')`) and `substring()` calls. This optimizes the extraction process and prevents regex backtracking overhead on large multimegabyte strings, while simultaneously making the MIME type extraction more robust against varying formats.
+
+## 2024-06-03 - Optimize Base64 Validation Memory Overhead
+**Learning:** Found that using `.trim()` on massive Base64 strings (e.g. 10MB payloads) just to check if they are not empty causes the JavaScript engine to allocate entirely new strings in memory. This leads to severe memory spikes and main-thread blocking, particularly when parsing payloads in `app/api/solve/route.ts` or hydrating history from IndexedDB in `hooks/useHistory.ts`.
+**Action:** When validating the existence or non-emptiness of massive data strings like Base64 URLs, avoid string mutation methods like `.trim()`. Instead, use simple length validation (`.length > 0`) to prevent redundant memory allocation overhead.
