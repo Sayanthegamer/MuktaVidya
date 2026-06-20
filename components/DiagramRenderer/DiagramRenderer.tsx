@@ -52,7 +52,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         const remainder = clean.substring(rootTagClose + 1);
 
         // FIX A: Inject the missing XML namespace so DOMPurify doesn't destroy the canvas
-        if (!/xmlns/i.test(rootTag)) {
+        if (!/\bxmlns\s*=/i.test(rootTag)) {
           rootTag = rootTag.replace(/<svg/i, '<svg xmlns="http://www.w3.org/2000/svg"');
         }
 
