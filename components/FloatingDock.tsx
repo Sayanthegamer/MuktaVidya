@@ -137,12 +137,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
         {/* Alien Glow Effect (Architecturally accurate pseudo-style) */}
         {/* react-doctor-disable-next-line react-doctor/no-large-animated-blur */}
         <div
-          className="absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out"
-          style={{
-             background: 'var(--accent)',
-             filter: 'blur(20px)',
-             opacity: isStreaming ? 0.25 : 0.1
-          }}
+          className={`absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out bg-[var(--accent)] blur-[20px] ${isStreaming ? 'opacity-25' : 'opacity-10'}`}
           aria-hidden="true"
         />
 
