@@ -11,6 +11,16 @@ interface FloatingDockProps {
 
 // Memoize the dock to prevent it from re-rendering 50+ times per second
 // during high-frequency AI streaming updates since it's a sibling of SolutionPanel.
+
+const WRAPPER_BASE_CLASSES = "fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe";
+const ALIEN_GLOW_CLASSES = "absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out";
+const CONTAINER_CLASSES = "relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all duration-200";
+const TEXTAREA_BASE_CLASSES = "flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] font-sans leading-relaxed scrollbar-thin placeholder-[var(--text-muted)]";
+const BUTTON_BASE_CLASSES = "p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0";
+const SUBMIT_BUTTON_BASE_CLASSES = "p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0";
+const STOP_BUTTON_CLASSES = "p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0";
+const REMOVE_IMAGE_BUTTON_CLASSES = "absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press";
+
 const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
@@ -128,7 +138,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
+      className={`${WRAPPER_BASE_CLASSES} ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
     >
@@ -137,7 +147,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
         {/* Alien Glow Effect (Architecturally accurate pseudo-style) */}
         {/* react-doctor-disable-next-line react-doctor/no-large-animated-blur */}
         <div
-          className="absolute -inset-[10px] -z-10 rounded-2xl pointer-events-none transition-opacity duration-1000 ease-out"
+          className={ALIEN_GLOW_CLASSES}
           style={{
              background: 'var(--accent)',
              filter: 'blur(20px)',
@@ -147,7 +157,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
         />
 
         {/* Main Dock Container */}
-        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all duration-200">
+        <div className={CONTAINER_CLASSES}>
 
           {/* Image Preview Area */}
           {attachedImage && (
@@ -158,7 +168,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               <button
                 type="button"
                 onClick={() => setAttachedImage(null)}
-                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
+                className={REMOVE_IMAGE_BUTTON_CLASSES}
                 aria-label="Remove attachment"
               >
                 <X size={12} weight="bold" aria-hidden="true" />
@@ -174,7 +184,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                 if (isStreaming || isCompressing) return;
                 fileInputRef.current?.click();
               }}
-              className={`p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0 ${
+              className={`${BUTTON_BASE_CLASSES} ${
                 isStreaming || isCompressing
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] btn-press'
@@ -213,7 +223,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                   ? "Compressing image..." 
                   : "Ask a follow-up question..."
               }
-              className={`flex-1 max-h-[120px] min-h-[24px] bg-transparent border-none outline-none resize-none py-2.5 text-[0.9375rem] font-sans leading-relaxed scrollbar-thin placeholder-[var(--text-muted)] ${
+              className={`${TEXTAREA_BASE_CLASSES} ${
                 isStreaming || isCompressing 
                   ? 'text-[var(--text-muted)] cursor-not-allowed' 
                   : 'text-[var(--text-primary)]'
@@ -227,7 +237,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               <button
                 type="button"
                 onClick={onStop}
-                className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
+                className={STOP_BUTTON_CLASSES}
                 title="Stop Generating (Esc)"
                 aria-label="Stop"
               >
@@ -244,7 +254,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                   handleSubmit();
                 }}
                 aria-disabled={(!text.trim() && !attachedImage) || isCompressing}
-                className={`p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
+                className={`${SUBMIT_BUTTON_BASE_CLASSES} ${
                   (text.trim() || attachedImage) && !isCompressing
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
