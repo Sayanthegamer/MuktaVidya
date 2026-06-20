@@ -64,9 +64,10 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
           const widthMatch = rootTag.match(/width\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
           const heightMatch = rootTag.match(/height\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
 
-          const w = widthMatch ? parseInt(widthMatch[1], 10) : 400;
-          const h = heightMatch ? parseInt(heightMatch[1], 10) : 250;
-          rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}">`);
+          const w = widthMatch ? parseFloat(widthMatch[1]) : 400;
+          const h = heightMatch ? parseFloat(heightMatch[1]) : 250;
+          const isSelfClosing = /\/\s*>$/.test(rootTag);
+          rootTag = rootTag.replace(/\/?\s*>$/, ` viewBox="0 0 ${w} ${h}"${isSelfClosing ? ' />' : '>'}`);
         }
 
         // FIX D: Strip hardcoded width/height so CSS can scale it responsibly
