@@ -22,8 +22,8 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackInProgressRef = useRef<Set<number>>(null as any);
-  if (!feedbackInProgressRef.current) {
+  const feedbackInProgressRef = useRef<Set<number> | null>(null);
+  if (feedbackInProgressRef.current === null) {
     feedbackInProgressRef.current = new Set();
   }
 
@@ -53,8 +53,8 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   }, [handleCopy]);
 
   const handleFeedback = useCallback(async (index: number, type: 'up' | 'down', text: string) => {
-    if (feedbackInProgressRef.current.has(index)) return;
-    feedbackInProgressRef.current.add(index);
+    if (feedbackInProgressRef.current?.has(index)) return;
+    feedbackInProgressRef.current?.add(index);
 
     setFeedbackMap(prev => ({ ...prev, [index]: type }));
 
@@ -65,7 +65,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         body: JSON.stringify({ type, content: text.substring(0, 100) }),
       });
       if (!response.ok) {
-        feedbackInProgressRef.current.delete(index);
+        feedbackInProgressRef.current?.delete(index);
         setFeedbackMap(prev => {
           const newMap = { ...prev };
           delete newMap[index];
@@ -73,10 +73,10 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
         });
         console.error("Feedback failed, response not ok");
       } else {
-        feedbackInProgressRef.current.delete(index);
+        feedbackInProgressRef.current?.delete(index);
       }
     } catch (e) {
-      feedbackInProgressRef.current.delete(index);
+      feedbackInProgressRef.current?.delete(index);
       setFeedbackMap(prev => {
         const newMap = { ...prev };
         delete newMap[index];
