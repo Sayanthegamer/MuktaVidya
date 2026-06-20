@@ -47,3 +47,8 @@
 
 **Learning:** Using the native `disabled` attribute on text inputs (like `<textarea>`) during long async operations (e.g., AI streaming or image compression) completely locks the element, preventing users from scrolling through their previously typed long text or selecting it for copying.
 **Action:** When locking text inputs during loading/streaming states, use `readOnly={isLoading}` instead of `disabled={isLoading}`. Pair this with a dynamic `placeholder` to explain the locked state (e.g., "Generating response..."), and conditionally apply a muted text color so it visually appears inactive without losing interactability.
+
+## 2026-06-20 - [Escape Key Bindings in Modals]
+
+**Learning:** Ad-hoc portals or floating dialogs without built-in backdrop click dismissals (like the crop dialog in UploadZone) trap keyboard users unless explicit `Escape` key listeners are implemented. Additionally, providing tooltips on modal close buttons (e.g., `title="Close history (Esc)"`) helps discoverability.
+**Action:** Always implement global keydown listeners for `Escape` to close any conditionally rendered modal or portal. When adding close actions, explicitly label keyboard shortcuts in the `title` attributes.
