@@ -90,6 +90,14 @@ export async function POST(request: NextRequest) {
 
     const { messages, language, mode } = bodyData as { messages?: ChatMessage[], language?: string, mode?: SolveMode };
 
+    if (language && (typeof language !== 'string' || language.length > 50)) {
+      return new Response(JSON.stringify({ error: 'Invalid language parameter' }), { status: 400 });
+    }
+
+    if (mode && (typeof mode !== 'string' || mode.length > 50)) {
+      return new Response(JSON.stringify({ error: 'Invalid mode parameter' }), { status: 400 });
+    }
+
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
     }
@@ -101,11 +109,16 @@ export async function POST(request: NextRequest) {
     // Validate that all messages have either text or imageBase64
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-      if (msg.text && msg.text.length > 10000) {
-        return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
+      if (msg.text && (typeof msg.text !== 'string' || msg.text.length > 10000)) {
+        return new Response(JSON.stringify({ error: `Message text at index ${i} is invalid or exceeds the maximum length of 10000 characters` }), { status: 400 });
       }
+      if (msg.imageBase64 && typeof msg.imageBase64 !== 'string') {
+        return new Response(JSON.stringify({ error: `Message imageBase64 at index ${i} is invalid` }), { status: 400 });
+      }
+
       const hasText = msg.text && msg.text.trim().length > 0;
-      const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
+      // DO NOT use .trim() on base64 strings to prevent event loop blocking
+      const hasImage = msg.imageBase64 && msg.imageBase64.length > 0;
       if (!hasText && !hasImage) {
         return new Response(
           JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
