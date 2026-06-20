@@ -1,0 +1,7 @@
+🛡️ Sentinel: [MEDIUM] Fix Content Security Policy (CSP) Bypass in Development
+
+🚨 Severity: Medium
+💡 Vulnerability: The Next.js application used a highly permissive Content Security Policy (CSP) when running in development mode (NODE_ENV === 'development'), adding `unsafe-eval` and `unsafe-inline`. This weaker posture masked real security issues, creating a false sense of security that would only be caught after deploying to production.
+🎯 Impact: Developers could inadvertently introduce XSS vulnerabilities (e.g., inline scripts, eval statements) that bypass security validation locally, leading to critical failures in the production environment.
+🔧 Fix: Removed the conditional check for the development environment. Unified the CSP header completely so both production and development environments share the exact same strict policy rules. While this degrades local Next.js Fast Refresh (which relies on eval), it guarantees parity and robust security validation locally.
+✅ Verification: `pnpm build` and the `jest` test suites completed successfully.
