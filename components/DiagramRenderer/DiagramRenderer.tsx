@@ -126,7 +126,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         xAxis: Array.isArray(rawOptions.xAxis) ? rawOptions.xAxis.map(applyAxisStyles) : applyAxisStyles(rawOptions.xAxis),
         yAxis: Array.isArray(rawOptions.yAxis) ? rawOptions.yAxis.map(applyAxisStyles) : applyAxisStyles(rawOptions.yAxis),
         legend: rawOptions.legend ? { ...rawOptions.legend, textStyle: { ...rawOptions.legend?.textStyle, color: secondaryColor } } : undefined,
-        color: rawOptions.color || ['#60a5fa', '#34d399', '#fbbf24', '#f87171', '#818cf8'],
+        color: rawOptions.color || ['var(--accent)', 'var(--success)', 'var(--text-primary)', 'var(--error)', 'var(--text-secondary)'],
         tooltip: { ...rawOptions.tooltip, backgroundColor: 'var(--surface-3)', borderColor: borderColor, textStyle: { color: primaryColor } }
       };
     } catch (e) {
