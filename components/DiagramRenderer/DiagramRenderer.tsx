@@ -45,6 +45,9 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
       clean = clean.replace(/stroke\s*:\s*(?:#(?:000|000000)\b|black|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))/gi, 'stroke: currentColor');
       clean = clean.replace(/fill=["']\s*(?:#(?:000|000000)|black)\s*["']/gi, 'fill="currentColor"');
 
+      // FIX B: Force uniform viewBox casing (DOMPurify deletes lowercase 'viewbox')
+      clean = clean.replace(/\bviewbox\s*=\s*/gi, 'viewBox=');
+
       // 4. THE CRITICAL FIX: Isolate the root tag to fix missing namespaces
       const rootTagClose = clean.indexOf('>');
       if (rootTagClose !== -1) {
@@ -55,9 +58,6 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         if (!/xmlns/i.test(rootTag)) {
           rootTag = rootTag.replace(/<svg/i, '<svg xmlns="http://www.w3.org/2000/svg"');
         }
-
-        // FIX B: Force uniform viewBox casing (DOMPurify deletes lowercase 'viewbox')
-        rootTag = rootTag.replace(/\bviewbox\s*=\s*/gi, 'viewBox=');
 
         // FIX C: If there is no viewBox, calculate it from width/height
         if (!/viewBox/i.test(rootTag)) {
