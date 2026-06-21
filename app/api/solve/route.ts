@@ -101,6 +101,15 @@ export async function POST(request: NextRequest) {
     // Validate that all messages have either text or imageBase64
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
+
+      if (msg.text !== undefined && typeof msg.text !== 'string') {
+        return new Response(JSON.stringify({ error: `Message text at index ${i} must be a string` }), { status: 400 });
+      }
+
+      if (msg.imageBase64 !== undefined && typeof msg.imageBase64 !== 'string') {
+        return new Response(JSON.stringify({ error: `Message imageBase64 at index ${i} must be a string` }), { status: 400 });
+      }
+
       if (msg.text && msg.text.length > 10000) {
         return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
       }
