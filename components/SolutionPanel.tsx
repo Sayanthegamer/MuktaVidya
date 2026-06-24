@@ -22,10 +22,14 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackInProgressRef = useRef<Set<number>>(null as any);
-  if (!feedbackInProgressRef.current) {
-    feedbackInProgressRef.current = new Set();
-  }
+  const feedbackInProgressRef = useRef<Set<number> | null>(null);
+
+  // Lazy initialize the Set outside of the render phase
+  useEffect(() => {
+    if (feedbackInProgressRef.current == null) {
+      feedbackInProgressRef.current = new Set<number>();
+    }
+  }, []);
 
   const handleCopy = useCallback(async (index: number, text: string) => {
     try {
@@ -53,7 +57,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   }, [handleCopy]);
 
   const handleFeedback = useCallback(async (index: number, type: 'up' | 'down', text: string) => {
-    if (feedbackInProgressRef.current.has(index)) return;
+    if (!feedbackInProgressRef.current || feedbackInProgressRef.current.has(index)) return;
     feedbackInProgressRef.current.add(index);
 
     setFeedbackMap(prev => ({ ...prev, [index]: type }));
