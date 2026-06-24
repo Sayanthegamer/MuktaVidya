@@ -105,7 +105,8 @@ export async function POST(request: NextRequest) {
         return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
       }
       const hasText = msg.text && msg.text.trim().length > 0;
-      const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
+      // ⚡ Bolt: Avoid calling .trim() on massive Base64 strings to prevent allocating multimegabyte string copies and blocking the event loop.
+      const hasImage = msg.imageBase64 && msg.imageBase64.length > 0;
       if (!hasText && !hasImage) {
         return new Response(
           JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
