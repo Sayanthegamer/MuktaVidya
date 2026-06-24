@@ -192,7 +192,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
             {/* Image container */}
             <div className="flex-1 w-full flex items-center justify-center overflow-hidden p-4 min-h-0">
                <ReactCrop crop={crop} onChange={c => setCrop(c)}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+
                   {/* react-doctor-disable-next-line react-doctor/nextjs-no-img-element */}
                   <img
                     ref={imageRef}
