@@ -10,8 +10,12 @@ export function useMode(defaultMode: SolveMode = "NORMAL") {
         if (savedMode === "NORMAL" || savedMode === "FASTEST") {
           return savedMode as SolveMode;
         }
-      } catch (e) {
-        console.error("Failed to read mode from localStorage", e);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          console.error("Failed to read mode from localStorage", e);
+        } else {
+          console.error("Failed to read mode from localStorage", String(e));
+        }
         return defaultMode;
       }
     }
@@ -23,8 +27,12 @@ export function useMode(defaultMode: SolveMode = "NORMAL") {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("muktavidya_mode", newMode);
-      } catch (e) {
-        console.error("Failed to save mode to localStorage", e);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          console.error("Failed to save mode to localStorage", e);
+        } else {
+          console.error("Failed to save mode to localStorage", String(e));
+        }
       }
     }
   }, []);
