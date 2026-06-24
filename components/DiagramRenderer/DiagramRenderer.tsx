@@ -107,7 +107,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         [key: string]: unknown;
       }
 
-      const applyAxisStyles = (axis: AxisConfig) => {
+      const applyAxisStyles = (axis?: AxisConfig) => {
         if (!axis) return { type: 'value', axisLine: { lineStyle: { color: borderColor } }, axisLabel: { color: secondaryColor }, splitLine: { lineStyle: { color: splitLineColor } } };
         return {
           ...axis,
