@@ -1,0 +1,16 @@
+[github_app]
+# 1. Automatically run these commands the second a PR is opened
+pr_commands = [
+    "/describe", 
+    "/review", 
+    "/improve --extended"
+]
+
+# 2. Automatically push code fixes directly to the PR branch
+[pr_review]
+# This makes Qodo automatically apply minor fixes to save time
+auto_fix_code = true 
+
+[pr_agent]
+# 3. Enable Qodo to leave comments directly on conflicting code lines
+enable_conflict_resolution = true
