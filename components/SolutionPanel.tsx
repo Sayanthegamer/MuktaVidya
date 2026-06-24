@@ -22,10 +22,7 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastScrollTimeRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackInProgressRef = useRef<Set<number>>(null as any);
-  if (!feedbackInProgressRef.current) {
-    feedbackInProgressRef.current = new Set();
-  }
+  const feedbackInProgressRef = useRef<Set<number>>(new Set());
 
   const handleCopy = useCallback(async (index: number, text: string) => {
     try {
@@ -124,7 +121,6 @@ export default function SolutionPanel({ isStreaming, isLoading, solution, messag
     };
   }, [isStreaming, messages]);
 
-  // Support legacy behavior if messages are not provided or empty and it's not a chat
   if (!hasStartedChat) {
     const isEmpty = !isLoading && !isStreaming && !solution;
     const showSkeleton = isLoading && !solution;
