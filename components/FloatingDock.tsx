@@ -126,6 +126,13 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
     }
   };
 
+
+  const getSendTooltipTitle = () => {
+    if (isCompressing) return "Compressing image...";
+    if (!text.trim() && !attachedImage) return "Enter text or attach an image to send";
+    return "Send Message (Enter)";
+  };
+
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
@@ -249,7 +256,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
-                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message (Enter)"}
+                title={getSendTooltipTitle()}
                 aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
