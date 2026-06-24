@@ -32,7 +32,7 @@ describe('POST /api/feedback', () => {
   it('should return 200 for valid JSON', async () => {
     const request = new NextRequest('http://localhost/api/feedback', {
       method: 'POST',
-      body: JSON.stringify({ type: 'thumbs-up', solutionLength: 100 }),
+      body: JSON.stringify({ type: 'up', content: 'good' }),
     });
     // Ensure no origin header so it passes dev mode check
     request.headers.delete('origin');
@@ -43,19 +43,61 @@ describe('POST /api/feedback', () => {
     expect(data).toEqual({ success: true });
   });
 
-  it('should handle incomplete (but parsable) data gracefully', async () => {
+  it('should return 400 for invalid structure (array)', async () => {
     const request = new NextRequest('http://localhost/api/feedback', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify([{ type: 'up' }]),
     });
-    // Ensure no origin header so it passes dev mode check
     request.headers.delete('origin');
 
     const response = await POST(request);
     const data = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(data).toEqual({ success: true });
+    expect(response.status).toBe(400);
+    expect(data).toEqual({ error: 'Invalid payload structure' });
+  });
+
+  it('should return 400 for invalid feedback type', async () => {
+    const request = new NextRequest('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'thumbs-up' }),
+    });
+    request.headers.delete('origin');
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data).toEqual({ error: 'Invalid feedback type' });
+  });
+
+  it('should return 400 if content is not a string', async () => {
+    const request = new NextRequest('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'up', content: { nested: 'obj' } }),
+    });
+    request.headers.delete('origin');
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data).toEqual({ error: 'Content must be a string' });
+  });
+
+  it('should return 400 if content exceeds maximum length', async () => {
+    const longContent = 'a'.repeat(1001);
+    const request = new NextRequest('http://localhost/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ type: 'up', content: longContent }),
+    });
+    request.headers.delete('origin');
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data).toEqual({ error: 'Content exceeds maximum length' });
   });
 
   it('should return 413 if the payload size exceeds MAX_BODY_BYTES_FEEDBACK_FEEDBACK in the content-length header', async () => {
@@ -131,7 +173,7 @@ describe('POST /api/feedback', () => {
     it('should allow requests from valid vercel preview subdomains', async () => {
       const request = new Request('http://localhost/api/feedback', {
         method: 'POST',
-        body: JSON.stringify({ type: 'thumbs-up' }),
+        body: JSON.stringify({ type: 'up' }),
         headers: {
           origin: 'https://muktavidya-a1b2c3d4e-xyz.vercel.app'
         }
