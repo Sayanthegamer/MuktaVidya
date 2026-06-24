@@ -15,7 +15,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
         <button
           type="button"
           onClick={onCopy}
-          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
           aria-label={copied ? "Copied solution" : "Copy solution"}
           title={copied ? "Copied" : "Copy solution"}
         >
@@ -25,7 +25,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
         <button
           type="button"
           onClick={onShare}
-          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
           aria-label="Share solution"
           title="Share solution"
         >
@@ -44,7 +44,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
               onFeedback('up');
             }}
             aria-pressed={feedback === 'up'}
-            className={`p-1.5 rounded transition-colors ${
+            className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] p-1.5 rounded transition-colors ${
               feedback !== null ? 'cursor-not-allowed' : ''
             } ${
               feedback === 'up'
@@ -66,7 +66,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
               onFeedback('down');
             }}
             aria-pressed={feedback === 'down'}
-            className={`p-1.5 rounded transition-colors ${
+            className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] p-1.5 rounded transition-colors ${
               feedback !== null ? 'cursor-not-allowed' : ''
             } ${
               feedback === 'down'

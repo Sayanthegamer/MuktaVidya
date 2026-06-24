@@ -55,7 +55,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
             aria-label="Close history"
           >
             <X size={16} />
@@ -80,7 +80,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
                     onSelect(item);
                     onClose();
                   }}
-                  className="flex gap-3 p-3 hover:bg-[var(--surface-2)] transition-colors border-b border-[var(--border-subtle)] last:border-0 text-left items-start"
+                  className="flex gap-3 p-3 hover:bg-[var(--surface-2)] transition-colors border-b border-[var(--border-subtle)] last:border-0 text-left items-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:-outline-offset-2"
                 >
                   {/* Thumbnail */}
                   <div className="relative shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
