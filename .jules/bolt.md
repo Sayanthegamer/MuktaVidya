@@ -44,3 +44,6 @@
 
 **Learning:** Found that using Regular Expressions (`match` and `replace`) to extract the MIME type and payload from massive Data URLs (base64 image strings up to 10MB) inside a tight map loop in the `POST` solve route caused unnecessary engine overhead and memory allocations. Furthermore, the existing regex `/^data:(image\/\w+);base64,/` was technically flawed as it failed to capture MIME types containing non-word characters like `+` (e.g., `image/svg+xml`).
 **Action:** Replaced the regex approach with simple string indexing (`indexOf(',')`) and `substring()` calls. This optimizes the extraction process and prevents regex backtracking overhead on large multimegabyte strings, while simultaneously making the MIME type extraction more robust against varying formats.
+## 2023-10-27 - Regex Performance Optimization
+**Learning:** Sequential string replacement calls (`.replace("...", "").replace("...", "")`) inherently re-traverse and re-allocate strings. For repetitive structure cleanup (like markdown tags), combining into a single non-greedy capturing regex prevents CPU bottlenecks during render cycles.
+**Action:** Use grouped optional tags (e.g. `/(?:svg-diagram|xml|svg)?/gi`) to trim text fences without needing to scan the entire string multiple times.
