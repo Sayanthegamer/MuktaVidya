@@ -2,7 +2,7 @@
 import { CameraPlus, Images, ArrowCounterClockwise, CircleNotch } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { createPortal } from "react-dom";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
@@ -79,6 +79,16 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     // Reuse the same handler from the hook — just delegate to onFileChange
     onFileChange(e);
   };
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && imageToCrop && !imagePreview) {
+        handleCancelCrop();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [imageToCrop, imagePreview]);
 
   return (
     <div className="w-full h-full min-h-[400px] md:min-h-full p-6 grid grid-cols-1 grid-rows-1">
@@ -208,14 +218,14 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
               <button
                 type="button"
                 onClick={handleCancelCrop}
-                className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
+                className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors btn-press"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleCropComplete}
-                className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors"
+                className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors btn-press"
               >
                 Crop & Solve
               </button>
@@ -254,8 +264,10 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
             type="button"
             onClick={onRescan}
             className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-1)]/90 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--accent)] hover:bg-[var(--surface-2)] transition-colors btn-press shadow-sm z-10"
+            aria-label="Rescan"
+            title="Rescan"
           >
-            <ArrowCounterClockwise size={14} weight="bold" />
+            <ArrowCounterClockwise size={14} weight="bold" aria-hidden="true" />
             <span className="text-xs font-medium">Rescan</span>
           </button>
         )}
