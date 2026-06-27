@@ -2,7 +2,7 @@
 import { CameraPlus, Images, ArrowCounterClockwise, CircleNotch } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef, ChangeEvent, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import ReactCrop, { type Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
@@ -53,10 +53,29 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     setImageToCrop(null);
   };
 
-  const handleCancelCrop = () => {
+  const handleCancelCrop = useCallback(() => {
     setImageToCrop(null);
     setCrop(undefined);
-  };
+  }, []);
+
+  const isCropDialogOpen = Boolean(imageToCrop && !imagePreview);
+
+  useEffect(() => {
+    if (!isCropDialogOpen) return;
+
+    const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+
+      // Prevent other global Escape handlers (e.g. HistorySidebar) from also acting.
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      handleCancelCrop();
+    };
+
+    // Use capture so this handler runs before bubble-phase listeners.
+    window.addEventListener("keydown", handleGlobalKeyDown, { capture: true });
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown, { capture: true });
+  }, [isCropDialogOpen, handleCancelCrop]);
 
   const handleImageLoaded = (base64: string) => {
     setImageToCrop(base64);
@@ -209,6 +228,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                 type="button"
                 onClick={handleCancelCrop}
                 className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
+                title="Cancel (Esc)"
               >
                 Cancel
               </button>
