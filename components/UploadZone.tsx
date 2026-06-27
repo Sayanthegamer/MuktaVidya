@@ -58,20 +58,24 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     setCrop(undefined);
   }, []);
 
-  const handleCancelCropRef = useRef(handleCancelCrop);
-  useEffect(() => {
-    handleCancelCropRef.current = handleCancelCrop;
-  }, [handleCancelCrop]);
+  const isCropDialogOpen = Boolean(imageToCrop && !imagePreview);
 
   useEffect(() => {
+    if (!isCropDialogOpen) return;
+
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape' && imageToCrop && !imagePreview) {
-        handleCancelCropRef.current();
-      }
+      if (e.key !== "Escape") return;
+
+      // Prevent other global Escape handlers (e.g. HistorySidebar) from also acting.
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      handleCancelCrop();
     };
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [imageToCrop, imagePreview]);
+
+    // Use capture so this handler runs before bubble-phase listeners.
+    window.addEventListener("keydown", handleGlobalKeyDown, { capture: true });
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown, { capture: true });
+  }, [isCropDialogOpen, handleCancelCrop]);
 
   const handleImageLoaded = (base64: string) => {
     setImageToCrop(base64);

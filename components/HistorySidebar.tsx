@@ -21,10 +21,12 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onCloseRef.current();
+      // If another overlay already handled Escape, don't also close the sidebar.
+      if (e.defaultPrevented) return;
+      if (e.key === "Escape" && isOpen) onCloseRef.current();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   return (
