@@ -101,11 +101,29 @@ export async function POST(request: NextRequest) {
     // Validate that all messages have either text or imageBase64
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-      if (msg.text && msg.text.length > 10000) {
+
+      if (!msg || typeof msg !== 'object') {
+        return new Response(JSON.stringify({ error: `Message at index ${i} must be an object` }), { status: 400 });
+      }
+
+      // Validate role early since later logic depends on it
+      if (!('role' in msg) || typeof (msg as any).role !== 'string' || !['user', 'model'].includes((msg as any).role)) {
+        return new Response(JSON.stringify({ error: `Message role at index ${i} must be either "user" or "model"` }), { status: 400 });
+      }
+
+      if ((msg as any).text !== undefined && typeof (msg as any).text !== 'string') {
+        return new Response(JSON.stringify({ error: `Message text at index ${i} must be a string` }), { status: 400 });
+      }
+
+      if ((msg as any).imageBase64 !== undefined && typeof (msg as any).imageBase64 !== 'string') {
+        return new Response(JSON.stringify({ error: `Message imageBase64 at index ${i} must be a string` }), { status: 400 });
+      }
+
+      if ((msg as any).text && (msg as any).text.length > 10000) {
         return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
       }
-      const hasText = msg.text && msg.text.trim().length > 0;
-      const hasImage = msg.imageBase64 && msg.imageBase64.trim().length > 0;
+      const hasText = (msg as any).text && (msg as any).text.trim().length > 0;
+      const hasImage = (msg as any).imageBase64 && (msg as any).imageBase64.trim().length > 0;
       if (!hasText && !hasImage) {
         return new Response(
           JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
