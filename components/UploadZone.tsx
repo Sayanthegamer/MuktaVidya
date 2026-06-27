@@ -106,7 +106,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
       />
 
       {/* State 1: Upload Zone */}
-      <label
+      <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
@@ -144,7 +144,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   fileInputRef.current?.click();
                 }}
                 aria-disabled={isCompressing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--accent-hover)]'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--accent-hover)]'}`}
                 aria-label="Take photo with camera"
                 title={isCompressing ? "Processing..." : "Take photo with camera"}
               >
@@ -159,7 +159,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   galleryInputRef.current?.click();
                 }}
                 aria-disabled={isCompressing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium transition-colors btn-press ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'}`}
                 aria-label="Upload from gallery"
                 title={isCompressing ? "Processing..." : "Upload from gallery"}
               >
@@ -173,7 +173,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
             </span>
           </div>
         )}
-      </label>
+      </div>
 
 
       {/* State 3: Cropping UI */}
@@ -208,14 +208,14 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
               <button
                 type="button"
                 onClick={handleCancelCrop}
-                className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors"
+                className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleCropComplete}
-                className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors"
+                className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 Crop & Solve
               </button>
@@ -253,7 +253,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
           <button
             type="button"
             onClick={onRescan}
-            className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-1)]/90 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--accent)] hover:bg-[var(--surface-2)] transition-colors btn-press shadow-sm z-10"
+            className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-1)]/90 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--accent)] hover:bg-[var(--surface-2)] transition-colors btn-press shadow-sm z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
           >
             <ArrowCounterClockwise size={14} weight="bold" />
             <span className="text-xs font-medium">Rescan</span>

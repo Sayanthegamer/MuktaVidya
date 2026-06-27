@@ -43,17 +43,17 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
     }
   };
 
-  const onDragOver = (e: DragEvent<HTMLLabelElement>) => {
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  const onDragLeave = (e: DragEvent<HTMLLabelElement>) => {
+  const onDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
 
-  const onDrop = (e: DragEvent<HTMLLabelElement>) => {
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     if (isCompressing) return;
@@ -69,7 +69,7 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
     }
   };
 
-  const handleUploadZoneKeyDown = (e: React.KeyboardEvent<HTMLLabelElement>) => {
+  const handleUploadZoneKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (isCompressing) return;
