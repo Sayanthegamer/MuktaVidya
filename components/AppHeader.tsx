@@ -18,7 +18,8 @@ const LANGUAGES = [
   { id: "HI", label: "HI" },
 ];
 
-const AppHeader = memo(function AppHeader({ onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode }: AppHeaderProps) {
+const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
+  const { onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode } = props;
   return (
     <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
       {/* Logo */}
