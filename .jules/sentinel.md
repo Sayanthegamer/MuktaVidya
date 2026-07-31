@@ -37,3 +37,8 @@
 **Vulnerability:** The application extracted IP addresses via `request.headers.get('x-vercel-forwarded-for')` and directly passed the result into Upstash rate limiters without trimming whitespace. A malicious actor could spoof their IP by sending `x-vercel-forwarded-for: "   "`. Because a string consisting of only whitespace is truthy in JavaScript, the fallback logic was bypassed. The resulting whitespace string was used to bucket rate limits, effectively allowing attackers to bypass rate limits by submitting infinitely unique padded strings (e.g., `" "`, `"  "`, `"   "`).
 **Learning:** Truthy checks (`if (ip)`) on HTTP headers are insufficient because malicious clients can inject pure whitespace or invisible characters. Rate limit bucket strings must be fully stripped of padding.
 **Prevention:** Always explicitly `trim()` extracted proxy IP addresses and check for truthiness _after_ trimming to guarantee the application securely falls back to the next trusted header or the default `127.0.0.1`.
+
+## 2026-06-17 - Unify dev and prod CSP configurations
+**Vulnerability:** The development CSP was more permissive than the production CSP (allowing `unsafe-eval` and `unsafe-inline`). This created a risk where development configurations masked potential CSP violations that would fail in production, leading to unexpected deployments.
+**Learning:** A development CSP should mirror the production security policies to guarantee the highest safety. Weakening it in development gives developers a false sense of security.
+**Prevention:** Keep the CSP header exactly the same between development and production. Understand the local development tools trade-offs (e.g. Next.js Fast Refresh may be degraded), but prioritize security consistency.

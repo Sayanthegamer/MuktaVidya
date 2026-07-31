@@ -11,12 +11,9 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@google/genai', 'isomorphic-dompurify'],
   turbopack: {},
   async headers() {
-    const isDevelopment = process.env.NODE_ENV === 'development';
-
-    // Use permissive CSP in development, strict CSP in production
-    const cspValue = isDevelopment
-      ? "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
-      : "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;";
+    // Strictly align dev and prod CSP to prevent masking security issues.
+    // Note: Next.js Fast Refresh will be degraded, but this guarantees prod parity.
+    const cspValue = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;";
 
     return [
       {
