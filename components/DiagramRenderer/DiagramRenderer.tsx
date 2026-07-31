@@ -46,7 +46,19 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
       clean = clean.replace(/fill=["']\s*(?:#(?:000|000000)|black)\s*["']/gi, 'fill="currentColor"');
 
       // 4. THE CRITICAL FIX: Isolate the root tag to fix missing namespaces
-      const rootTagClose = clean.indexOf('>');
+      let rootTagClose = -1;
+      let inQuote: string | null = null;
+      for (let i = 0; i < clean.length; i++) {
+        const char = clean[i];
+        if (char === '"' || char === "'") {
+          if (inQuote === char) inQuote = null;
+          else if (!inQuote) inQuote = char;
+        } else if (char === '>' && !inQuote) {
+          rootTagClose = i;
+          break;
+        }
+      }
+
       if (rootTagClose !== -1) {
         let rootTag = clean.substring(0, rootTagClose + 1);
         const remainder = clean.substring(rootTagClose + 1);
