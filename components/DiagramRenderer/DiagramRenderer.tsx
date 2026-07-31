@@ -16,7 +16,6 @@ interface DiagramRendererProps {
 }
 
 const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }: DiagramRendererProps) {
-  // --- SVG Rendering Pipeline ---
   const cleanedSvg = useMemo(() => {
     if (type !== 'svg') return null;
     try {
@@ -86,7 +85,6 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
     }
   }, [chartData, type]);
 
-  // --- ECharts Layout Pipeline (Fallback for functions & data plotting) ---
   const parsedOptions = useMemo(() => {
     if (type !== 'chart') return null;
     try {
