@@ -75,6 +75,15 @@ describe('DiagramRenderer', () => {
       expect(svgElement?.innerHTML).toContain('<circle cx="50" cy="50" r="40"');
     });
 
+    it('forces uniform viewBox casing on root and nested elements', () => {
+      const svgData = `<svg viewbox="0 0 100 100"><symbol id="sym" viewbox="0 0 10 10"><circle cx="5" cy="5" r="4"/></symbol></svg>`;
+      const { container } = render(<DiagramRenderer chartData={svgData} type="svg" />);
+
+      const svgElement = container.querySelector('svg');
+      expect(svgElement?.getAttribute('viewBox')).toBe('0 0 100 100');
+      expect(svgElement?.innerHTML).toContain('viewBox="0 0 10 10"');
+    });
+
     it('calls sanitize with security options', () => {
       const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
       render(<DiagramRenderer chartData={svgData} type="svg" />);
