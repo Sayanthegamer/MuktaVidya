@@ -61,8 +61,8 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
 
         // FIX C: If there is no viewBox, calculate it from width/height
         if (!/viewBox/i.test(rootTag)) {
-          const widthMatch = rootTag.match(/width\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
-          const heightMatch = rootTag.match(/height\s*=\s*["']?\s*([\d.]+)(?:px|%)?\s*["']?/i);
+          const widthMatch = rootTag.match(/(?:\s)width\s*=\s*["']?\s*([\d.]+)(?:[a-z%]+)?\s*["']?/i);
+          const heightMatch = rootTag.match(/(?:\s)height\s*=\s*["']?\s*([\d.]+)(?:[a-z%]+)?\s*["']?/i);
 
           const w = widthMatch ? parseInt(widthMatch[1], 10) : 400;
           const h = heightMatch ? parseInt(heightMatch[1], 10) : 250;
@@ -70,7 +70,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         }
 
         // FIX D: Strip hardcoded width/height so CSS can scale it responsibly
-        rootTag = rootTag.replace(/\b(width|height)\s*=\s*["']?[\d.+%px\s]*["']?/gi, '');
+        rootTag = rootTag.replace(/\s+(width|height)\s*=\s*(?:["'][^"']*["']|[^\s>]+)/gi, '');
         
         clean = rootTag + remainder;
       }
