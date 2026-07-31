@@ -20,7 +20,6 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Intersection Observer for visibility
   useEffect(() => {
     if (isStreaming) {
       setTimeout(() => setIsVisible(true), 0);
