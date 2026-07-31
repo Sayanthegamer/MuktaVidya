@@ -75,6 +75,14 @@ describe('DiagramRenderer', () => {
       expect(svgElement?.innerHTML).toContain('<circle cx="50" cy="50" r="40"');
     });
 
+    it('calculates viewBox from width/height and preserves self-closing tags', () => {
+      const svgData = `<svg width="100.5" height="150.2" />`;
+      const { container } = render(<DiagramRenderer chartData={svgData} type="svg" />);
+
+      const svgElement = container.querySelector('svg');
+      expect(svgElement).toHaveAttribute('viewBox', '0 0 100.5 150.2');
+    });
+
     it('calls sanitize with security options', () => {
       const svgData = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>`;
       render(<DiagramRenderer chartData={svgData} type="svg" />);
