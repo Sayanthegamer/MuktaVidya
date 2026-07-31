@@ -126,6 +126,19 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
     }
   };
 
+
+  const getAttachButtonTitle = () => {
+    if (isCompressing) return "Compressing image...";
+    if (isStreaming) return "Wait for response to finish";
+    return "Attach Image";
+  };
+
+  const getSendButtonTitle = () => {
+    if (isCompressing) return "Compressing image...";
+    if (!text.trim() && !attachedImage) return "Enter text or attach an image to send";
+    return "Send Message (Enter)";
+  };
+
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
@@ -179,7 +192,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] btn-press'
               }`}
-              title={isCompressing ? "Compressing image..." : isStreaming ? "Wait for response to finish" : "Attach Image"}
+              title={getAttachButtonTitle()}
               aria-label="Attach image"
               aria-disabled={isStreaming || isCompressing}
             >
@@ -249,7 +262,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                     ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
-                title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message (Enter)"}
+                title={getSendButtonTitle()}
                 aria-label="Send"
               >
                 <PaperPlaneRight size={20} weight="fill" aria-hidden="true" />
