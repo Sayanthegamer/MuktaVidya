@@ -21,7 +21,9 @@ describe('GET /api/health', () => {
     expect(data.status).toBe('ok');
     expect(data.hasGeminiKey).toBe(true);
     expect(data.geminiModel).toBe('gemini-3.5-flash-lite');
+    expect(data).toHaveProperty('hasRateLimiting');
   });
+
 
   it('reports false when GEMINI_API_KEY is not set', async () => {
     delete process.env.GEMINI_API_KEY;

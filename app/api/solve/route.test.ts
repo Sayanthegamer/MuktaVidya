@@ -31,11 +31,14 @@ const env = process.env as Record<string, string | undefined>;
 
 describe('POST /api/solve IP Extraction Security', () => {
   beforeEach(() => {
-    mockRatelimit.limit.mockResolvedValue({ success: true });
     jest.clearAllMocks();
     mockRatelimit.limit.mockResolvedValue({ success: true });
+    mockGenerateContentStream.mockResolvedValue([
+      { text: 'mock response' },
+    ]);
     env.NODE_ENV = 'development';
   });
+
 
   const createRequestWithHeaders = (headers: Record<string, string>) => {
     const req = new NextRequest('http://localhost:3000/api/solve', {
@@ -72,7 +75,18 @@ describe('POST /api/solve IP Extraction Security', () => {
     const data = await res.json();
     expect(data.error).toBe("You're studying too fast! Wait 60 seconds.");
   });
+
+  it('fails open when ratelimit throws an error (e.g. Upstash database deleted)', async () => {
+    mockRatelimit.limit.mockRejectedValue(new Error('Upstash: Database deleted or unauthorized'));
+    const req = createRequestWithHeaders({
+      'x-vercel-forwarded-for': '203.0.113.5',
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+  });
 });
+
 
 describe('Solve API route', () => {
   beforeEach(() => {

@@ -36,14 +36,19 @@ export async function POST(request: Request | NextRequest) {
   const ip = extractIP(request);
 
   if (ratelimit) {
-    const { success } = await ratelimit.limit(ip);
-    if (!success) {
-      return NextResponse.json(
-        { error: "You're studying too fast! Wait 60 seconds." },
-        { status: 429, headers: { 'Retry-After': '60' } }
-      );
+    try {
+      const { success } = await ratelimit.limit(ip);
+      if (!success) {
+        return NextResponse.json(
+          { error: "You're studying too fast! Wait 60 seconds." },
+          { status: 429, headers: { 'Retry-After': '60' } }
+        );
+      }
+    } catch (ratelimitError) {
+      console.warn('Rate limiter check failed (failing open):', ratelimitError);
     }
   }
+
 
   let bodyData: SolveRequestBody;
   try {

@@ -22,11 +22,16 @@ export async function POST(request: Request) {
   const ip = extractIP(request);
 
   if (ratelimit) {
-    const { success } = await ratelimit.limit(ip);
-    if (!success) {
-      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    try {
+      const { success } = await ratelimit.limit(ip);
+      if (!success) {
+        return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+      }
+    } catch (ratelimitError) {
+      console.warn('Rate limiter check failed (failing open):', ratelimitError);
     }
   }
+
 
   try {
     const data = await readJsonBody<FeedbackPayload>(request, MAX_BODY_BYTES);
