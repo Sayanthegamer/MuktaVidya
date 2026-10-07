@@ -32,6 +32,13 @@ const rehypePlugins: RehypePlugins = [
 
 
 const createMarkdownComponents = (isStreaming: boolean) => ({
+  h3({ children, ...props }: React.ComponentPropsWithoutRef<"h3">) {
+    return (
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-1 mb-2 tracking-tight flex items-center gap-2" {...props}>
+        {children}
+      </h3>
+    );
+  },
   pre({ children, ...props }: React.ComponentPropsWithoutRef<"pre">) {
     return (
       <pre className="overflow-x-auto rounded-xl p-4 bg-[var(--surface-1)]/70 backdrop-blur-sm border border-[var(--border-subtle)] shadow-inner" {...props}>
@@ -59,6 +66,27 @@ const createMarkdownComponents = (isStreaming: boolean) => ({
     );
   }
 });
+
+function extractSubjectName(rawText: string): string {
+  if (!rawText) return '';
+  const lines = rawText.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (/^###\s*subject:?$/i.test(trimmed)) continue;
+    const matchHeader = /^###\s*subject:\s*(.*)$/i.exec(trimmed);
+    if (matchHeader && matchHeader[1]) {
+      return matchHeader[1].replace(/[*_#]/g, '').trim();
+    }
+    const matchLine = /^subject:\s*(.*)$/i.exec(trimmed);
+    if (matchLine && matchLine[1]) {
+      return matchLine[1].replace(/[*_#]/g, '').trim();
+    }
+    const clean = trimmed.replace(/[*_#]/g, '').trim();
+    if (clean) return clean;
+  }
+  return '';
+}
 
 interface ParsedSection {
   id: string;
@@ -137,11 +165,11 @@ function getSectionProps(type: ParsedSection['type']) {
 function getSectionClassName(type: ParsedSection['type']): string {
   switch (type) {
     case 'subject':
-      return 'inline-flex items-center gap-1.5 my-2 px-3 py-1 rounded-full bg-[var(--accent-muted)] border border-[var(--accent-border)] text-xs font-semibold text-[var(--accent)] backdrop-blur-sm shadow-sm transition-transform duration-200 hover:scale-[1.02]';
+      return 'mb-5 block';
     case 'given':
-      return 'my-3 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
+      return 'my-4 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
     case 'approach':
-      return 'my-3 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
+      return 'my-4 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
     case 'solution':
       return 'my-4 pl-4 border-l-2 border-[var(--border-strong)] hover:border-[var(--accent)]/50 transition-colors duration-200 py-1';
     case 'answer':
@@ -221,6 +249,32 @@ const ChatMessageItem = memo(function ChatMessageItem({
             {sections.map((section, sIndex) => {
               const isLastSection = sIndex === sections.length - 1;
               const sectionProps = getSectionProps(section.type);
+
+              if (section.type === 'subject') {
+                const subjectName = extractSubjectName(section.rawText);
+                const displayName = subjectName || (isCurrentlyStreaming ? 'Analyzing...' : 'General');
+
+                return (
+                  <div key={section.id} className="mb-5 block">
+                    <span
+                      {...sectionProps}
+                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface-1)]/80 border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] backdrop-blur-md shadow-sm transition-all duration-200 hover:border-[var(--accent)]/40 hover:bg-[var(--surface-1)]"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] animate-pulse" aria-hidden="true" />
+                      <span className="text-[var(--text-muted)] text-[10px] uppercase font-semibold tracking-wider">Subject</span>
+                      <span className="text-[var(--text-primary)] font-medium text-xs">{displayName}</span>
+                    </span>
+                    {isCurrentlyStreaming && isLastSection && (
+                      <span
+                        data-testid="streaming-cursor"
+                        className="streaming-cursor inline-block w-2 h-4 bg-[var(--accent)] ml-1 animate-pulse align-middle"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+                );
+              }
+
               const className = getSectionClassName(section.type);
 
               return (

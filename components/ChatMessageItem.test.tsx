@@ -258,6 +258,8 @@ The kinetic energy is **125 J**.`;
       );
       expect(subjectBadge).toBeInTheDocument();
       expect(subjectBadge).toHaveTextContent(/Physics/i);
+      expect(subjectBadge?.querySelector('h3')).toBeNull();
+      expect(subjectBadge?.querySelector('p')).toBeNull();
 
       // 2. Given section card wrapper
       const givenCard = container.querySelector(

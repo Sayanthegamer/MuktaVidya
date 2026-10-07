@@ -127,6 +127,14 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   color: var(--text-secondary);
 }
 
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
 /* Base Elements */
 .prose p { margin-bottom: 1.25em; margin-top: 1.25em; }
 .prose strong, .prose b { color: var(--text-primary); font-weight: 600; }
