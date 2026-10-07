@@ -119,6 +119,7 @@ FORMATTING STRICT RULES:
 - EXAM PAPER FORMAT: Separate each logical step and every equation with a blank line. Do not write steps in a continuous paragraph.
 - DISPLAY EQUATIONS: Place all main equations on their own separate lines, completely separated from text, using display LaTeX ($$...$$). Do NOT inline main equations.
 - Use $...$ ONLY for short inline variables. Ensure brackets are properly closed.
+- LATEX RELIABILITY: Always use standard KaTeX syntax. Wrap complex subscripts with braces (e.g. $x_{1}$ not $x_1_2$). Never use raw unescaped text or markdown formatting inside math delimiters. Always properly close all math delimiters ($ and $$).
 - Use standard Markdown.
 
 SCIENTIFIC CHARTS & VISUAL DIAGRAMS:

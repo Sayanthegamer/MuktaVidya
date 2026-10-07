@@ -102,5 +102,24 @@ describe('DiagramRenderer', () => {
 
       expect(getByText('Invalid diagram vector data.')).toBeInTheDocument();
     });
+
+    it('renders a streaming skeleton when SVG data is in-flight', () => {
+      const inFlightSvg = `<svg viewBox="0 0 100 100"><circle cx="50"`;
+      const { getByTestId, getByText } = render(<DiagramRenderer chartData={inFlightSvg} type="svg" />);
+
+      expect(getByTestId('diagram-skeleton')).toBeInTheDocument();
+      expect(getByText(/Rendering diagram vector/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Streaming In-Flight State (ADR-0008)', () => {
+    it('renders a streaming skeleton when chart JSON is in-flight', () => {
+      const inFlightChart = `\`\`\`json-chart\n{\n  "title": { "text": "In Flight"`;
+      const { getByTestId, getByText } = render(<DiagramRenderer chartData={inFlightChart} type="chart" />);
+
+      expect(getByTestId('diagram-skeleton')).toBeInTheDocument();
+      expect(getByText(/Generating chart visualization/i)).toBeInTheDocument();
+    });
   });
 });
+

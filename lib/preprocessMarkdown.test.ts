@@ -83,4 +83,63 @@ $$ \cos(x) = -\sin(h) $$`;
 
     expect(preprocessMarkdown(input)).toBe(expected);
   });
+
+  describe('streaming math delimiter balancing (ADR-0008)', () => {
+    it('should balance unclosed block math ($$) during streaming', () => {
+      const input = 'Solving the integral:\n$$\\int_0^1 x^2 \\, dx';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      expect(processed).toMatch(/\$\$/);
+      // Count of $$ should be even
+      const count = (processed.match(/\$\$/g) || []).length;
+      expect(count % 2).toBe(0);
+      expect(processed.trim().endsWith('$$')).toBe(true);
+    });
+
+    it('should balance unclosed inline math ($) during streaming', () => {
+      const input = 'We observe that $x = 42';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      // Count of $ outside $$ should be even
+      const withoutBlock = processed.replace(/\$\$[\s\S]*?\$\$/g, '');
+      const count = (withoutBlock.match(/\$/g) || []).length;
+      expect(count % 2).toBe(0);
+      expect(processed.trim().endsWith('$')).toBe(true);
+    });
+
+    it('should convert and balance unclosed LaTeX bracket block delimiters (\\[) during streaming', () => {
+      const input = 'Derivation:\n\\[E = mc^2';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      expect(processed).toContain('$$');
+      const count = (processed.match(/\$\$/g) || []).length;
+      expect(count % 2).toBe(0);
+      expect(processed.trim().endsWith('$$')).toBe(true);
+    });
+
+    it('should convert and balance unclosed LaTeX paren inline delimiters (\\() during streaming', () => {
+      const input = 'Here \\(f(x) = x^2';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      const withoutBlock = processed.replace(/\$\$[\s\S]*?\$\$/g, '');
+      const count = (withoutBlock.match(/\$/g) || []).length;
+      expect(count % 2).toBe(0);
+      expect(processed.trim().endsWith('$')).toBe(true);
+    });
+
+    it('should not append extra delimiters if math is already balanced during streaming', () => {
+      const input = 'Given $a = 1$ and block:\n$$\nb = 2\n$$';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      const blockCount = (processed.match(/\$\$/g) || []).length;
+      expect(blockCount).toBe(2);
+      const withoutBlock = processed.replace(/\$\$[\s\S]*?\$\$/g, '');
+      const inlineCount = (withoutBlock.match(/\$/g) || []).length;
+      expect(inlineCount).toBe(2);
+    });
+
+    it('should not treat escaped dollar signs (\\$) as math delimiters during streaming', () => {
+      const input = 'Price is \\$50 and tax is \\$5.';
+      const processed = preprocessMarkdown(input, { isStreaming: true });
+      expect(processed).toBe(input);
+      expect(processed.endsWith('$')).toBe(false);
+    });
+  });
 });
+
+

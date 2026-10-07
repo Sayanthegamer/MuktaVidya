@@ -7,6 +7,11 @@ export class SolutionErrorBoundary extends React.Component<
 > {
   state = { hasError: false };
   static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidUpdate(prevProps: { fallbackText?: string | null }) {
+    if (this.state.hasError && prevProps.fallbackText !== this.props.fallbackText) {
+      this.setState({ hasError: false });
+    }
+  }
   render() {
     if (this.state.hasError) {
       return (

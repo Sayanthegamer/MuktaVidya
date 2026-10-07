@@ -13,9 +13,11 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), {
 interface DiagramRendererProps {
   chartData: string;
   type: 'chart' | 'svg';
+  isStreaming?: boolean;
 }
 
-const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }: DiagramRendererProps) {
+const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type, isStreaming }: DiagramRendererProps) {
+
   // --- SVG Rendering Pipeline ---
   const cleanedSvg = useMemo(() => {
     if (type !== 'svg') return null;
@@ -150,6 +152,21 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
   }, [chartData, type]);
 
   if (type === 'svg') {
+    const isInFlight = isStreaming
+      ? !cleanedSvg
+      : (chartData.includes('```svg-diagram') || chartData.includes('```svg') || /<svg/i.test(chartData)) && !/<\/svg>/i.test(chartData);
+
+    if (isInFlight) {
+      return (
+        <div
+          data-testid="diagram-skeleton"
+          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-dashed border-[var(--border-subtle)] rounded-xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
+        >
+          Rendering diagram vector...
+        </div>
+      );
+    }
+
     if (!cleanedSvg) return <p className="text-xs text-[var(--error)] font-mono">Invalid diagram vector data.</p>;
 
     return (
@@ -165,6 +182,22 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
   }
 
   if (type === 'chart') {
+    const isInFlight = isStreaming
+      ? !parsedOptions
+      : (chartData.includes('```json-chart') || chartData.includes('```echarts')) ||
+        (chartData.includes('{') && (chartData.includes('"title"') || chartData.includes('"series"')) && !chartData.includes('}'));
+
+    if (isInFlight) {
+      return (
+        <div
+          data-testid="diagram-skeleton"
+          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-dashed border-[var(--border-subtle)] rounded-xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
+        >
+          Generating chart visualization...
+        </div>
+      );
+    }
+
     if (!parsedOptions) {
       return (
         <div className="my-4 p-3 bg-[var(--surface-3)] border border-[var(--border-subtle)] rounded-lg text-xs font-mono text-[var(--text-secondary)]">
@@ -175,6 +208,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
 
     return (
       <div className="my-6 w-full flex justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-4">
+
          <div className="w-full min-w-[300px]">
            <ReactECharts
              option={parsedOptions}
