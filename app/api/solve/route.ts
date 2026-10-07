@@ -167,15 +167,34 @@ ${langInstruction}${modeInstruction}`;
     });
 
     const ai = getAI();
-    const responseStream = await ai.models.generateContentStream({
-      model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
-      contents,
-      config: {
-        systemInstruction: systemPrompt,
-      },
-    });
+    const primaryModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const fallbackModels = ['gemini-2.5-flash', 'gemini-2.0-flash'].filter((m) => m !== primaryModel);
+    const candidateModels = [primaryModel, ...fallbackModels];
+
+    let responseStream;
+    let lastError: unknown;
+    for (const model of candidateModels) {
+      try {
+        responseStream = await ai.models.generateContentStream({
+          model,
+          contents,
+          config: {
+            systemInstruction: systemPrompt,
+          },
+        });
+        break;
+      } catch (modelError) {
+        lastError = modelError;
+        console.warn(`Gemini model ${model} failed, attempting next fallback...`, modelError);
+      }
+    }
+
+    if (!responseStream) {
+      throw lastError || new Error('Failed to generate content with available models');
+    }
 
     let isStreamErrored = false;
+
     const stream = new ReadableStream({
       async start(controller) {
         try {

@@ -19,13 +19,27 @@ export async function compressImageToDataUrl(
   } = options;
 
   const imageCompression = (await import('browser-image-compression')).default;
-  const compressedFile = await imageCompression(file, {
-    maxSizeMB,
-    maxWidthOrHeight,
-    useWebWorker,
-  });
+  let compressedFile: File | Blob;
+  try {
+    compressedFile = await imageCompression(file, {
+      maxSizeMB,
+      maxWidthOrHeight,
+      useWebWorker,
+    });
+  } catch (workerError) {
+    if (useWebWorker) {
+      compressedFile = await imageCompression(file, {
+        maxSizeMB,
+        maxWidthOrHeight,
+        useWebWorker: false,
+      });
+    } else {
+      throw workerError;
+    }
+  }
 
   return new Promise((resolve, reject) => {
+
     const reader = new FileReader();
 
     reader.onerror = () => {

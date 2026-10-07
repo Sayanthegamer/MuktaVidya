@@ -13,16 +13,16 @@ jest.mock('@/lib/rateLimit', () => ({
   },
 }));
 
+const mockGenerateContentStream = jest.fn();
+
 jest.mock('@google/genai', () => ({
   GoogleGenAI: jest.fn().mockImplementation(() => ({
     models: {
-      generateContentStream: jest.fn().mockResolvedValue([
-        { text: 'mock response part 1' },
-        { text: 'mock response part 2' }
-      ]),
+      generateContentStream: (...args: unknown[]) => mockGenerateContentStream(...args),
     },
   })),
 }));
+
 
 import { ratelimit } from '@/lib/rateLimit';
 
@@ -77,10 +77,15 @@ describe('POST /api/solve IP Extraction Security', () => {
 describe('Solve API route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGenerateContentStream.mockResolvedValue([
+      { text: 'mock response part 1' },
+      { text: 'mock response part 2' }
+    ]);
     mockRatelimit.limit.mockResolvedValue({ success: true });
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
     env.NODE_ENV = 'development';
   });
+
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_APP_URL;
@@ -175,8 +180,63 @@ describe('Solve API route', () => {
     }
 
     expect(result).toBe('mock response part 1mock response part 2');
+    expect(mockGenerateContentStream).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'gemini-2.5-flash',
+      })
+    );
+  });
+
+  it('falls back to secondary model if primary model fails', async () => {
+    // First model fails (e.g. 404 or unsupported model)
+    mockGenerateContentStream.mockRejectedValueOnce(new Error('Model not found'));
+    // Fallback model succeeds
+    mockGenerateContentStream.mockResolvedValueOnce([
+      { text: 'fallback response' }
+    ]);
+
+    const bodyContent = JSON.stringify({
+      messages: [{ role: 'user', imageBase64: 'data:image/jpeg;base64,validbase64' }],
+      language: 'EN'
+    });
+
+    const request = new Request('http://localhost:3000/api/solve', {
+      method: 'POST',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'content-type': 'application/json',
+        'content-length': String(bodyContent.length)
+      },
+      body: bodyContent
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const reader = response.body?.getReader();
+    let result = '';
+    if (reader) {
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += decoder.decode(value);
+      }
+    }
+
+    expect(result).toBe('fallback response');
+    expect(mockGenerateContentStream).toHaveBeenCalledTimes(2);
+    expect(mockGenerateContentStream).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ model: 'gemini-2.5-flash' })
+    );
+    expect(mockGenerateContentStream).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ model: 'gemini-2.0-flash' })
+    );
   });
 });
+
 
 describe('Solve API Error Handling Security', () => {
   const originalConsoleError = console.error;
