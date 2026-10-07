@@ -100,18 +100,18 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
         />
 
         {/* Main Dock Container */}
-        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-[border-color,box-shadow] duration-200">
+        <div className="relative w-full bg-[var(--surface-0)]/85 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] hover:border-[var(--border-strong)] transition-all duration-300">
 
           {/* Image Preview Area */}
           {attachedImage && (
             <div className="relative self-start mt-4 ml-4">
-              <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] w-20 h-20">
+              <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] w-20 h-20 shadow-md">
                 <Image src={attachedImage} alt="Attached" fill sizes="80px" className="object-cover" unoptimized />
               </div>
               <button
                 type="button"
                 onClick={() => setAttachedImage(null)}
-                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-colors z-10 btn-press"
+                className="absolute -top-2 -right-2 bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:text-[var(--accent)] border border-[var(--border-subtle)] rounded-full p-1 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 z-10 btn-press"
                 aria-label="Remove attachment"
               >
                 <X size={12} weight="bold" aria-hidden="true" />
@@ -127,10 +127,10 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                 if (isStreaming || isCompressing) return;
                 fileInputRef.current?.click();
               }}
-              className={`p-2 mb-1 rounded-full text-[var(--text-muted)] transition-colors shrink-0 ${
+              className={`p-2 mb-1 rounded-full text-[var(--text-muted)] transition-all duration-200 shrink-0 ${
                 isStreaming || isCompressing
                   ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] btn-press'
+                  : 'hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:scale-105 active:scale-95 btn-press'
               }`}
               title={isCompressing ? "Compressing image..." : isStreaming ? "Wait for response to finish" : "Attach Image"}
               aria-label="Attach image"
@@ -180,7 +180,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
               <button
                 type="button"
                 onClick={onStop}
-                className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors btn-press shrink-0"
+                className="p-2.5 mb-1 rounded-full bg-[var(--surface-3)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-all duration-200 hover:scale-105 active:scale-95 btn-press shrink-0 shadow-sm"
                 title="Stop Generating (Esc)"
                 aria-label="Stop"
               >
@@ -199,7 +199,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
                 aria-disabled={(!text.trim() && !attachedImage) || isCompressing}
                 className={`p-2.5 mb-1 rounded-full transition-all duration-200 shrink-0 ${
                   (text.trim() || attachedImage) && !isCompressing
-                    ? 'bg-[var(--accent)] text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] btn-press'
+                    ? 'bg-[var(--accent)] text-white shadow-[0_0_20px_rgba(var(--accent-rgb,139,92,246),0.5)] hover:scale-105 active:scale-95 btn-press'
                     : 'bg-[var(--surface-2)] text-[var(--text-muted)] cursor-not-allowed opacity-50'
                 }`}
                 title={isCompressing ? "Compressing image..." : (!text.trim() && !attachedImage) ? "Enter text or attach an image to send" : "Send Message (Enter)"}
@@ -210,6 +210,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
             )}
           </div>
         </div>
+
 
         {/* Disclaimer Text */}
         <div className="absolute -bottom-6 left-0 right-0 text-center pointer-events-none">

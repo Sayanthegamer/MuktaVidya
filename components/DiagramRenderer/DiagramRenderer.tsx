@@ -160,7 +160,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type, i
       return (
         <div
           data-testid="diagram-skeleton"
-          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-dashed border-[var(--border-subtle)] rounded-xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
+          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)]/50 backdrop-blur-sm border border-dashed border-[var(--border-subtle)] rounded-2xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
         >
           Rendering diagram vector...
         </div>
@@ -170,7 +170,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type, i
     if (!cleanedSvg) return <p className="text-xs text-[var(--error)] font-mono">Invalid diagram vector data.</p>;
 
     return (
-      <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm">
+      <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)]/70 backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-6 overflow-x-auto shadow-sm">
         <div
           className="w-full max-w-[500px] text-[var(--text-primary)] svg-diagram-container"
           style={{ color: 'var(--text-primary)' }}
@@ -191,7 +191,7 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type, i
       return (
         <div
           data-testid="diagram-skeleton"
-          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-dashed border-[var(--border-subtle)] rounded-xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
+          className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)]/50 backdrop-blur-sm border border-dashed border-[var(--border-subtle)] rounded-2xl p-8 animate-pulse text-xs text-[var(--text-muted)] font-mono"
         >
           Generating chart visualization...
         </div>
@@ -200,14 +200,14 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type, i
 
     if (!parsedOptions) {
       return (
-        <div className="my-4 p-3 bg-[var(--surface-3)] border border-[var(--border-subtle)] rounded-lg text-xs font-mono text-[var(--text-secondary)]">
+        <div className="my-4 p-3 bg-[var(--surface-3)] border border-[var(--border-subtle)] rounded-xl text-xs font-mono text-[var(--text-secondary)]">
           <code>{chartData}</code>
         </div>
       );
     }
 
     return (
-      <div className="my-6 w-full flex justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-4">
+      <div className="my-6 w-full flex justify-center bg-[var(--surface-1)]/70 backdrop-blur-sm border border-[var(--border-subtle)] rounded-2xl p-4 shadow-sm">
 
          <div className="w-full min-w-[300px]">
            <ReactECharts

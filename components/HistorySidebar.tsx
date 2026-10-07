@@ -54,20 +54,20 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
       {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role, react-doctor/prefer-html-dialog */}
       <div
         id="history-sidebar"
-        className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-1)] border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel ${isOpen ? "is-open" : ""}`}
+        className={`fixed inset-y-0 right-0 w-[360px] max-w-[90vw] bg-[var(--surface-0)]/90 backdrop-blur-2xl border-l border-[var(--border-subtle)] z-50 flex flex-col shadow-2xl sidebar-panel ${isOpen ? "is-open" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="history-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] shrink-0">
-          <h2 id="history-title" className="text-sm font-medium text-[var(--text-primary)]">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)] bg-[var(--surface-1)]/40 backdrop-blur-sm shrink-0">
+          <h2 id="history-title" className="text-sm font-semibold text-[var(--text-primary)]">
             Recent Scans
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors btn-press"
+            className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded-lg transition-all duration-200 hover:scale-105 btn-press"
             aria-label="Close history"
           >
             <X size={16} />
@@ -78,7 +78,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
         <div className="flex-1 overflow-y-auto">
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-              <ClockCounterClockwise size={32} className="text-[var(--text-muted)] mb-4" />
+              <ClockCounterClockwise size={32} className="text-[var(--text-muted)] mb-4 animate-pulse" />
               <p className="text-[var(--text-muted)] text-sm font-medium mb-1">No scans yet</p>
               <p className="text-[var(--text-muted)] text-xs">Questions you analyze will appear here.</p>
             </div>
@@ -92,16 +92,17 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
                     onSelect(item);
                     onClose();
                   }}
-                  className="flex gap-3 p-3 hover:bg-[var(--surface-2)] transition-colors border-b border-[var(--border-subtle)] last:border-0 text-left items-start"
+                  className="group flex gap-3 p-3.5 hover:bg-[var(--surface-2)]/60 transition-all duration-200 border-b border-[var(--border-subtle)] last:border-0 text-left items-start"
                 >
                   {/* Thumbnail */}
-                  <div className="relative shrink-0 w-12 h-12 rounded-md overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)]">
+                  <div className="relative shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-[var(--surface-3)] flex items-center justify-center border border-[var(--border-subtle)] group-hover:scale-105 transition-transform duration-200 shadow-sm">
                     {item.imageBase64 ? (
                       <Image src={item.imageBase64} alt="" fill sizes="48px" className="w-full h-full object-cover" unoptimized />
                     ) : (
                       <FileText size={24} className="text-[var(--text-muted)]" />
                     )}
                   </div>
+
 
                   {/* Details */}
                   <div className="flex-1 min-w-0 flex flex-col">

@@ -34,7 +34,7 @@ const rehypePlugins: RehypePlugins = [
 const createMarkdownComponents = (isStreaming: boolean) => ({
   pre({ children, ...props }: React.ComponentPropsWithoutRef<"pre">) {
     return (
-      <pre className="overflow-x-auto rounded-lg p-4 bg-[var(--surface-2)] border border-[var(--border-subtle)]" {...props}>
+      <pre className="overflow-x-auto rounded-xl p-4 bg-[var(--surface-1)]/70 backdrop-blur-sm border border-[var(--border-subtle)] shadow-inner" {...props}>
         {children}
       </pre>
     );
@@ -137,19 +137,20 @@ function getSectionProps(type: ParsedSection['type']) {
 function getSectionClassName(type: ParsedSection['type']): string {
   switch (type) {
     case 'subject':
-      return 'inline-block my-2 px-3 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border-subtle)] text-xs font-semibold text-[var(--accent)]';
+      return 'inline-flex items-center gap-1.5 my-2 px-3 py-1 rounded-full bg-[var(--accent-muted)] border border-[var(--accent-border)] text-xs font-semibold text-[var(--accent)] backdrop-blur-sm shadow-sm transition-transform duration-200 hover:scale-[1.02]';
     case 'given':
-      return 'my-4 p-4 rounded-xl bg-[var(--surface-1)] border border-[var(--border-subtle)] transition-all';
+      return 'my-3 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
     case 'approach':
-      return 'my-4 p-4 rounded-xl bg-[var(--surface-1)] border border-[var(--border-subtle)] transition-all';
+      return 'my-3 pl-4 border-l-2 border-[var(--accent)]/40 hover:border-[var(--accent)]/70 transition-colors duration-200 py-1';
     case 'solution':
-      return 'my-4 p-4 rounded-xl bg-[var(--surface-1)] border border-[var(--border-subtle)] transition-all';
+      return 'my-4 pl-4 border-l-2 border-[var(--border-strong)] hover:border-[var(--accent)]/50 transition-colors duration-200 py-1';
     case 'answer':
-      return 'my-4 p-5 rounded-xl bg-[var(--surface-2)] border-2 border-[var(--accent)] text-[var(--text-primary)] shadow-md transition-all';
+      return 'my-5 p-5 rounded-2xl bg-[var(--surface-1)]/60 backdrop-blur-md border border-[var(--accent)]/40 text-[var(--text-primary)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-[var(--accent)] hover:shadow-[0_8px_32px_rgba(var(--accent),0.15)] transition-all duration-300 relative overflow-hidden';
     default:
       return 'w-full';
   }
 }
+
 
 const ChatMessageItem = memo(function ChatMessageItem({
   msg,
@@ -179,7 +180,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
       <div className="flex justify-end w-full fade-up">
         <div className="flex flex-col items-end gap-2 max-w-[85%]">
           {msg.imageBase64 && (
-            <div className="relative rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-1)] shadow-sm max-w-xs sm:max-w-sm">
+            <div className="relative rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-1)] shadow-md max-w-xs sm:max-w-sm">
                <Image
                  src={msg.imageBase64}
                  alt="Uploaded reference"
@@ -192,7 +193,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                  <button
                    type="button"
                    onClick={onRescan}
-                   className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-md border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors shadow-sm"
+                   className="absolute top-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--surface-0)]/80 backdrop-blur-md rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)]/40 transition-all shadow-sm"
                    title="Start Over"
                    aria-label="Start over"
                  >
@@ -202,7 +203,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
             </div>
           )}
           {msg.text && (
-            <div className="px-4 py-3 rounded-2xl rounded-tr-sm bg-[var(--surface-2)] text-[var(--text-primary)] text-[0.9375rem] border border-[var(--border-subtle)] shadow-sm">
+            <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm bg-[var(--accent)]/15 border border-[var(--accent)]/30 backdrop-blur-md text-[var(--text-primary)] text-[0.9375rem] shadow-sm">
               {msg.text}
             </div>
           )}

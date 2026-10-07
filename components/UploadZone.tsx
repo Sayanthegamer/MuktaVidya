@@ -130,27 +130,27 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         className={`
-          upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-lg border-2 border-dashed
+          upload-zone relative w-full h-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed
           col-start-1 row-start-1
-          transition-opacity duration-300 ease-out
+          transition-all duration-300 ease-out
           ${imagePreview || imageToCrop ? "opacity-0 pointer-events-none" : "opacity-100"}
           ${isDragging
-            ? "is-dragging bg-transparent border-[var(--accent)]"
-            : "border-[var(--border-subtle)] bg-transparent"
+            ? "is-dragging bg-[var(--surface-1)]/40 border-[var(--accent)]"
+            : "border-[var(--border-subtle)] hover:border-[var(--border-strong)] bg-[var(--surface-1)]/20"
           }
         `}
       >
         <CameraPlus
-          size={32}
-          className={`mb-4 transition-colors ${isDragging ? "text-[var(--accent)]" : "text-[var(--text-muted)]"}`}
+          size={36}
+          className={`mb-4 transition-all duration-300 ${isDragging ? "text-[var(--accent)] scale-110" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"}`}
           weight={isDragging ? "fill" : "regular"}
         />
 
         {isDragging ? (
-          <span className="text-[var(--text-muted)] text-sm font-medium">Release to analyze</span>
+          <span className="text-[var(--text-primary)] text-sm font-medium animate-pulse">Release to analyze</span>
         ) : (
           <div aria-live="polite" aria-busy={isCompressing} className="flex flex-col items-center">
-            <span className="text-[var(--text-muted)] text-sm font-medium mb-6">
+            <span className="text-[var(--text-secondary)] text-sm font-medium mb-6">
               {isCompressing ? "Processing..." : "Snap or upload a question"}
             </span>
 
@@ -163,7 +163,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   fileInputRef.current?.click();
                 }}
                 aria-disabled={isCompressing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-white text-xs font-medium transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--accent-hover)]'}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold shadow-md shadow-[var(--accent)]/20 transition-all duration-200 btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--accent-hover)] hover:scale-105 active:scale-95'}`}
                 aria-label="Take photo with camera"
                 title={isCompressing ? "Processing..." : "Take photo with camera"}
               >
@@ -178,7 +178,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                   galleryInputRef.current?.click();
                 }}
                 aria-disabled={isCompressing}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-xs font-medium transition-colors btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border-default)] bg-[var(--surface-2)]/60 backdrop-blur-sm text-[var(--text-primary)] text-xs font-medium shadow-sm transition-all duration-200 btn-press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--surface-2)] hover:border-[var(--accent)]/50 hover:scale-105 active:scale-95'}`}
                 aria-label="Upload from gallery"
                 title={isCompressing ? "Processing..." : "Upload from gallery"}
               >
@@ -186,6 +186,7 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
                 {isCompressing ? "Processing..." : "Gallery"}
               </button>
             </div>
+
 
             <span className="text-[var(--text-muted)] text-xs tracking-wider mt-6 font-mono uppercase">
               WBJEE · JEE · NEET

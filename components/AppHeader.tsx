@@ -21,31 +21,31 @@ const LANGUAGES = [
 const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
   const { onHistoryClick, isHistoryOpen, language, setLanguage, mode, setMode } = props;
   return (
-    <header className="sticky top-0 h-14 bg-[var(--surface-1)] border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30">
+    <header className="sticky top-0 h-14 bg-[var(--surface-0)]/80 backdrop-blur-md border-b border-[var(--border-subtle)] flex items-center justify-between px-6 z-30 transition-colors duration-200">
       {/* Logo */}
-      <h1 className="flex items-center gap-1.5 select-none">
-        <span className="font-mono text-sm tracking-widest text-[var(--text-muted)] uppercase">
+      <h1 className="flex items-center gap-1.5 select-none cursor-pointer group">
+        <span className="font-mono text-sm tracking-widest text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors uppercase">
           MuktaVidya
         </span>
-        <span className="font-sans font-medium text-[var(--accent)] text-sm">
+        <span className="font-sans font-semibold text-[var(--accent)] text-xs tracking-tight px-1.5 py-0.5 rounded-md bg-[var(--accent-muted)] border border-[var(--accent-border)] transition-transform duration-200 group-hover:scale-105">
           AI
         </span>
       </h1>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Mode Selector */}
         {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
-        <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Solve mode">
+        <div className="flex rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/60 backdrop-blur-sm p-0.5" role="group" aria-label="Solve mode">
           <button
             type="button"
             onClick={() => setMode("NORMAL")}
             aria-pressed={mode === "NORMAL"}
             className={`
-              px-3 py-1 text-xs font-mono transition-colors border-r border-[var(--border-subtle)]
+              px-2.5 py-1 text-xs font-mono rounded-md transition-all duration-200
               ${
                 mode === "NORMAL"
-                  ? "bg-[var(--surface-3)] text-[var(--text-primary)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                  ? "bg-[var(--surface-3)] text-[var(--text-primary)] shadow-sm font-semibold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]/50"
               }
             `}
           >
@@ -56,11 +56,11 @@ const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
             onClick={() => setMode("FASTEST")}
             aria-pressed={mode === "FASTEST"}
             className={`
-              px-3 py-1 text-xs font-mono transition-colors
+              px-2.5 py-1 text-xs font-mono rounded-md transition-all duration-200
               ${
                 mode === "FASTEST"
-                  ? "bg-[var(--surface-3)] text-[var(--text-primary)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                  ? "bg-[var(--surface-3)] text-[var(--accent)] shadow-sm font-semibold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]/50"
               }
             `}
             title="Fastest and Shortest approach with Best Solvability"
@@ -71,20 +71,19 @@ const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
 
         {/* Language Selector */}
         {/* react-doctor-disable-next-line react-doctor/prefer-tag-over-role */}
-        <div className="flex rounded-md border border-[var(--border-subtle)] overflow-hidden" role="group" aria-label="Response language">
-        {LANGUAGES.map((lang, index) => (
+        <div className="flex rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/60 backdrop-blur-sm p-0.5" role="group" aria-label="Response language">
+        {LANGUAGES.map((lang) => (
           <button
             key={lang.id}
             type="button"
             onClick={() => setLanguage(lang.id)}
             aria-pressed={language === lang.id}
             className={`
-              px-3 py-1 text-xs font-mono transition-colors
-              ${index < 2 ? "border-r border-[var(--border-subtle)]" : ""}
+              px-2.5 py-1 text-xs font-mono rounded-md transition-all duration-200
               ${
                 language === lang.id
-                  ? "bg-[var(--surface-3)] text-[var(--text-primary)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+                  ? "bg-[var(--surface-3)] text-[var(--text-primary)] shadow-sm font-semibold"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]/50"
               }
             `}
           >
@@ -103,11 +102,11 @@ const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
         aria-controls="history-sidebar"
         title="Recent scans"
         className={`
-          p-2 rounded-md transition-colors btn-press
+          p-2 rounded-lg transition-all duration-200 btn-press border border-transparent
           ${
             isHistoryOpen
-              ? "text-[var(--accent)] bg-[var(--accent-muted)]"
-              : "text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-2)]"
+              ? "text-[var(--accent)] bg-[var(--accent-muted)] border-[var(--accent-border)] shadow-sm"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:border-[var(--border-subtle)]"
           }
         `}
       >
@@ -115,6 +114,7 @@ const AppHeader = memo(function AppHeader(props: AppHeaderProps) {
       </button>
     </header>
   );
+
 });
 
 export default AppHeader;

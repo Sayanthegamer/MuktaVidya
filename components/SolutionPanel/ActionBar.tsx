@@ -10,12 +10,12 @@ interface ActionBarProps {
 
 export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedback }: ActionBarProps) {
   return (
-    <div className="mt-8 flex items-center justify-between fade-up px-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-1)]/70 backdrop-blur-md shadow-sm">
+    <div className="mt-6 flex items-center justify-between fade-up px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-1)]/40 backdrop-blur-xl shadow-sm hover:border-[var(--border-default)] transition-all duration-300">
       <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={onCopy}
-          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:scale-105 active:scale-95 transition-all duration-200 btn-press"
           aria-label={copied ? "Copied solution" : "Copy solution"}
           title={copied ? "Copied" : "Copy solution"}
         >
@@ -25,7 +25,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
         <button
           type="button"
           onClick={onShare}
-          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors btn-press"
+          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:scale-105 active:scale-95 transition-all duration-200 btn-press"
           aria-label="Share solution"
           title="Share solution"
         >
@@ -33,6 +33,7 @@ export default function ActionBar({ copied, feedback, onCopy, onShare, onFeedbac
           <span className="text-xs font-medium">Share</span>
         </button>
       </div>
+
 
       <div className="flex items-center gap-3">
         <span className="text-xs text-[var(--text-muted)]">Was this helpful?</span>
