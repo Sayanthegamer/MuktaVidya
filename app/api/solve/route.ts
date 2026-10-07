@@ -167,9 +167,10 @@ ${langInstruction}${modeInstruction}`;
     });
 
     const ai = getAI();
-    const primaryModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    const primaryModel = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
     const fallbackModels = ['gemini-2.5-flash', 'gemini-2.0-flash'].filter((m) => m !== primaryModel);
     const candidateModels = [primaryModel, ...fallbackModels];
+
 
     let responseStream;
     let lastError: unknown;

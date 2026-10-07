@@ -182,7 +182,7 @@ describe('Solve API route', () => {
     expect(result).toBe('mock response part 1mock response part 2');
     expect(mockGenerateContentStream).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.5-flash-lite',
       })
     );
   });
@@ -228,13 +228,14 @@ describe('Solve API route', () => {
     expect(mockGenerateContentStream).toHaveBeenCalledTimes(2);
     expect(mockGenerateContentStream).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ model: 'gemini-2.5-flash' })
+      expect.objectContaining({ model: 'gemini-3.5-flash-lite' })
     );
     expect(mockGenerateContentStream).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ model: 'gemini-2.0-flash' })
+      expect.objectContaining({ model: 'gemini-2.5-flash' })
     );
   });
+
 });
 
 
