@@ -1,5 +1,5 @@
 "use client";
-import { CameraPlus, Images, ArrowCounterClockwise, CircleNotch } from "@phosphor-icons/react";
+import { CameraPlus, Images, ArrowCounterClockwise, CircleNotch, MagnifyingGlassPlus, MagnifyingGlassMinus } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useUploadZone } from "../hooks/useUploadZone";
 import { useState, useRef, ChangeEvent } from "react";
@@ -17,6 +17,7 @@ interface UploadZoneProps {
 export default function UploadZone({ onImageSelect, isProcessing, imagePreview, onRescan }: UploadZoneProps) {
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>();
+  const [zoom, setZoom] = useState(1);
   const imageRef = useRef<HTMLImageElement>(null);
 
   const handleCropComplete = async () => {
@@ -64,15 +65,20 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
     const croppedBase64 = canvas.toDataURL("image/jpeg", 0.9);
     onImageSelect(croppedBase64);
     setImageToCrop(null);
+    setCrop(undefined);
+    setZoom(1);
   };
 
   const handleCancelCrop = () => {
     setImageToCrop(null);
     setCrop(undefined);
+    setZoom(1);
   };
 
   const handleImageLoaded = (base64: string) => {
     setImageToCrop(base64);
+    setCrop(undefined);
+    setZoom(1);
   };
 
   const {
@@ -194,41 +200,109 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
         createPortal(
           // react-doctor-disable-next-line react-doctor/prefer-tag-over-role, react-doctor/prefer-html-dialog
           <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
-            {/* Header/Title area (optional, helps with spacing) */}
-            <div className="shrink-0 p-4 flex justify-center items-center border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
-              <span id="crop-dialog-title" className="text-sm font-medium text-[var(--text-primary)]">Crop Image</span>
+            {/* Header/Title area */}
+            <div className="shrink-0 px-4 py-3 flex justify-between items-center border-b border-[var(--border-subtle)] bg-[var(--surface-1)]">
+              <div className="flex items-center gap-2">
+                <span id="crop-dialog-title" className="text-sm font-semibold text-[var(--text-primary)]">Crop Question</span>
+                <span className="hidden md:inline-block text-xs text-[var(--text-muted)]">
+                  · Drag across the image to select the question you want solved
+                </span>
+              </div>
+
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 bg-[var(--surface-2)] border border-[var(--border-subtle)] rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setZoom(prev => Math.max(1, Number((prev - 0.25).toFixed(2))))}
+                  disabled={zoom <= 1}
+                  className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  <MagnifyingGlassMinus size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoom(1)}
+                  className="px-2 py-0.5 text-[11px] font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  aria-label="Reset zoom"
+                  title="Reset zoom to fit screen"
+                >
+                  {Math.round(zoom * 100)}%
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoom(prev => Math.min(2.5, Number((prev + 0.25).toFixed(2))))}
+                  disabled={zoom >= 2.5}
+                  className="p-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  <MagnifyingGlassPlus size={16} aria-hidden="true" />
+                </button>
+              </div>
             </div>
 
             {/* Image container */}
-            <div className="flex-1 w-full flex items-center justify-center overflow-hidden p-4 min-h-0">
-               <ReactCrop crop={crop} onChange={c => setCrop(c)}>
+            <div className="flex-1 w-full flex items-center justify-center overflow-auto p-4 min-h-0 crop-modal-viewport select-none">
+               <ReactCrop
+                 crop={crop}
+                 onChange={c => setCrop(c)}
+                 className="max-h-full max-w-full"
+                 style={{
+                   maxHeight: zoom > 1 ? `calc((100dvh - 160px) * ${zoom})` : 'calc(100dvh - 160px)',
+                   maxWidth: zoom > 1 ? `${zoom * 100}%` : '100%',
+                 }}
+               >
                   {/* react-doctor-disable-next-line react-doctor/nextjs-no-img-element */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={imageRef}
                     src={imageToCrop}
                     alt="Crop preview"
-                    className="max-w-full max-h-[70vh] object-contain"
+                    style={{
+                      maxHeight: zoom > 1 ? `calc((100dvh - 160px) * ${zoom})` : 'calc(100dvh - 160px)',
+                      maxWidth: zoom > 1 ? `${zoom * 100}%` : '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                    }}
+                    className="w-auto h-auto object-contain block select-none"
                   />
                </ReactCrop>
             </div>
 
             {/* Footer with buttons - Fixed at bottom */}
-            <div className="shrink-0 flex items-center justify-center gap-4 p-4 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface-1)]">
+            <div className="shrink-0 flex items-center justify-between gap-4 px-4 py-3 pb-safe border-t border-[var(--border-subtle)] bg-[var(--surface-1)]">
               <button
                 type="button"
                 onClick={handleCancelCrop}
-                className="px-6 py-3 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                className="px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleCropComplete}
-                className="px-6 py-3 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-              >
-                Crop & Solve
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (imageToCrop) onImageSelect(imageToCrop);
+                    setImageToCrop(null);
+                    setCrop(undefined);
+                    setZoom(1);
+                  }}
+                  className="px-4 py-2 rounded-md border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-medium hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                >
+                  Use Full Image
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCropComplete}
+                  className="px-5 py-2 rounded-md bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] shadow-sm btn-press"
+                >
+                  {crop && crop.width && crop.height ? "Crop & Solve" : "Solve"}
+                </button>
+              </div>
             </div>
           </div>,
           document.body
