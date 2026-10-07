@@ -286,4 +286,56 @@ describe('Solve API Error Handling Security', () => {
     // Ensure the error was actually logged internally
     expect(console.error).toHaveBeenCalled();
   });
+
+  it('returns 503 when GEMINI_API_KEY is not configured', async () => {
+    const { getGeminiApiKey } = await import('@/lib/env');
+    (getGeminiApiKey as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('GEMINI_API_KEY is not set. Add it to .env.local or your Vercel dashboard.');
+    });
+
+    const bodyContent = JSON.stringify({
+      messages: [{ role: 'user', imageBase64: 'data:image/jpeg;base64,validbase64' }],
+      language: 'EN'
+    });
+
+    const request = new Request('http://localhost:3000/api/solve', {
+      method: 'POST',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'content-type': 'application/json',
+        'content-length': String(bodyContent.length)
+      },
+      body: bodyContent
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(503);
+    const data = await response.json();
+    expect(data.error).toContain('GEMINI_API_KEY is not set');
+  });
+
+  it('returns 401 when API key is invalid', async () => {
+    mockGenerateContentStream.mockRejectedValue(new Error('API key not valid. Please pass a valid API key.'));
+
+    const bodyContent = JSON.stringify({
+      messages: [{ role: 'user', imageBase64: 'data:image/jpeg;base64,validbase64' }],
+      language: 'EN'
+    });
+
+    const request = new Request('http://localhost:3000/api/solve', {
+      method: 'POST',
+      headers: {
+        'origin': 'http://localhost:3000',
+        'content-type': 'application/json',
+        'content-length': String(bodyContent.length)
+      },
+      body: bodyContent
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid GEMINI_API_KEY configured in Vercel environment variables.');
+  });
 });
+

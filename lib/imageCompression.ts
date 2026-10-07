@@ -15,8 +15,9 @@ export async function compressImageToDataUrl(
   const {
     maxSizeMB = 1,
     maxWidthOrHeight = 1920,
-    useWebWorker = true,
+    useWebWorker = false,
   } = options;
+
 
   const imageCompression = (await import('browser-image-compression')).default;
   let compressedFile: File | Blob;

@@ -7,13 +7,10 @@ import { readJsonBody, PayloadTooLargeError, EmptyBodyError } from '@/lib/payloa
 import { NextRequest, NextResponse } from 'next/server';
 import { SolveMode } from '@/hooks/useMode';
 
-let aiInstance: GoogleGenAI | null = null;
 function getAI() {
-  if (!aiInstance) {
-    aiInstance = new GoogleGenAI({ apiKey: getGeminiApiKey() });
-  }
-  return aiInstance;
+  return new GoogleGenAI({ apiKey: getGeminiApiKey() });
 }
+
 
 const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10MB limit
 
@@ -231,7 +228,30 @@ ${langInstruction}${modeInstruction}`;
       },
     });
   } catch (error: unknown) {
-    console.error('Solve API Error:', error);
+    console.error('Solve API Error:', error instanceof Error ? `${error.name}: ${error.message}\n${error.stack}` : error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('GEMINI_API_KEY is not set')) {
+        return NextResponse.json(
+          { error: 'AI service configuration error: GEMINI_API_KEY is not set in Vercel environment variables.' },
+          { status: 503 }
+        );
+      }
+      if (error.message.includes('API key not valid') || error.message.includes('API_KEY_INVALID')) {
+        return NextResponse.json(
+          { error: 'Invalid GEMINI_API_KEY configured in Vercel environment variables.' },
+          { status: 401 }
+        );
+      }
+      if (error.message.includes('Resource has been exhausted') || error.message.includes('quota') || error.message.includes('429')) {
+        return NextResponse.json(
+          { error: 'Gemini API quota exceeded. Please try again in a moment.' },
+          { status: 429 }
+        );
+      }
+    }
+
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

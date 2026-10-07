@@ -99,7 +99,7 @@ describe('compressImageToDataUrl', () => {
     window.FileReader = jest.fn(() => mockFileReaderInstance) as unknown as typeof FileReader;
 
     try {
-      const result = await compressImageToDataUrl(file);
+      const result = await compressImageToDataUrl(file, { useWebWorker: true });
       expect(result).toBe('data:image/jpeg;base64,fallbacksuccess');
       expect(imageCompression).toHaveBeenCalledTimes(2);
       expect(imageCompression).toHaveBeenNthCalledWith(1, file, expect.objectContaining({ useWebWorker: true }));
@@ -109,4 +109,5 @@ describe('compressImageToDataUrl', () => {
     }
   });
 });
+
 

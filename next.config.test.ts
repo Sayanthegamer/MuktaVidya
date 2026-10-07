@@ -14,7 +14,9 @@ describe('next.config CSP headers', () => {
     expect(cspHeader).toBeDefined();
 
     const cspValue = cspHeader?.value || '';
-    expect(cspValue).toContain("worker-src 'self' blob:;");
-    expect(cspValue).toContain("child-src 'self' blob:;");
+    expect(cspValue).toContain("worker-src 'self' blob: https://cdn.jsdelivr.net;");
+    expect(cspValue).toContain("child-src 'self' blob: https://cdn.jsdelivr.net;");
+    expect(cspValue).toContain("https://cdn.jsdelivr.net");
   });
 });
+

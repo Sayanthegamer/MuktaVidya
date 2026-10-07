@@ -92,9 +92,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <body className="min-h-screen bg-[var(--surface-0)] text-[var(--text-primary)] antialiased">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(regs){for(var r of regs){r.unregister()}})}`,
+          }}
+        />
         {children}
         <Analytics />
       </body>
     </html>
   );
 }
+
