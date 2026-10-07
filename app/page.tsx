@@ -1,6 +1,5 @@
 // app/page.tsx — Server Component
 import MainWorkspace from "@/components/MainWorkspace";
-import 'katex/dist/katex.min.css';
 
 export default function Home() {
   return (

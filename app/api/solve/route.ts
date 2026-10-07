@@ -3,10 +3,10 @@ import { getGeminiApiKey } from '@/lib/env';
 import { ratelimit } from '@/lib/rateLimit';
 import { isAllowedOrigin } from '@/lib/origin';
 import { extractIP } from '@/lib/ip';
-import { NextRequest } from 'next/server';
+import { readJsonBody, PayloadTooLargeError, EmptyBodyError } from '@/lib/payload';
+import { NextRequest, NextResponse } from 'next/server';
 import { SolveMode } from '@/hooks/useMode';
 
-// Lazy initialization to avoid build-time env-var issues
 let aiInstance: GoogleGenAI | null = null;
 function getAI() {
   if (!aiInstance) {
@@ -15,7 +15,7 @@ function getAI() {
   return aiInstance;
 }
 
-const MAX_BODY_BYTES = 10 * 1024 * 1024; // Increased to 10MB to support multiple images in history
+const MAX_BODY_BYTES = 10 * 1024 * 1024; // 10MB limit
 
 export interface ChatMessage {
   role: 'user' | 'model';
@@ -23,108 +23,89 @@ export interface ChatMessage {
   imageBase64?: string;
 }
 
-export async function POST(request: NextRequest) {
+interface SolveRequestBody {
+  messages?: ChatMessage[];
+  language?: string;
+  mode?: SolveMode;
+}
 
+export async function POST(request: Request | NextRequest) {
   const isAllowed = isAllowedOrigin(request);
 
   if (!isAllowed) {
     return new Response('Forbidden', { status: 403 });
   }
 
-  const contentLength = parseInt(request.headers.get('content-length') || '0');
-  if (contentLength > MAX_BODY_BYTES) {
-    return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
-  }
-
   const ip = extractIP(request);
-  
+
   if (ratelimit) {
     const { success } = await ratelimit.limit(ip);
     if (!success) {
-      return new Response(
-        JSON.stringify({ error: "You're studying too fast! Wait 60 seconds." }),
+      return NextResponse.json(
+        { error: "You're studying too fast! Wait 60 seconds." },
         { status: 429, headers: { 'Retry-After': '60' } }
       );
     }
   }
 
+  let bodyData: SolveRequestBody;
   try {
-    if (!request.body) {
-      return new Response(JSON.stringify({ error: 'No body provided' }), { status: 400 });
+    bodyData = await readJsonBody<SolveRequestBody>(request, MAX_BODY_BYTES);
+  } catch (error) {
+    if (error instanceof PayloadTooLargeError) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
     }
-
-    const reader = request.body.getReader();
-    let receivedLength = 0;
-    const chunks = [];
-
-    while (true) {
-      // react-doctor-disable-next-line react-doctor/async-await-in-loop
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      if (value) {
-        receivedLength += value.length;
-        if (receivedLength > MAX_BODY_BYTES) {
-          reader.cancel();
-          return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413 });
-        }
-        chunks.push(value);
-      }
+    if (error instanceof EmptyBodyError) {
+      return NextResponse.json({ error: 'No body provided' }, { status: 400 });
     }
-
-    const totalBuffer = new Uint8Array(receivedLength);
-    let offset = 0;
-    for (const chunk of chunks) {
-      totalBuffer.set(chunk, offset);
-      offset += chunk.length;
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
+    console.error('Solve API Error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 
-    const bodyString = new TextDecoder().decode(totalBuffer);
+  const { messages, language, mode } = bodyData;
 
-    let bodyData;
-    try {
-      bodyData = JSON.parse(bodyString);
-    } catch {
-      return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return NextResponse.json({ error: 'No messages provided' }, { status: 400 });
+  }
+
+  if (messages.length > 50) {
+    return NextResponse.json({ error: 'Too many messages' }, { status: 400 });
+  }
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg || typeof msg !== 'object') {
+      return NextResponse.json({ error: `Invalid message at index ${i}` }, { status: 400 });
     }
-
-    const { messages, language, mode } = bodyData as { messages?: ChatMessage[], language?: string, mode?: SolveMode };
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: 'No messages provided' }), { status: 400 });
+    if (typeof msg.text === 'string' && msg.text.length > 10000) {
+      return NextResponse.json(
+        { error: `Message text at index ${i} exceeds the maximum length of 10000 characters` },
+        { status: 400 }
+      );
     }
-
-    if (messages.length > 50) {
-      return new Response(JSON.stringify({ error: 'Too many messages' }), { status: 400 });
+    const hasText = typeof msg.text === 'string' && msg.text.trim().length > 0;
+    const hasImage = typeof msg.imageBase64 === 'string' && msg.imageBase64.length > 0;
+    if (!hasText && !hasImage) {
+      return NextResponse.json(
+        { error: `Message at index ${i} has neither text nor image content` },
+        { status: 400 }
+      );
     }
+  }
 
-    // Validate that all messages have either text or imageBase64
-    for (let i = 0; i < messages.length; i++) {
-      const msg = messages[i];
-      if (msg.text && msg.text.length > 10000) {
-        return new Response(JSON.stringify({ error: `Message text at index ${i} exceeds the maximum length of 10000 characters` }), { status: 400 });
-      }
-      const hasText = msg.text && msg.text.trim().length > 0;
-      const hasImage = msg.imageBase64 && msg.imageBase64.length > 0;
-      if (!hasText && !hasImage) {
-        return new Response(
-          JSON.stringify({ error: `Message at index ${i} has neither text nor image content` }),
-          { status: 400 }
-        );
-      }
-    }
+  const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
+  const langInstruction = upperLang !== 'EN'
+    ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : upperLang === 'HI' ? 'Hindi' : upperLang}. Use LaTeX for all math notation regardless of language.`
+    : '';
 
-    // Build language-aware structured prompt
-    const upperLang = typeof language === 'string' ? language.toUpperCase() : 'EN';
-    const langInstruction = upperLang !== 'EN'
-      ? `\nRespond entirely in ${upperLang === 'BN' ? 'Bengali' : 'Hindi'}. Use LaTeX for all math notation regardless of language.`
-      : '';
+  const modeInstruction = mode === 'FASTEST'
+    ? `\n\nPRIORITY INSTRUCTION: Provide the FASTEST and SHORTEST approach with the best solvability. Do NOT use overly complex, fabricated, or advanced college-level formulas if a simpler standard method exists. Be concise but accurate.`
+    : '';
 
-    const modeInstruction = mode === 'FASTEST'
-      ? `\n\nPRIORITY INSTRUCTION: Provide the FASTEST and SHORTEST approach with the best solvability. Do NOT use overly complex, fabricated, or advanced college-level formulas if a simpler standard method exists. Be concise but accurate.`
-      : '';
-
-   const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
+  const systemPrompt = `You are an elite academic evaluator specialized in Indian competitive exams (WBJEE, JEE Main, NEET).
 Analyze the image or answer the user's question. For the first image, identify the subject (Physics/Chemistry/Mathematics/Biology) and structure your response as: ### Subject, ### Given, ### Approach, ### Solution, ### Answer. For MCQs, state which option is correct and why others are wrong.
 For follow-up questions, act as a helpful tutor guiding the student through the problem.
 
@@ -151,17 +132,10 @@ RULES FOR GENERATING HIGH-ACCURACY \`\`\`svg-diagram:
 - Place clear text descriptive tags using <text fill="#ffffff" font-size="12"> at distinct coordinates near components so labels are readable and do not overlap.
 - Keep structural vector primitives clean and compact (<line>, <circle>, <path>, <rect>, <text>). Do not append markdown notes or descriptions inside the code block envelope.
 ${langInstruction}${modeInstruction}`;
-    
-    // Map our messages to Gemini API format
-    let systemPromptInjected = false;
+
+  try {
     const contents = messages.map((msg) => {
       const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
-
-      // Inject system prompt into the first user message
-      if (msg.role === 'user' && !systemPromptInjected) {
-        parts.push({ text: systemPrompt });
-        systemPromptInjected = true;
-      }
 
       if (msg.text) {
         parts.push({ text: msg.text });
@@ -171,13 +145,15 @@ ${langInstruction}${modeInstruction}`;
         let mimeType = 'image/jpeg';
         let base64Data = msg.imageBase64;
 
-        // Validate proper data URL format: data:<mime>;base64,<data>
         if (msg.imageBase64.startsWith('data:')) {
-          const base64Index = msg.imageBase64.indexOf(';base64,');
-          if (base64Index !== -1) {
-            // Extract MIME type between 'data:' and ';base64,'
-            mimeType = msg.imageBase64.substring(5, base64Index);
-            base64Data = msg.imageBase64.substring(base64Index + 8);
+          const commaIndex = msg.imageBase64.indexOf(',');
+          const colonIndex = msg.imageBase64.indexOf(':');
+          const semicolonIndex = msg.imageBase64.indexOf(';');
+          if (colonIndex !== -1 && semicolonIndex !== -1 && semicolonIndex > colonIndex) {
+            mimeType = msg.imageBase64.substring(colonIndex + 1, semicolonIndex);
+          }
+          if (commaIndex !== -1) {
+            base64Data = msg.imageBase64.substring(commaIndex + 1);
           }
         }
 
@@ -185,40 +161,57 @@ ${langInstruction}${modeInstruction}`;
       }
 
       return {
-        role: msg.role === 'model' ? 'model' : 'user',
-        parts: parts
+        role: msg.role === 'model' ? ('model' as const) : ('user' as const),
+        parts,
       };
     });
 
     const ai = getAI();
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-3.1-flash-lite',
-      contents: contents,
+      model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+      contents,
+      config: {
+        systemInstruction: systemPrompt,
+      },
     });
 
+    let isStreamErrored = false;
     const stream = new ReadableStream({
       async start(controller) {
         try {
           for await (const chunk of responseStream) {
+            if (request.signal?.aborted) {
+              break;
+            }
             const text = chunk.text;
             if (text) {
               controller.enqueue(new TextEncoder().encode(text));
             }
           }
         } catch (streamError) {
+          isStreamErrored = true;
           controller.error(streamError);
         } finally {
-          controller.close();
+          if (!isStreamErrored) {
+            try {
+              controller.close();
+            } catch {
+              // Ignore if already closed
+            }
+          }
         }
-      }
+      },
     });
 
     return new Response(stream, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        'X-Content-Type-Options': 'nosniff',
+      },
     });
-
   } catch (error: unknown) {
     console.error('Solve API Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

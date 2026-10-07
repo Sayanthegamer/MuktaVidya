@@ -2,26 +2,30 @@
 import { isAllowedOrigin, ALLOWED_ORIGINS } from './origin';
 
 describe('isAllowedOrigin', () => {
-  const originalEnv = process.env;
+  const originalEnv = { ...process.env };
+
+  const setNodeEnv = (val: string) => {
+    (process.env as Record<string, string | undefined>).NODE_ENV = val;
+  };
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = { ...originalEnv };
+    Object.assign(process.env, originalEnv);
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    Object.assign(process.env, originalEnv);
   });
 
   it('allows requests without origin in development', () => {
-    process.env.NODE_ENV = 'development';
+    setNodeEnv('development');
     const req = new Request('http://localhost:3000');
     // Request constructor might set origin to empty string or null depending on environment, we just ensure no origin header is provided
     expect(isAllowedOrigin(req)).toBe(true);
   });
 
   it('allows localhost origin in development', () => {
-    process.env.NODE_ENV = 'development';
+    setNodeEnv('development');
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'http://localhost:3001' }
     });
@@ -29,7 +33,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('denies localhost origin in production', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'http://localhost:3001' }
     });
@@ -37,7 +41,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('allows explicitly allowed origins', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     process.env.NEXT_PUBLIC_APP_URL = 'https://myapp.com';
     // Re-evaluate allowed origins for the test by pushing to it or we rely on the ones we hardcoded
     if(!ALLOWED_ORIGINS.some(o => o === 'https://muktavidya.vercel.app')) {
@@ -51,7 +55,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('allows VERCEL_URL matches', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     process.env.VERCEL_URL = 'my-vercel-app.vercel.app';
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'https://my-vercel-app.vercel.app' }
@@ -60,7 +64,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('allows VERCEL_BRANCH_URL matches', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     process.env.VERCEL_BRANCH_URL = 'my-vercel-app-branch.vercel.app';
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'https://my-vercel-app-branch.vercel.app' }
@@ -69,7 +73,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('allows VERCEL_PROJECT_NAME matches', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     process.env.VERCEL_PROJECT_NAME = 'muktavidya';
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'https://muktavidya-a1b2c3d4e-something.vercel.app' }
@@ -78,7 +82,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('denies VERCEL_PROJECT_NAME mismatch on different domain', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     process.env.VERCEL_PROJECT_NAME = 'muktavidya';
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'https://muktavidya-a1b2c3d4e-something.otherdomain.com' }
@@ -87,7 +91,7 @@ describe('isAllowedOrigin', () => {
   });
 
   it('denies unknown origins', () => {
-    process.env.NODE_ENV = 'production';
+    setNodeEnv('production');
     const req = new Request('http://localhost:3000', {
       headers: { origin: 'https://evil.com' }
     });

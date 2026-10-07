@@ -1,4 +1,5 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
+import { compressImageToDataUrl } from "../lib/imageCompression";
 
 export function useUploadZone(onImageLoaded: (base64: string) => void) {
   const [isDragging, setIsDragging] = useState(false);
@@ -11,34 +12,11 @@ export function useUploadZone(onImageLoaded: (base64: string) => void) {
     setIsCompressing(true);
 
     try {
-      const imageCompression = (await import("browser-image-compression")).default;
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
-      const reader = new FileReader();
-      reader.onerror = () => {
-        console.error("FileReader error", reader.error);
-        setIsCompressing(false);
-      };
-      reader.onloadend = () => {
-        if (reader.error) {
-          console.error("Error reading file", reader.error);
-          setIsCompressing(false);
-          return;
-        }
-        if (reader.result && typeof reader.result === 'string') {
-          onImageLoaded(reader.result);
-        } else {
-          console.error("FileReader result is null or not a string");
-        }
-        setIsCompressing(false);
-      };
-      reader.readAsDataURL(compressedFile);
+      const base64 = await compressImageToDataUrl(file);
+      onImageLoaded(base64);
     } catch (error) {
       console.error("Error compressing image", error);
+    } finally {
       setIsCompressing(false);
     }
   };

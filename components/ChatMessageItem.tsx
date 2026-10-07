@@ -28,26 +28,27 @@ const remarkPlugins = [remarkMath];
 const rehypePlugins = [rehypeKatex];
 
 const markdownComponents = {
+  pre({ children, ...props }: React.ComponentPropsWithoutRef<"pre">) {
+    return (
+      <pre className="overflow-x-auto rounded-lg p-4 bg-[var(--surface-2)] border border-[var(--border-subtle)]" {...props}>
+        {children}
+      </pre>
+    );
+  },
   code({ className, children, node, ...props }: React.ComponentPropsWithoutRef<"code"> & { node?: Element }) {
     const match = /language-(\w+(?:-\w+)?)/.exec(className || '');
     const lang = match ? match[1] : '';
-    const isInline = !lang && (!node || node.tagName === 'code' && Object.keys(props).length === 0);
+    const isInline = !lang && (!node || (node.tagName === 'code' && Object.keys(props).length === 0));
 
     if (!isInline && (lang === 'json-chart' || lang === 'echarts')) {
-        return <DiagramRenderer chartData={String(children)} type="chart" />;
-      }
+      return <DiagramRenderer chartData={String(children)} type="chart" />;
+    }
 
-      if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
-        return <DiagramRenderer chartData={String(children)} type="svg" />;
-      }
+    if (!isInline && (lang === 'svg-diagram' || lang === 'svg')) {
+      return <DiagramRenderer chartData={String(children)} type="svg" />;
+    }
 
-    return !isInline ? (
-      <div className="overflow-x-auto">
-        <code className={className} {...props}>
-          {children}
-        </code>
-      </div>
-    ) : (
+    return (
       <code className={className} {...props}>
         {children}
       </code>
@@ -122,7 +123,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
              {processedText}
            </pre>
         ) : (
-          <SolutionErrorBoundary>
+          <SolutionErrorBoundary fallbackText={processedText}>
             <div className="prose w-full">
               <ReactMarkdown
                 remarkPlugins={remarkPlugins}

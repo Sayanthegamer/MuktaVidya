@@ -284,11 +284,42 @@ h1, h2, h3, h4 { letter-spacing: -0.025em; line-height: 1.1; }
   animation: fade-up 280ms var(--ease-out-expo) both;
 }
 
-/* ─── MERMAID DIAGRAM RESIZING ──────────────────────────────────────── */
-.mermaid-diagram svg {
-  max-width: 100%;
-  height: auto;
-  background: transparent !important;
+/* ─── SVG DIAGRAM RENDERING ──────────────────────────────────────── */
+.svg-diagram-container svg {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 350px;
+  display: block;
+}
+.svg-diagram-container svg text {
+  fill: var(--text-primary) !important;
+  font-family: var(--font-sans), system-ui, sans-serif !important;
+}
+
+.svg-diagram-container svg line:not([stroke-width]),
+.svg-diagram-container svg circle:not([stroke-width]),
+.svg-diagram-container svg ellipse:not([stroke-width]),
+.svg-diagram-container svg rect:not([stroke-width]),
+.svg-diagram-container svg polyline:not([stroke-width]),
+.svg-diagram-container svg polygon:not([stroke-width]),
+.svg-diagram-container svg path:not([stroke-width]) {
+  stroke-width: var(--svg-stroke-width, 2px);
+}
+
+.svg-diagram-container svg line:not([stroke]),
+.svg-diagram-container svg circle:not([stroke]):not([fill]),
+.svg-diagram-container svg circle:not([stroke])[fill="none"],
+.svg-diagram-container svg ellipse:not([stroke]):not([fill]),
+.svg-diagram-container svg ellipse:not([stroke])[fill="none"],
+.svg-diagram-container svg rect:not([stroke]):not([fill]),
+.svg-diagram-container svg rect:not([stroke])[fill="none"],
+.svg-diagram-container svg polyline:not([stroke]):not([fill]),
+.svg-diagram-container svg polyline:not([stroke])[fill="none"],
+.svg-diagram-container svg polygon:not([stroke]):not([fill]),
+.svg-diagram-container svg polygon:not([stroke])[fill="none"],
+.svg-diagram-container svg path:not([stroke]):not([fill]),
+.svg-diagram-container svg path:not([stroke])[fill="none"] {
+  stroke: var(--text-secondary);
 }
 
 /* ─── UPLOAD ZONE BREATHING GLOW ──────────────────────────── */

@@ -147,8 +147,6 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
           return newMessages;
         });
 
-        setIsStreaming(false);
-
         if (abortController.signal.aborted) return;
 
         // Trigger callback to save to history if provided
@@ -169,11 +167,12 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
         title: "Analysis failed",
         description: errorMessage
       });
-      setIsProcessing(false);
-      setIsStreaming(false);
       // Remove the empty model message
       setMessages(currentMessages);
       if (isInitialCapture) setImagePreview(null);
+    } finally {
+      setIsProcessing(false);
+      setIsStreaming(false);
     }
   }, [abortCurrentRequest, language, mode, onSolveComplete]);
 
@@ -211,15 +210,7 @@ export function useImageSolver({ onSolveComplete, language, mode = "NORMAL" }: U
     setIsStreaming(false);
   }, [abortCurrentRequest]);
 
-  const resetState = useCallback(() => {
-    abortCurrentRequest();
-    setImagePreview(null);
-    setSolution("");
-    setMessages([]);
-    setError(null);
-    setIsProcessing(false);
-    setIsStreaming(false);
-  }, [abortCurrentRequest]);
+  const resetState = handleRescan;
 
   // For history item selection to set initial messages
   const setInitialState = useCallback((imageBase64: string, solutionText: string) => {

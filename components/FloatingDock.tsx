@@ -2,6 +2,7 @@
 import { PaperPlaneRight, Stop, Image as ImageIcon, X, CircleNotch } from "@phosphor-icons/react";
 import { useState, useRef, useEffect, KeyboardEvent, ChangeEvent, memo } from "react";
 import Image from "next/image";
+import { compressImageToDataUrl } from "@/lib/imageCompression";
 
 interface FloatingDockProps {
   onFollowUp: (text?: string, imageBase64?: string) => void;
@@ -14,41 +15,10 @@ interface FloatingDockProps {
 const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onStop }: FloatingDockProps) {
   const [text, setText] = useState("");
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
   const [isCompressing, setIsCompressing] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Intersection Observer for visibility
-  useEffect(() => {
-    if (isStreaming) {
-      setTimeout(() => setIsVisible(true), 0);
-      return;
-    }
-
-    const target = document.getElementById('solution-bottom-target');
-    if (!target) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-        });
-      },
-      {
-        root: null, // viewport or closest scroll container
-        rootMargin: '100px', // trigger a bit before hitting absolute bottom
-        threshold: 0,
-      }
-    );
-
-    observer.observe(target);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isStreaming]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -100,38 +70,21 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
 
     setIsCompressing(true);
     try {
-      const imageCompression = (await import("browser-image-compression")).default;
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result && typeof reader.result === 'string') {
-          setAttachedImage(reader.result);
-        }
-        setIsCompressing(false);
-      };
-      reader.readAsDataURL(compressedFile);
+      const dataUrl = await compressImageToDataUrl(file);
+      setAttachedImage(dataUrl);
     } catch (error) {
       console.error("Error compressing image", error);
+    } finally {
       setIsCompressing(false);
-    }
-
-    // Reset input so the same file can be selected again if removed
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      // Reset input so the same file can be selected again if removed
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   return (
-    <div
-      className={`fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 transition-[transform,opacity] duration-500 ease-out flex justify-center pointer-events-none pb-safe ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      }`}
-    >
+    <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 z-50 flex justify-center pointer-events-none pb-safe">
       <div className="w-full max-w-3xl relative pointer-events-auto group">
 
         {/* Alien Glow Effect (Architecturally accurate pseudo-style) */}
@@ -147,7 +100,7 @@ const FloatingDock = memo(function FloatingDock({ onFollowUp, isStreaming, onSto
         />
 
         {/* Main Dock Container */}
-        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-all duration-200">
+        <div className="relative w-full bg-[var(--surface-0)]/80 border border-[var(--border-strong)] rounded-2xl p-2 flex flex-col gap-2 backdrop-blur-xl focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-[border-color,box-shadow] duration-200">
 
           {/* Image Preview Area */}
           {attachedImage && (

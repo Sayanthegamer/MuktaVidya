@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -75,8 +76,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
-  themeColor: "#0a0a0b", // Updated to match dark theme surface-0
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
 };
 
 export default function RootLayout({
@@ -88,9 +89,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
+      <body className="min-h-screen bg-[var(--surface-0)] text-[var(--text-primary)] antialiased">
         {children}
         <Analytics />
       </body>

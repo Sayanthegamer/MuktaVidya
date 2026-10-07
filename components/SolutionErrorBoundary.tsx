@@ -10,9 +10,9 @@ export class SolutionErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="text-sm">
-          <p className="text-red-400 mb-2">Render failed. Showing raw text:</p>
-          <pre className="whitespace-pre-wrap text-gray-300 font-mono text-xs">
+        <div className="text-sm p-4 rounded-lg bg-[var(--surface-2)] border border-[var(--border-subtle)]">
+          <p className="text-[var(--error)] mb-2 font-medium">Render failed. Showing raw text:</p>
+          <pre className="whitespace-pre-wrap text-[var(--text-secondary)] font-mono text-xs overflow-x-auto">
             {this.props.fallbackText}
           </pre>
         </div>

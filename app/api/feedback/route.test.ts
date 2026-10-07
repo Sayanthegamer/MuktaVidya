@@ -90,12 +90,12 @@ describe('POST /api/feedback', () => {
     const originalProjectName = process.env.VERCEL_PROJECT_NAME;
 
     beforeEach(() => {
-      process.env.NODE_ENV = 'production';
+      (process.env as Record<string, string | undefined>).NODE_ENV = 'production';
       process.env.VERCEL_PROJECT_NAME = 'muktavidya';
     });
 
     afterAll(() => {
-      process.env.NODE_ENV = originalNodeEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
       process.env.VERCEL_PROJECT_NAME = originalProjectName;
     });
 

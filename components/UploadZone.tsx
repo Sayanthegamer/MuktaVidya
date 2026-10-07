@@ -26,26 +26,39 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
       return;
     }
 
-    const canvas = document.createElement("canvas");
-    const scaleX = imageRef.current.naturalWidth / imageRef.current.width;
-    const scaleY = imageRef.current.naturalHeight / imageRef.current.height;
+    const img = imageRef.current;
+    const isPercent = crop.unit === '%';
+    const scaleX = img.naturalWidth / img.width;
+    const scaleY = img.naturalHeight / img.height;
 
-    canvas.width = crop.width * scaleX;
-    canvas.height = crop.height * scaleY;
+    const cropX = isPercent ? (crop.x / 100) * img.naturalWidth : crop.x * scaleX;
+    const cropY = isPercent ? (crop.y / 100) * img.naturalHeight : crop.y * scaleY;
+    const cropWidth = isPercent ? (crop.width / 100) * img.naturalWidth : crop.width * scaleX;
+    const cropHeight = isPercent ? (crop.height / 100) * img.naturalHeight : crop.height * scaleY;
+
+    if (cropWidth <= 0 || cropHeight <= 0) {
+      if (imageToCrop) onImageSelect(imageToCrop);
+      setImageToCrop(null);
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     ctx.drawImage(
-      imageRef.current,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
+      img,
+      cropX,
+      cropY,
+      cropWidth,
+      cropHeight,
       0,
       0,
-      crop.width * scaleX,
-      crop.height * scaleY
+      cropWidth,
+      cropHeight
     );
 
     const croppedBase64 = canvas.toDataURL("image/jpeg", 0.9);
@@ -177,11 +190,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
 
 
       {/* State 3: Cropping UI */}
-      {(() => {
-        if (typeof document === "undefined" || !document.body) return null;
-        if (!imageToCrop || imagePreview) return null;
-
-        return createPortal(
+      {typeof document !== "undefined" && document.body && imageToCrop && !imagePreview && (
+        createPortal(
           // react-doctor-disable-next-line react-doctor/prefer-tag-over-role, react-doctor/prefer-html-dialog
           <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--surface-0)] sm:bg-[var(--surface-0)]/95 sm:backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
             {/* Header/Title area (optional, helps with spacing) */}
@@ -222,8 +232,8 @@ export default function UploadZone({ onImageSelect, isProcessing, imagePreview, 
             </div>
           </div>,
           document.body
-        );
-      })()}
+        )
+      )}
 
       {/* State 2: Image Preview */}
       <div

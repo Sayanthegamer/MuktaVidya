@@ -11,6 +11,18 @@ interface HistorySidebarProps {
   onSelect: (item: HistoryItem) => void;
 }
 
+function formatTimestamp(timestamp: string): string {
+  try {
+    const d = new Date(timestamp);
+    if (isNaN(d.getTime())) return '';
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[d.getMonth()]} ${d.getDate()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch {
+    return '';
+  }
+}
+
 const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, onSelect }: HistorySidebarProps) {
 
   const onCloseRef = useRef(onClose);
@@ -72,9 +84,9 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
             </div>
           ) : (
             <div className="flex flex-col">
-               {history.map((item, index) => (
+                {history.map((item) => (
                 <button
-                  key={item.id || index}
+                  key={item.id}
                   type="button"
                   onClick={() => {
                     onSelect(item);
@@ -98,9 +110,7 @@ const HistorySidebar = memo(function HistorySidebar({ isOpen, onClose, history, 
                         {item.language === 'BN' ? 'BN' : item.language === 'HI' ? 'HI' : 'EN'}
                       </span>
                       <span className="text-[10px] text-[var(--text-muted)] truncate whitespace-nowrap">
-                        {new Date(item.timestamp).toLocaleString(undefined, {
-                          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                        })}
+                        {formatTimestamp(item.timestamp)}
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">

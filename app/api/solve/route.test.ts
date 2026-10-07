@@ -26,12 +26,15 @@ jest.mock('@google/genai', () => ({
 
 import { ratelimit } from '@/lib/rateLimit';
 
+const mockRatelimit = ratelimit as unknown as { limit: jest.Mock };
+const env = process.env as Record<string, string | undefined>;
+
 describe('POST /api/solve IP Extraction Security', () => {
   beforeEach(() => {
-    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
+    mockRatelimit.limit.mockResolvedValue({ success: true });
     jest.clearAllMocks();
-    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
-    process.env.NODE_ENV = 'development';
+    mockRatelimit.limit.mockResolvedValue({ success: true });
+    env.NODE_ENV = 'development';
   });
 
   const createRequestWithHeaders = (headers: Record<string, string>) => {
@@ -53,17 +56,17 @@ describe('POST /api/solve IP Extraction Security', () => {
     });
 
     await POST(req);
-    expect(ratelimit.limit).toHaveBeenCalledWith('203.0.113.1');
+    expect(mockRatelimit.limit).toHaveBeenCalledWith('203.0.113.1');
   });
 
   it('returns 429 when rate limited based on extracted IP', async () => {
-    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: false });
+    mockRatelimit.limit.mockResolvedValue({ success: false });
     const req = createRequestWithHeaders({
        'x-vercel-forwarded-for': '203.0.113.4',
     });
 
     const res = await POST(req);
-    expect(ratelimit.limit).toHaveBeenCalledWith('203.0.113.4');
+    expect(mockRatelimit.limit).toHaveBeenCalledWith('203.0.113.4');
     expect(res.status).toBe(429);
 
     const data = await res.json();
@@ -74,14 +77,14 @@ describe('POST /api/solve IP Extraction Security', () => {
 describe('Solve API route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
+    mockRatelimit.limit.mockResolvedValue({ success: true });
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
-    process.env.NODE_ENV = 'development';
+    env.NODE_ENV = 'development';
   });
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_APP_URL;
-    process.env.NODE_ENV = 'test';
+    env.NODE_ENV = 'test';
   });
 
   it('rejects payloads exceeding MAX_BODY_BYTES even if content-length header is 0', async () => {
@@ -181,15 +184,15 @@ describe('Solve API Error Handling Security', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     console.error = jest.fn(); // Suppress expected error logs
-    (ratelimit.limit as jest.Mock).mockResolvedValue({ success: true });
+    mockRatelimit.limit.mockResolvedValue({ success: true });
     process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
-    process.env.NODE_ENV = 'development';
+    env.NODE_ENV = 'development';
   });
 
   afterEach(() => {
     console.error = originalConsoleError;
     delete process.env.NEXT_PUBLIC_APP_URL;
-    process.env.NODE_ENV = 'test';
+    env.NODE_ENV = 'test';
   });
 
   it('masks internal error details and returns a generic 500 error', async () => {

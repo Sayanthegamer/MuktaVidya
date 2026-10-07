@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
@@ -13,7 +13,6 @@
   "dependencies": {
     "@google/genai": "^2.3.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@serwist/next": "^9.5.11",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
@@ -29,8 +28,7 @@
     "react-image-crop": "^11.0.10",
     "react-markdown": "^10.1.0",
     "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0",
-    "serwist": "^9.5.11"
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

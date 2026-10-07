@@ -90,7 +90,12 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
   const parsedOptions = useMemo(() => {
     if (type !== 'chart') return null;
     try {
-      const cleanedData = chartData.replace(/```json-chart/g, '').replace(/```json/g, '').replace(/```/g, '').trim();
+      let cleanedData = chartData.replace(/```json-chart/g, '').replace(/```json/g, '').replace(/```/g, '').trim();
+      const startIdx = cleanedData.indexOf('{');
+      const endIdx = cleanedData.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1 && endIdx >= startIdx) {
+        cleanedData = cleanedData.slice(startIdx, endIdx + 1);
+      }
       const rawOptions = JSON.parse(cleanedData);
 
       const primaryColor = 'var(--text-primary)';
@@ -137,7 +142,9 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
         tooltip: { ...rawOptions.tooltip, backgroundColor: 'var(--surface-3)', borderColor: borderColor, textStyle: { color: primaryColor } }
       };
     } catch (e) {
-      console.error('[DiagramRenderer] Failed to parse ECharts JSON:', e);
+      if (process.env.NODE_ENV !== 'test') {
+        console.error('[DiagramRenderer] Failed to parse ECharts JSON:', e);
+      }
       return null;
     }
   }, [chartData, type]);
@@ -146,55 +153,13 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
     if (!cleanedSvg) return <p className="text-xs text-[var(--error)] font-mono">Invalid diagram vector data.</p>;
 
     return (
-      <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm transition-all">
+      <div className="my-6 w-full flex flex-col items-center justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-6 overflow-x-auto shadow-sm">
         <div
           className="w-full max-w-[500px] text-[var(--text-primary)] svg-diagram-container"
           style={{ color: 'var(--text-primary)' }}
           // react-doctor-disable-next-line react-doctor/no-danger
           dangerouslySetInnerHTML={{ __html: cleanedSvg }}
         />
-        
-        {/* Standard template block forces layout engine evaluation independent of hydration timings */}
-        <style>{`
-          .svg-diagram-container svg {
-            width: 100% !important;
-            height: auto !important;
-            max-height: 350px;
-            display: block;
-          }
-          .svg-diagram-container svg text {
-            fill: var(--text-primary) !important;
-            font-family: var(--font-sans), system-ui, sans-serif !important;
-          }
-          
-          /* 1. Ensure baseline visibility for structural tracks lacking strict thickness declarations */
-          .svg-diagram-container svg line:not([stroke-width]),
-          .svg-diagram-container svg circle:not([stroke-width]),
-          .svg-diagram-container svg ellipse:not([stroke-width]),
-          .svg-diagram-container svg rect:not([stroke-width]),
-          .svg-diagram-container svg polyline:not([stroke-width]),
-          .svg-diagram-container svg polygon:not([stroke-width]),
-          .svg-diagram-container svg path:not([stroke-width]) {
-            stroke-width: var(--svg-stroke-width, 2px);
-          }
-
-          /* 2. Map responsive theme lines across un-styled structural geometric nodes safely */
-          .svg-diagram-container svg line:not([stroke]),
-          .svg-diagram-container svg circle:not([stroke]):not([fill]),
-          .svg-diagram-container svg circle:not([stroke])[fill="none"],
-          .svg-diagram-container svg ellipse:not([stroke]):not([fill]),
-          .svg-diagram-container svg ellipse:not([stroke])[fill="none"],
-          .svg-diagram-container svg rect:not([stroke]):not([fill]),
-          .svg-diagram-container svg rect:not([stroke])[fill="none"],
-          .svg-diagram-container svg polyline:not([stroke]):not([fill]),
-          .svg-diagram-container svg polyline:not([stroke])[fill="none"],
-          .svg-diagram-container svg polygon:not([stroke]):not([fill]),
-          .svg-diagram-container svg polygon:not([stroke])[fill="none"],
-          .svg-diagram-container svg path:not([stroke]):not([fill]),
-          .svg-diagram-container svg path:not([stroke])[fill="none"] {
-            stroke: var(--text-secondary);
-          }
-        `}</style>
       </div>
     );
   }
@@ -211,7 +176,13 @@ const DiagramRenderer = React.memo(function DiagramRenderer({ chartData, type }:
     return (
       <div className="my-6 w-full flex justify-center bg-[var(--surface-1)] border border-[var(--border-subtle)] rounded-xl p-4">
          <div className="w-full min-w-[300px]">
-           <ReactECharts option={parsedOptions} style={{ height: '350px', width: '100%' }} opts={{ renderer: 'svg' }} />
+           <ReactECharts
+             option={parsedOptions}
+             style={{ height: '350px', width: '100%' }}
+             opts={{ renderer: 'svg' }}
+             notMerge={true}
+             lazyUpdate={true}
+           />
          </div>
       </div>
     );

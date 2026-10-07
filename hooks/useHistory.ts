@@ -39,10 +39,7 @@ export function useHistory() {
         });
 
         setHistory(currentHistory => {
-          const existingIds = currentHistory.reduce((acc, item) => {
-            if (item.id !== undefined) acc.add(item.id);
-            return acc;
-          }, new Set<string>());
+          const existingIds = new Set(currentHistory.map(item => item.id).filter(Boolean));
           const newHydratedItems = deduplicatedHistory.filter((item: HistoryItem) => !item.id || !existingIds.has(item.id));
           return [...currentHistory, ...newHydratedItems].slice(0, 50);
         });
